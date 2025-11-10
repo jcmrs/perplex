@@ -75,11 +75,19 @@ if [ -d ".git" ]; then
     CURRENT_BRANCH=$(git branch --show-current)
     echo "  ✓ Current branch: $CURRENT_BRANCH"
 
-    if git diff --quiet && git diff --staged --quiet; then
+    # Check for changes (allow these commands to return non-zero)
+    set +e
+    git diff --quiet 2>/dev/null
+    UNSTAGED=$?
+    git diff --staged --quiet 2>/dev/null
+    STAGED=$?
+    set -e
+
+    if [ $UNSTAGED -eq 0 ] && [ $STAGED -eq 0 ]; then
         echo "  ✓ Working directory clean"
     else
-        echo "  ⚠ Uncommitted changes present"
-        ((WARNINGS++))
+        # This is informational during commits, not an error
+        echo "  ℹ️  Uncommitted or staged changes present (expected during commit)"
     fi
 else
     echo "  ✗ Not a git repository"
