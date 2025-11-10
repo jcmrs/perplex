@@ -1,6 +1,6 @@
 # Current Project Status
 
-**Last Updated:** 2025-11-10 22:28 UTC
+**Last Updated:** 2025-11-10 23:22 UTC
 **Phase:** foundation
 **Branch:** claude/perplex-initial-setup-011CUzxDPZiWB31A6DM5T2Mc
 
@@ -12,32 +12,24 @@ Project Perplex is bridging local AI development tools with Perplexity AI's rese
 
 ### Git Status
 ```
-?? .claude/
-?? .gitignore
-?? FOUNDATION.md
-?? README.md
-?? config/
-?? decisions/
-?? docs/
-?? examples/
-?? knowledge/
-?? sessions/
-?? src/
-?? tools/
+ M sessions/CURRENT_STATUS.md
 ```
 
 ### Recent Commits
 ```
-No commits yet
+83436b0 Fix validation script to handle staged changes during commit
+c1f7872 Foundation enhancements: Enforcement, traceability, and continuity
+65267b6 Initial foundation: Complete AI-first development infrastructure
 ```
 
 ### Statistics
-- Decisions Logged: 2
+- Decisions Logged: 3
 - Latest Session: session-20251110-initial-setup.md
 
 ## Recent Decisions
 
 Last 3 decisions:
+- 2025-11-10-foundation-enhancements.md
 - 2025-11-10-foundation-methodology.md
 - TEMPLATE.md
 
