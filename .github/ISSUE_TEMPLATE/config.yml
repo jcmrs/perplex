@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussion Forum
+    url: https://github.com/jcmrs/perplex/discussions
+    about: For open-ended discussions, design questions, or RFC (Request for Comments)
