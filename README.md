@@ -55,7 +55,16 @@ See [`FOUNDATION.md`](FOUNDATION.md) for complete details.
 ```
 perplex/
 ├── FOUNDATION.md           # Core principles and imperatives
-├── README.md              # This file
+├── README.md               # This file
+├── LICENSE                 # MIT License
+├── CONTRIBUTING.md         # Contribution guidelines
+├── CHANGELOG.md            # Version history
+│
+├── .github/                # GitHub configuration
+│   ├── workflows/          # GitHub Actions (PR validation)
+│   ├── ISSUE_TEMPLATE/     # Issue templates
+│   ├── pull_request_template.md  # PR template
+│   └── CODEOWNERS          # Code ownership rules
 │
 ├── .githooks/             # Git hooks for automated enforcement
 │   ├── pre-commit         # Foundation validation before commits
@@ -94,6 +103,11 @@ perplex/
 │   ├── TRACEABILITY.md    # Vision → Requirements → Implementation links
 │   ├── functional/        # Functional requirements
 │   └── non-functional/    # Non-functional requirements
+│
+├── backlog/               # Pending work tracking
+│   ├── BACKLOG.md         # Master list by priority
+│   ├── items/             # Individual backlog items
+│   └── TEMPLATE.md        # Backlog item template
 │
 ├── sessions/              # Session continuity
 │   ├── CURRENT_STATUS.md  # Always-current project snapshot
@@ -180,7 +194,7 @@ See [ADR 001](decisions/2025-11-10-foundation-methodology.md) for full rationale
 
 ## 📋 Current Milestones
 
-### Phase 1: Foundation (Complete!)
+### Phase 1: Foundation & GitHub Integration (Complete! ✅)
 - ✅ Core infrastructure established
 - ✅ Documentation systems in place
 - ✅ Automation tooling created
@@ -189,6 +203,14 @@ See [ADR 001](decisions/2025-11-10-foundation-methodology.md) for full rationale
 - ✅ Ideas logging system created
 - ✅ Branching strategy documented
 - ✅ Continuity protocols established
+- ✅ Backlog tracking system
+- ✅ GitHub Actions for PR validation
+- ✅ GitHub templates (PR, issues)
+- ✅ Local setup automation
+- ✅ Experiment tracking template
+- ✅ MIT License
+- ✅ Contributing guidelines
+- ✅ CODEOWNERS and CHANGELOG
 
 ### Phase 2: Discovery & Research (Not Started)
 - ⬜ Perplexity AI interface research
