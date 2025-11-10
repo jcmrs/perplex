@@ -1,0 +1,34 @@
+name: Foundation Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make validation script executable
+        run: chmod +x tools/validate-foundation.sh
+
+      - name: Run foundation validation
+        run: ./tools/validate-foundation.sh
+
+      - name: Check for uncommitted changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "❌ Error: Uncommitted changes detected in repository"
+            echo ""
+            echo "Files with changes:"
+            git status --short
+            echo ""
+            echo "Please commit all changes before creating PR"
+            exit 1
+          fi
+          echo "✅ No uncommitted changes detected"
