@@ -1,0 +1,127 @@
+# Project Perplex - Core Configuration
+# This file drives project behavior and metadata
+
+project:
+  name: "Perplex"
+  full_name: "Project Perplex"
+  version: "0.1.0-foundation"
+  phase: "foundation"
+
+  description: >
+    Bridge between local AI development tools (Claude Code, Gemini CLI)
+    and Perplexity AI's research capabilities.
+
+  repository:
+    url: "https://github.com/jcmrs/perplex"
+    branch: "claude/perplex-initial-setup-011CUzxDPZiWB31A6DM5T2Mc"
+    main_branch: "main"
+
+  team:
+    human_partner:
+      role: "Strategic Partner"
+      responsibilities:
+        - "Set strategic direction"
+        - "Validate alignment with vision"
+        - "Approve major architectural decisions"
+        - "Provide domain context AI cannot infer"
+      technical_level: "non-technical"
+
+    ai_agent:
+      role: "Autonomous Developer"
+      responsibilities:
+        - "Execute development tasks"
+        - "Maintain documentation and systems"
+        - "Make tactical technical decisions"
+        - "Document decisions and rationale"
+        - "Preserve continuity across sessions"
+
+foundation:
+  imperatives:
+    - "Holistic System Thinking"
+    - "AI-First"
+    - "Configurability"
+    - "Modularity"
+    - "Extensibility"
+    - "Integration"
+    - "Automation"
+
+  methodology: "Discovery-Driven with Lean Principles"
+
+  success_criteria:
+    - "AI agent can start any session and understand project state"
+    - "All decisions logged with context"
+    - "Progress visible and tracked automatically"
+    - "Product vision preserved and referenced"
+    - "Foundation imperatives have enforcement mechanisms"
+    - "Automation exists for common operations"
+    - "Knowledge persists across sessions"
+    - "Configuration drives behavior"
+    - "System can self-validate alignment"
+
+paths:
+  docs: "docs"
+  decisions: "decisions"
+  knowledge: "knowledge"
+  sessions: "sessions"
+  config: "config"
+  source: "src"
+  tools: "tools"
+  examples: "examples"
+
+automation:
+  session_start_script: "tools/session-start.sh"
+  session_end_script: "tools/session-end.sh"
+  validation_script: "tools/validate-foundation.sh"
+  status_update_script: "tools/generate-status.sh"
+
+documentation:
+  foundation_doc: "FOUNDATION.md"
+  product_vision: "docs/PRODUCT_VISION.md"
+  current_status: "sessions/CURRENT_STATUS.md"
+  architecture: "docs/ARCHITECTURE.md"
+  development_guide: "docs/DEVELOPMENT_GUIDE.md"
+
+decision_tracking:
+  format: "ADR"
+  naming: "YYYY-MM-DD-decision-title.md"
+  location: "decisions"
+  template: "decisions/TEMPLATE.md"
+
+session_management:
+  log_format: "session-YYYYMMDD-description.md"
+  current_status_file: "sessions/CURRENT_STATUS.md"
+  session_directory: "sessions"
+
+# Feature flags for phased development
+features:
+  manual_capture: true
+  browser_automation: false
+  api_integration: false
+  automated_extraction: false
+
+# Integration points (to be developed)
+integrations:
+  perplexity:
+    method: "manual"  # manual, browser_automation, api (future)
+    capture_location: "knowledge/external/perplexity"
+
+  claude_code:
+    enabled: true
+    config_dir: ".claude"
+
+  gemini_cli:
+    enabled: false  # future integration
+
+# Milestones
+milestones:
+  foundation_complete: false
+  discovery_phase_complete: false
+  integration_prototype_complete: false
+  production_ready: false
+
+# Notes for AI agents
+ai_agent_notes: >
+  Read this file at session start to understand project configuration.
+  All paths are relative to project root.
+  Update feature flags and milestones as project progresses.
+  This configuration drives automation scripts and tooling.

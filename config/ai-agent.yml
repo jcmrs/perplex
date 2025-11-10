@@ -1,0 +1,127 @@
+# AI Agent Operational Configuration
+# Settings that govern AI agent behavior and autonomy
+
+agent:
+  primary_model: "Claude Sonnet 4.5"
+  session_mode: "autonomous"
+  human_in_loop: false  # Human is strategic partner, not in execution loop
+
+behavior:
+  # Decision-making autonomy levels
+  decisions:
+    tactical_technical: "autonomous"      # Can decide independently
+    architecture_significant: "document"  # Decide but document thoroughly
+    strategic: "consult"                 # Require human input
+
+  # Documentation requirements
+  documentation:
+    auto_update: true
+    decision_logging_threshold: "significant"  # all, significant, major
+    session_logging: "required"
+
+  # Communication style
+  communication:
+    verbosity: "concise"
+    use_emojis: false
+    explain_decisions: true
+    ask_clarifying_questions: true
+    conversation_over_interrogation: true
+
+session_protocol:
+  # What to do at session start
+  start:
+    - "Read /FOUNDATION.md"
+    - "Read /config/project.yml"
+    - "Read /sessions/CURRENT_STATUS.md"
+    - "Review recent /decisions/*.md"
+    - "Check /docs/PRODUCT_VISION.md for alignment"
+    - "Create new session log"
+
+  # What to do during session
+  during:
+    - "Document significant actions in session log"
+    - "Create ADRs for important decisions"
+    - "Update documentation when reality diverges"
+    - "Track progress against todos"
+
+  # What to do at session end
+  end:
+    - "Finalize session log"
+    - "Update CURRENT_STATUS.md"
+    - "Run validation checks"
+    - "Commit all changes with clear message"
+    - "Push to repository"
+
+validation:
+  # Checks to run before committing
+  pre_commit:
+    - "Foundation alignment check"
+    - "Documentation consistency check"
+    - "TODO list updated"
+
+  # Periodic checks during session
+  periodic:
+    interval: "every major milestone"
+    checks:
+      - "Vision alignment"
+      - "Foundation imperatives adherence"
+
+learning:
+  # How to capture and preserve learnings
+  capture_mistakes: true
+  document_discoveries: true
+  update_patterns: true
+  location: "knowledge/learnings"
+
+context_management:
+  # Managing context across sessions
+  preserve:
+    - "Decision rationale"
+    - "Architectural context"
+    - "Discovered constraints"
+    - "User preferences"
+
+  isolate:
+    - "Project-specific Perplexity conversations"
+    - "Temporary experiments"
+    - "Session-specific state"
+
+work_patterns:
+  # Preferred working style
+  approach: "discovery-driven"
+  experiment_size: "small"
+  commit_frequency: "logical_units"
+  branch_strategy: "feature_branches"
+
+  # Task breakdown
+  task_planning:
+    use_todo_tool: true
+    granularity: "actionable_steps"
+    track_progress: "continuously"
+
+quality_standards:
+  # What defines "done"
+  code:
+    - "Follows modular design"
+    - "Configuration-driven where possible"
+    - "Documented with purpose"
+    - "Tested (when applicable)"
+
+  documentation:
+    - "Up to date with reality"
+    - "AI-readable and human-friendly"
+    - "Cross-referenced appropriately"
+    - "Explains 'why' not just 'what'"
+
+  decisions:
+    - "Context provided"
+    - "Alternatives considered"
+    - "Rationale explained"
+    - "Consequences documented"
+
+# Notes for AI agents
+notes: >
+  This configuration defines how you should operate within this project.
+  It reflects the AI-First principle - you are the primary user.
+  When in doubt, err on the side of documentation and transparency.
+  The human partner trusts your expertise but needs to see your thinking.
