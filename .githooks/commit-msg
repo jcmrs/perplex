@@ -1,0 +1,48 @@
+#!/bin/bash
+# Commit Message Git Hook
+# Validates commit message format and content
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+echo "=== Commit Message Validation ==="
+echo ""
+
+# Check if commit message is empty
+if [ -z "$COMMIT_MSG" ]; then
+    echo "❌ Commit message cannot be empty"
+    exit 1
+fi
+
+# Check minimum length (at least 10 characters)
+if [ ${#COMMIT_MSG} -lt 10 ]; then
+    echo "❌ Commit message too short (minimum 10 characters)"
+    echo "   Provide a meaningful commit message"
+    exit 1
+fi
+
+# Extract first line (subject)
+SUBJECT=$(echo "$COMMIT_MSG" | head -n 1)
+
+# Check subject length (recommend max 72 chars, warn if > 72)
+SUBJECT_LENGTH=${#SUBJECT}
+if [ $SUBJECT_LENGTH -gt 72 ]; then
+    echo "⚠️  Warning: Subject line is $SUBJECT_LENGTH characters (recommended max: 72)"
+    echo "   Subject: $SUBJECT"
+    echo ""
+fi
+
+# Optional: Check for imperative mood (very basic check)
+# This is informational, not blocking
+FIRST_WORD=$(echo "$SUBJECT" | awk '{print tolower($1)}')
+case "$FIRST_WORD" in
+    added|fixed|updated|changed|removed|created|implemented|refactored|documented)
+        echo "💡 Tip: Consider using imperative mood (e.g., 'Add' instead of 'Added')"
+        echo ""
+        ;;
+esac
+
+echo "✅ Commit message validated"
+echo ""
+
+exit 0

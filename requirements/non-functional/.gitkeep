@@ -1,0 +1,7 @@
+# Non-Functional Requirements
+
+Requirements describing how the system must PERFORM.
+
+Examples: Performance, security, usability, reliability, maintainability.
+
+Format: `REQ-NF-XXX-brief-title.md`

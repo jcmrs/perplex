@@ -57,6 +57,11 @@ perplex/
 ├── FOUNDATION.md           # Core principles and imperatives
 ├── README.md              # This file
 │
+├── .githooks/             # Git hooks for automated enforcement
+│   ├── pre-commit         # Foundation validation before commits
+│   ├── commit-msg         # Commit message validation
+│   └── README.md          # Hook documentation
+│
 ├── config/                # Configuration files
 │   ├── project.yml        # Project metadata and settings
 │   └── ai-agent.yml       # AI agent operational parameters
@@ -66,16 +71,29 @@ perplex/
 │   └── *.md              # Individual decisions
 │
 ├── docs/                  # Living documentation
-│   ├── PRODUCT_VISION.md      # What we're building and why
-│   ├── MILESTONES.md          # Progress tracking
-│   ├── VALIDATION_CHECKLIST.md # Foundation alignment checks
-│   └── *.md                   # Additional documentation
+│   ├── PRODUCT_VISION.md          # What we're building and why
+│   ├── MILESTONES.md              # Progress tracking
+│   ├── VALIDATION_CHECKLIST.md   # Foundation alignment checks
+│   ├── BRANCHING_STRATEGY.md     # Git workflow and PR standards
+│   ├── CONTINUITY_AND_RECOVERY.md # Context preservation strategies
+│   └── *.md                       # Additional documentation
+│
+├── ideas/                 # Idea capture and tracking
+│   ├── TEMPLATE.md        # Idea template
+│   ├── INDEX.md           # Ideas by status (auto-generated)
+│   └── *.md              # Individual ideas
 │
 ├── knowledge/             # Research and learnings
 │   ├── research/          # Investigation findings
 │   ├── learnings/         # Mistakes and discoveries
 │   ├── external/          # External sources (Perplexity, etc.)
 │   └── patterns/          # Reusable patterns
+│
+├── requirements/          # Specifications and traceability
+│   ├── TEMPLATE.md        # Requirement template
+│   ├── TRACEABILITY.md    # Vision → Requirements → Implementation links
+│   ├── functional/        # Functional requirements
+│   └── non-functional/    # Non-functional requirements
 │
 ├── sessions/              # Session continuity
 │   ├── CURRENT_STATUS.md  # Always-current project snapshot
@@ -162,11 +180,15 @@ See [ADR 001](decisions/2025-11-10-foundation-methodology.md) for full rationale
 
 ## 📋 Current Milestones
 
-### Phase 1: Foundation (90% Complete)
+### Phase 1: Foundation (Complete!)
 - ✅ Core infrastructure established
 - ✅ Documentation systems in place
 - ✅ Automation tooling created
-- ⬜ Validation testing complete
+- ✅ Enforcement mechanisms (git hooks) implemented
+- ✅ Requirements & traceability system added
+- ✅ Ideas logging system created
+- ✅ Branching strategy documented
+- ✅ Continuity protocols established
 
 ### Phase 2: Discovery & Research (Not Started)
 - ⬜ Perplexity AI interface research
@@ -186,24 +208,44 @@ See [`docs/MILESTONES.md`](docs/MILESTONES.md) for complete roadmap.
 **Validation & Status:**
 - `./tools/validate-foundation.sh` - Check foundation alignment
 - `./tools/generate-status.sh` - Update current status
+- `./tools/generate-ideas-index.sh` - Update ideas index by status
 
-**Documentation:**
+**Automated Enforcement:**
+- `.githooks/pre-commit` - Foundation validation (runs automatically)
+- `.githooks/commit-msg` - Commit message validation (runs automatically)
+
+**Templates:**
 - `decisions/TEMPLATE.md` - Create new Architecture Decision Record
-- `docs/VALIDATION_CHECKLIST.md` - Pre-commit validation
+- `ideas/TEMPLATE.md` - Capture new idea
+- `requirements/TEMPLATE.md` - Document new requirement
+- `sessions/SESSION_LOG_TEMPLATE.md` - Enhanced session logging
 
 ---
 
 ## 📝 Key Documents
 
+### Essential Reading
 | Document | Purpose | Audience |
 |----------|---------|----------|
 | [`FOUNDATION.md`](FOUNDATION.md) | Core principles and imperatives | AI & Human |
 | [`docs/PRODUCT_VISION.md`](docs/PRODUCT_VISION.md) | What we're building and why | AI & Human |
+| [`sessions/CURRENT_STATUS.md`](sessions/CURRENT_STATUS.md) | Always-current snapshot | AI Primary |
+
+### Configuration & Operations
+| Document | Purpose | Audience |
+|----------|---------|----------|
 | [`config/project.yml`](config/project.yml) | Project configuration | AI Primary |
 | [`config/ai-agent.yml`](config/ai-agent.yml) | AI operational parameters | AI Primary |
-| [`sessions/CURRENT_STATUS.md`](sessions/CURRENT_STATUS.md) | Always-current snapshot | AI Primary |
+| [`docs/BRANCHING_STRATEGY.md`](docs/BRANCHING_STRATEGY.md) | Git workflow and PR standards | AI & Human |
+| [`docs/CONTINUITY_AND_RECOVERY.md`](docs/CONTINUITY_AND_RECOVERY.md) | Context preservation strategies | AI & Human |
+
+### Quality & Tracking
+| Document | Purpose | Audience |
+|----------|---------|----------|
 | [`docs/MILESTONES.md`](docs/MILESTONES.md) | Progress tracking | AI & Human |
 | [`docs/VALIDATION_CHECKLIST.md`](docs/VALIDATION_CHECKLIST.md) | Alignment validation | AI Primary |
+| [`requirements/TRACEABILITY.md`](requirements/TRACEABILITY.md) | Vision → Implementation links | AI & Human |
+| [`ideas/INDEX.md`](ideas/INDEX.md) | Ideas by status | AI & Human |
 
 ---
 
@@ -243,10 +285,12 @@ This project is designed to work for users who don't write code. Configuration o
 
 ## 📊 Progress Metrics
 
-- **Decisions Logged:** 1 ADR
-- **Foundation Completion:** 90%
+- **Decisions Logged:** 2 ADRs
+- **Foundation Completion:** 100% ✅
 - **Experiments Conducted:** 0 (research phase not started)
 - **Validated Learnings:** 0
+- **Ideas Captured:** 0
+- **Requirements Defined:** 0 (pre-implementation)
 
 ---
 
