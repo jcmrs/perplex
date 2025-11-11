@@ -90,7 +90,7 @@ jobs:
             ./tools/resume-from-checkpoint.sh
             \`\`\`
 
-            Or read the checkpoint directly: [\`checkpoints/LATEST.md\`](../blob/main/checkpoints/LATEST.md)
+            Or read the checkpoint directly: \`checkpoints/LATEST.md\`
 
             This automated message helps AI agents and contributors quickly restore project context.
             `

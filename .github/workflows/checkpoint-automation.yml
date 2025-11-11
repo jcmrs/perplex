@@ -136,17 +136,16 @@ jobs:
             exit 0
           fi
 
-          git commit --no-gpg-sign -m "$(cat <<'EOF'
-          Add automated checkpoint: ${{ steps.params.outputs.description }}
+          COMMIT_MSG="Add automated checkpoint: ${{ steps.params.outputs.description }}
 
           Checkpoint created automatically by GitHub Actions.
 
           Trigger: ${{ steps.params.outputs.trigger }}
           Phase: ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
 
-          Summary: ${{ steps.params.outputs.summary }}
-          EOF
-          )"
+          Summary: ${{ steps.params.outputs.summary }}"
+
+          git commit --no-gpg-sign -m "$COMMIT_MSG"
 
       - name: Push checkpoint to main
         if: github.event_name == 'workflow_dispatch'
@@ -159,32 +158,33 @@ jobs:
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
       - name: Create GitHub Release
-        if: steps.params.outputs.create_release == 'true'
-        uses: actions/create-release@v1
+        if: github.event.inputs.create_release == 'true'
+        run: |
+          TAG_NAME="checkpoint-${{ steps.params.outputs.phase }}-${{ github.run_number }}"
+          RELEASE_NAME="Checkpoint: ${{ steps.params.outputs.description }}"
+
+          RELEASE_BODY="## Checkpoint: ${{ steps.params.outputs.description }}
+
+          **Phase:** ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
+
+          ### Summary
+          ${{ steps.params.outputs.summary }}
+
+          ### Next Focus
+          ${{ steps.params.outputs.focus }}
+
+          ---
+
+          **Trigger:** ${{ steps.params.outputs.trigger }}
+          **Created:** $(date -u +"%Y-%m-%d %H:%M UTC")
+
+          See checkpoint files in \`checkpoints/\` directory for full details."
+
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_NAME" \
+            --notes "$RELEASE_BODY"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: checkpoint-${{ steps.params.outputs.phase }}-${{ github.run_number }}
-          release_name: Checkpoint: ${{ steps.params.outputs.description }}
-          body: |
-            ## Checkpoint: ${{ steps.params.outputs.description }}
-
-            **Phase:** ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
-
-            ### Summary
-            ${{ steps.params.outputs.summary }}
-
-            ### Next Focus
-            ${{ steps.params.outputs.focus }}
-
-            ---
-
-            **Trigger:** ${{ steps.params.outputs.trigger }}
-            **Created:** ${{ github.event.repository.updated_at }}
-
-            See checkpoint files in `checkpoints/` directory for full details.
-          draft: false
-          prerelease: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
