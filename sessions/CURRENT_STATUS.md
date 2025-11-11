@@ -1,6 +1,6 @@
 # Current Project Status
 
-**Last Updated:** 2025-11-11 01:31 UTC
+**Last Updated:** 2025-11-11 02:37 UTC
 **Phase:** foundation
 **Branch:** claude/perplex-initial-setup-011CUzxDPZiWB31A6DM5T2Mc
 
@@ -17,23 +17,23 @@ Project Perplex is bridging local AI development tools with Perplexity AI's rese
 
 ### Recent Commits
 ```
-9cccc15 Fix YAML syntax error in checkpoint-automation workflow
-fbf4951 Fix GitHub workflow syntax and deprecated actions
-8295f6e Add completeness review system for gap detection
-521c2ed Add GitHub automation for checkpoint system
-d451146 Add checkpoint + memory graph system for session continuity
+dae6c1d Add learning capture system (ITEM-009)
+ce5990f Add manual checkpoint: foundation-complete-branch-management
+086c505 Add branch management completion guide
+e5b6f3e Add foundation PR details for main branch establishment
+d2e7ff9 Add CLAUDE.md orchestration layer for session continuity
 ```
 
 ### Statistics
-- Decisions Logged: 3
-- Latest Session: session-20251110-initial-setup.md
+- Decisions Logged: 4
+- Latest Session: session-20251111-foundation-completion.md
 
 ## Recent Decisions
 
 Last 3 decisions:
+- 2025-11-11-claude-md-architecture.md
 - 2025-11-10-foundation-enhancements.md
 - 2025-11-10-foundation-methodology.md
-- TEMPLATE.md
 
 ## For Next Session
 
@@ -41,7 +41,7 @@ Last 3 decisions:
 2. Review this file for context
 3. Check recent decisions in `/decisions`
 4. Review `/docs/PRODUCT_VISION.md` for alignment
-5. Check latest session log: `sessions/session-20251110-initial-setup.md`
+5. Check latest session log: `sessions/session-20251111-foundation-completion.md`
 
 ## Notes
 
