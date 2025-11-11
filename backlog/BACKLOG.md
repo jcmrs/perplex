@@ -1,7 +1,7 @@
 # Backlog - Master List
 
 **Last Updated:** 2025-11-11
-**Total Items:** 13
+**Total Items:** 14
 
 ---
 
@@ -51,6 +51,16 @@
 **Target:** GitHub Integration Phase
 **Description:** Create CONTRIBUTING.md with step-by-step setup instructions for new contributors
 **Outcome:** Comprehensive CONTRIBUTING.md (410+ lines) exists with quick start, project principles, contribution workflows, code standards, testing guide (updated with new infrastructure), review process, AI agent and human partner guidance, code of conduct, and recognition. Well-structured and AI-readable.
+
+### ITEM-014: GitHub Actions Status Check in Completeness Review
+**Status:** Backlog
+**Effort:** Small
+**Target:** Post-Foundation Enhancement
+**Description:** Add GitHub Actions workflow status check to completeness review system. Currently checks local state but not remote CI/CD status.
+**Rationale:** Gap discovered during backlog cleanup - completeness review passed locally but GitHub Actions tests were failing. System should verify CI/CD checks are passing.
+**Priority:** Medium - Proven valuable gap, but not blocking (can manually check GitHub Actions)
+**Dependencies:** Requires gh CLI (optional), network access to GitHub API
+**Related:** ITEM-012 (Completeness Review Enhancements completed)
 
 ---
 
@@ -126,7 +136,7 @@
 
 ## 📊 Summary by Status
 
-- **Backlog:** 4 items
+- **Backlog:** 5 items
 - **Active:** 0 items
 - **Complete:** 6 items
 - **Discarded:** 0 items
@@ -135,7 +145,7 @@
 ## 📊 Summary by Priority
 
 - **High:** 1 item (complete)
-- **Medium:** 4 items (4 complete, 0 backlog)
+- **Medium:** 5 items (4 complete, 1 backlog)
 - **Low/Deferred:** 8 items (3 deferred, 4 backlog, 1 complete)
 
 ---
