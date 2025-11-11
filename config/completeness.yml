@@ -206,37 +206,26 @@ auto_fix:
 
 # Custom Checks (Advanced)
 # Add project-specific checks here
-custom_checks:
+custom_checks: {}
   # Example: Check for database migrations
   # - name: "pending_migrations"
   #   script: "./tools/check-migrations.sh"
   #   enabled: false
 
----
-
-# Notes for AI Agents
-
-This configuration controls completeness review behavior.
-
-**When to update:**
-- If thresholds are too strict/lenient
-- To disable noisy checks
-- To add project-specific checks
-- When workflow patterns change
-
-**Best practices:**
-- Keep thresholds reasonable (not too strict)
-- Don't disable checks permanently (fix root cause)
-- Document why custom checks added
-- Review configuration periodically
-
-**For humans:**
-- This file makes completeness review configurable
-- Adjust thresholds based on team workflow
-- Enable/disable checks as needed
-- Scheduled runs provide health monitoring
-
----
-
-**Last Updated:** 2025-11-11
-**Status:** Active
+# ==============================================================================
+# Notes for AI Agents:
+# - This configuration controls completeness review behavior
+# - Update when: thresholds too strict/lenient, disabling noisy checks,
+#   adding project checks, or workflow patterns change
+# - Best practices: Keep thresholds reasonable, don't disable checks permanently
+#   (fix root cause instead), document custom checks, review config periodically
+#
+# For humans:
+# - This file makes completeness review configurable
+# - Adjust thresholds based on team workflow
+# - Enable/disable checks as needed
+# - Scheduled runs provide health monitoring
+#
+# Last Updated: 2025-11-11
+# Status: Active
+# ==============================================================================
