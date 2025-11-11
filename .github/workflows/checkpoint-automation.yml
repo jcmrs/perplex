@@ -74,6 +74,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -128,13 +129,24 @@ jobs:
           chmod +x tools/create-checkpoint.sh
           ./tools/create-checkpoint.sh
 
-      - name: Commit checkpoint files
+      - name: Create checkpoint branch and commit
+        id: checkpoint_branch
         run: |
           git add checkpoints/
           if git diff --staged --quiet; then
             echo "No checkpoint files to commit"
+            echo "skip=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+
+          # Create unique branch name
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BRANCH_NAME="automated-checkpoint-${TIMESTAMP}"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+          # Create and switch to new branch
+          git checkout -b "$BRANCH_NAME"
 
           COMMIT_MSG="Add automated checkpoint: ${{ steps.params.outputs.description }}
 
@@ -147,11 +159,65 @@ jobs:
 
           git commit --no-gpg-sign -m "$COMMIT_MSG"
 
-      - name: Push checkpoint
+      - name: Push checkpoint branch
+        if: steps.checkpoint_branch.outputs.skip != 'true'
         run: |
-          # For manual triggers or PR merges, push to main
-          # (PR is already merged to main at this point)
-          git push origin main
+          git push origin ${{ steps.checkpoint_branch.outputs.branch_name }}
+
+      - name: Create checkpoint PR
+        if: steps.checkpoint_branch.outputs.skip != 'true'
+        run: |
+          PR_TITLE="Automated Checkpoint: ${{ steps.params.outputs.description }}"
+
+          PR_BODY="$(cat <<'PR_EOF'
+## 🔖 Automated Checkpoint
+
+**Description:** ${{ steps.params.outputs.description }}
+**Phase Transition:** ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
+**Trigger:** ${{ steps.params.outputs.trigger }}
+
+### Summary
+${{ steps.params.outputs.summary }}
+
+### Next Focus
+${{ steps.params.outputs.focus }}
+
+---
+
+**Created by:** GitHub Actions (checkpoint-automation workflow)
+**Branch:** \`${{ steps.checkpoint_branch.outputs.branch_name }}\`
+
+This checkpoint preserves project state at this moment. Review the checkpoint files for full context:
+- \`checkpoints/LATEST.md\` - Checkpoint summary
+- \`checkpoints/LATEST-graph.json\` - Memory graph
+
+**To resume from this checkpoint:**
+\`\`\`bash
+./tools/resume-from-checkpoint.sh
+\`\`\`
+
+---
+
+### Checkpoint Review Checklist
+- [ ] Checkpoint description accurate
+- [ ] Phase transition correct
+- [ ] Critical files list appropriate
+- [ ] Memory graph relationships valid
+- [ ] Ready to merge
+
+Once approved and merged, this checkpoint becomes the new restoration point for future sessions.
+PR_EOF
+)"
+
+          gh pr create \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "${{ steps.checkpoint_branch.outputs.branch_name }}" \
+            --label "automated" \
+            --label "checkpoint"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         if: github.event.inputs.create_release == 'true'
@@ -184,27 +250,49 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
+      - name: Comment on merged PR
+        if: github.event_name == 'pull_request' && steps.checkpoint_branch.outputs.skip != 'true'
         uses: actions/github-script@v7
         with:
           script: |
+            // Get the PR number for the checkpoint PR we just created
+            const branchName = '${{ steps.checkpoint_branch.outputs.branch_name }}';
+
+            // Get PR list to find the checkpoint PR number
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branchName}`,
+              state: 'open'
+            });
+
+            const checkpointPrNumber = prs.length > 0 ? prs[0].number : null;
+            const checkpointPrLink = checkpointPrNumber
+              ? `#${checkpointPrNumber}`
+              : 'the checkpoint PR';
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ✅ Checkpoint Created
+              body: `## 🔖 Checkpoint PR Created
 
               A new checkpoint has been created automatically after this PR merge.
 
-              **Checkpoint:** ${{ steps.params.outputs.description }}
-              **Phase:** ${{ steps.params.outputs.phase }}
+              **Checkpoint PR:** ${checkpointPrLink}
+              **Description:** ${{ steps.params.outputs.description }}
+              **Phase:** ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
 
-              To resume from this checkpoint in your next session:
+              The checkpoint PR contains:
+              - Updated checkpoint files in \`checkpoints/\`
+              - Memory graph for session continuity
+              - Phase transition details
+
+              Once the checkpoint PR is merged, you can resume from this checkpoint in your next session:
               \`\`\`bash
               ./tools/resume-from-checkpoint.sh
               \`\`\`
 
-              Or review the checkpoint directly: \`checkpoints/LATEST.md\`
+              Review the checkpoint PR to verify accuracy before merging.
               `
             })
