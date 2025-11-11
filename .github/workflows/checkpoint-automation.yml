@@ -52,8 +52,19 @@ on:
         type: boolean
         default: false
 
-  # Automatic trigger DISABLED - was creating too many checkpoint PRs
-  # Re-enable only for true milestones (phase transitions, releases)
+  # ⚠️ CRITICAL WARNING: DO NOT UNCOMMENT THE PULL_REQUEST TRIGGER BELOW ⚠️
+  #
+  # Automatic checkpoint creation on PR merge causes CASCADING PR CREATION:
+  # - Close PR #1 → Creates checkpoint PR #2
+  # - Close PR #2 → Creates checkpoint PR #3
+  # - Close PR #3 → Creates checkpoint PR #4
+  # - Infinite loop until manually stopped
+  #
+  # This created chaos on 2025-11-11 and nearly drove the user mad.
+  #
+  # ONLY use workflow_dispatch (manual trigger) for checkpoints.
+  # Checkpoints are for MILESTONES (phase transitions, releases), not every PR.
+  #
   # pull_request:
   #   types: [closed]
   #   branches:
