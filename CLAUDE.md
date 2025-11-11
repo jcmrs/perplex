@@ -149,9 +149,22 @@ Runs validation, completeness review, shows summary. Use before ending session.
 ## 🔀 Git Workflow
 
 **Branch Strategy:**
-- Main branch: `main` (protected, requires PR)
+- Main branch: `main` (stable, always deployable)
 - Feature branches: `claude/description-sessionid` (Claude Code web sessions)
 - Commits: Descriptive, imperative mood, explain WHY
+
+**Autonomous Workflow (Full Automation):**
+1. Create feature branch: `git checkout -b claude/feature-sessionid`
+2. Do work, commit with descriptive messages
+3. Push to remote: `git push -u origin claude/feature-sessionid`
+4. **Automation handles the rest:**
+   - Auto-Create PR workflow creates PR (GitHub Actions + REST API)
+   - Tests workflow validates changes (shellcheck, yamllint, bats)
+   - Auto-Merge workflow merges to main after validation passes
+   - Branch auto-deleted after merge
+5. Pull merged changes: `git checkout main && git pull`
+
+**No manual PR creation or merging required!** See `docs/BRANCH_MANAGEMENT.md` for details.
 
 **Commit Messages:**
 ```
