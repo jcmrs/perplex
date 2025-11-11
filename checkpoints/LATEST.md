@@ -1,1 +1,1 @@
-checkpoint-20251110-235900-foundation-complete.md
+checkpoint-20251111-022805-foundation-complete-branch-management.md

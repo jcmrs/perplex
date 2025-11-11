@@ -1,0 +1,163 @@
+name: Completeness Review
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+
+  schedule:
+    # Run weekly on Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to check (default: current branch)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  completeness-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+
+      - name: Run completeness review
+        id: completeness
+        env:
+          COMPLETENESS_NON_INTERACTIVE: 'true'
+        run: |
+          echo "Running completeness review..."
+
+          # Make script executable
+          chmod +x tools/review-completeness.sh
+
+          # Run completeness review and capture output
+          if tools/review-completeness.sh > completeness-output.txt 2>&1; then
+            echo "result=success" >> $GITHUB_OUTPUT
+            echo "exit_code=0" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+            echo "exit_code=$?" >> $GITHUB_OUTPUT
+          fi
+
+          # Extract summary
+          if grep -q "✅ Completeness check passed with no issues" completeness-output.txt; then
+            echo "summary=✅ All completeness checks passed" >> $GITHUB_OUTPUT
+          elif grep -q "⚠️  Completeness check passed with" completeness-output.txt; then
+            WARNINGS=$(grep -oP '\d+(?= warning)' completeness-output.txt | head -1)
+            echo "summary=⚠️ Passed with $WARNINGS warning(s)" >> $GITHUB_OUTPUT
+          else
+            ISSUES=$(grep -oP '\d+(?= issue)' completeness-output.txt | head -1 || echo "unknown")
+            echo "summary=❌ Found $ISSUES issue(s)" >> $GITHUB_OUTPUT
+          fi
+
+          # Save output for comment
+          cat completeness-output.txt
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('completeness-output.txt', 'utf8');
+
+            const body = `## Completeness Review Results
+
+            **Summary:** ${{ steps.completeness.outputs.summary }}
+
+            <details>
+            <summary>Full Report</summary>
+
+            \`\`\`
+            ${output}
+            \`\`\`
+
+            </details>
+
+            ### What This Checks
+
+            The completeness review validates:
+            1. **Git State** - Clean working directory, all changes committed and pushed
+            2. **Documentation** - Session logs, CURRENT_STATUS.md, and ADRs are current
+            3. **Foundation Artifacts** - Ideas logged, backlog updated, checkpoints created
+            4. **Quality** - Foundation validation passing, no breaking changes undocumented
+            5. **Session Completeness** - All todos complete, questions answered, next actions clear
+
+            ⚠️ Warnings are suggestions, not blockers. Issues should be addressed before merge.
+
+            ---
+
+            *Automated completeness check - See [Completeness Review Guide](../blob/main/docs/COMPLETENESS_REVIEW.md) for details*
+            `;
+
+            // Find existing completeness review comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Completeness Review Results')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Report status
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Completeness review complete"
+          echo "Result: ${{ steps.completeness.outputs.result }}"
+          echo "Summary: ${{ steps.completeness.outputs.summary }}"
+
+          if [ "${{ steps.completeness.outputs.exit_code }}" != "0" ]; then
+            echo "⚠️ Completeness issues found"
+            echo "Run './tools/review-completeness.sh' locally for details"
+          fi
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: completeness-report
+          path: completeness-output.txt
+          retention-days: 30
+
+      # Don't fail the workflow on warnings, only on issues
+      - name: Check exit status
+        if: steps.completeness.outputs.exit_code != '0'
+        run: |
+          echo "❌ Completeness check found issues"
+          echo "This is informational - not blocking merge"
+          echo "Review the report above and address issues before merge"
+          # Don't fail the job - just inform
+          exit 0

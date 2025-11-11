@@ -1,0 +1,35 @@
+{
+  "checkpoint_id": "checkpoint-20251111-022805-foundation-complete-branch-management",
+  "timestamp": "2025-11-11T02:28:05Z",
+  "phase": "foundation",
+  "next_phase": "discovery",
+
+  "critical_files": [
+    {"path": "FOUNDATION.md", "reason": "Core principles and imperatives", "priority": "critical"},
+    {"path": "docs/PRODUCT_VISION.md", "reason": "Mission and goals", "priority": "critical"}
+  ],
+
+  "active_work": {
+    "focus": "Begin discovery phase - review PRODUCT_VISION.md discovery questions and start first experiment",
+    "blockers": [],
+    "next_steps": []
+  },
+
+  "relationships": {
+    "2025-11-10-foundation-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-10-foundation-methodology": {"type": "decision", "status": "active"},
+    "2025-11-11-claude-md-architecture": {"type": "decision", "status": "active"}
+  },
+
+  "skip_for_now": [
+    "*/TEMPLATE.md",
+    "sessions/session-*.md",
+    "examples/*"
+  ],
+
+  "git_state": {
+    "branch": "claude/perplex-initial-setup-011CUzxDPZiWB31A6DM5T2Mc",
+    "last_commit": "086c505",
+    "last_commit_message": "Add branch management completion guide"
+  }
+}

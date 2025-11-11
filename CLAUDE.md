@@ -183,36 +183,45 @@ Always use `--no-gpg-sign` for commits (environment doesn't support signing).
 
 **Before ending ANY session, you MUST:**
 
-1. **Run completeness review:**
+1. **Run session-end script (MANDATORY):**
    ```bash
-   ./tools/review-completeness.sh
+   ./tools/session-end.sh
    ```
-   Address any issues or warnings found.
+   This automatically:
+   - Validates foundation structure
+   - **Runs completeness review (MANDATORY - cannot be skipped)**
+   - Shows session summary
+   - Prompts for final checks
 
-2. **Update documentation:**
+2. **Address completeness issues:**
+   - If completeness review finds issues, address them before continuing
+   - Issues indicate missing documentation, uncommitted work, or forgotten artifacts
+   - Script will prompt to fix or acknowledge issues
+
+3. **Update documentation:**
    - Session log: `sessions/session-YYYYMMDD-description.md`
    - Current status: `./tools/generate-status.sh`
 
-3. **Commit remaining changes:**
+4. **Commit remaining changes:**
    - All work committed with descriptive messages
    - No uncommitted changes (check with `git status`)
 
-4. **Push to remote:**
+5. **Push to remote:**
    ```bash
    git push -u origin $(git branch --show-current)
    ```
+   **Note:** Pre-push hook will run completeness review again (non-blocking warning)
 
-5. **Create checkpoint (if milestone):**
+6. **Create checkpoint (if milestone):**
    ```bash
    ./tools/create-checkpoint.sh "Description of what was accomplished"
    ```
    Use for: Phase transitions, major features complete, significant milestones.
 
-6. **Run session-end script (optional but recommended):**
-   ```bash
-   ./tools/session-end.sh
-   ```
-   This automates the above steps with prompts.
+**Automated Checks:**
+- **Pre-push hook:** Runs completeness review as warning before push (non-blocking)
+- **GitHub Actions:** Runs completeness review on all PRs and posts results
+- **Session-end script:** Runs completeness review mandatorily (blocking if issues found)
 
 **What constitutes "complete":** See @docs/COMPLETENESS_REVIEW.md for work-type-specific definitions (bug fix, feature, refactor, docs, research, infrastructure).
 
