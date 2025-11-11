@@ -1,0 +1,108 @@
+name: Auto-merge Claude Branches
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge Claude branches after validation
+    runs-on: ubuntu-latest
+    # Only auto-merge PRs from claude/* branches
+    if: startsWith(github.head_ref, 'claude/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Run foundation validation
+        id: validation
+        run: |
+          chmod +x tools/validate-foundation.sh
+          if ./tools/validate-foundation.sh; then
+            echo "validation=passed" >> $GITHUB_OUTPUT
+          else
+            echo "validation=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Auto-merge PR
+        if: steps.validation.outputs.validation == 'passed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Add comment explaining auto-merge
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `## ✅ Auto-merge Initiated
+
+              This PR is from a Claude Code branch and has passed validation:
+              - Foundation validation: ✅ Passed
+              - All required checks: ✅ Passed
+
+              Merging automatically per AI-First workflow policy.
+
+              Branch: \`${pr.head.ref}\`
+              Workflow: \`.github/workflows/auto-merge-claude-branches.yml\`
+              `
+            });
+
+            // Merge the PR
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                merge_method: 'merge',
+                commit_title: `Merge ${pr.title}`,
+                commit_message: `Auto-merged by Claude Code workflow after validation passed.`
+              });
+
+              console.log('PR merged successfully');
+
+              // Delete the branch after merge
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${pr.head.ref}`
+                });
+                console.log('Branch deleted successfully');
+              } catch (deleteError) {
+                console.log('Branch deletion failed (may already be deleted):', deleteError.message);
+              }
+
+            } catch (mergeError) {
+              console.error('Merge failed:', mergeError.message);
+
+              // Comment on failure
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `## ⚠️ Auto-merge Failed
+
+                Validation passed but merge failed. This may be due to:
+                - Merge conflicts
+                - Branch protection rules
+                - Other GitHub restrictions
+
+                Error: ${mergeError.message}
+
+                **Manual intervention required.**`
+              });
+
+              throw mergeError;
+            }
