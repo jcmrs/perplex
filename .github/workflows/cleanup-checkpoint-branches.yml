@@ -1,0 +1,118 @@
+name: Cleanup Checkpoint Branches
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (list branches without deleting)'
+        required: false
+        default: 'false'
+
+jobs:
+  cleanup:
+    name: Delete Merged Checkpoint Branches
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'automated-checkpoint-'))
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged checkpoint branch
+        if: github.event_name == 'pull_request'
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+
+          echo "Checkpoint PR #${{ github.event.pull_request.number }} was merged"
+          echo "Deleting branch: $BRANCH_NAME"
+
+          # Delete the branch
+          git push origin --delete "$BRANCH_NAME" || {
+            echo "::warning::Failed to delete branch $BRANCH_NAME"
+            exit 0  # Don't fail the workflow
+          }
+
+          echo "✓ Branch $BRANCH_NAME deleted successfully"
+
+      - name: Cleanup all merged checkpoint branches (manual)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          echo "Finding merged checkpoint branches..."
+
+          # Get all remote checkpoint branches
+          CHECKPOINT_BRANCHES=$(git branch -r | grep 'origin/automated-checkpoint-' | sed 's/origin\///' | tr -d ' ' || echo "")
+
+          if [ -z "$CHECKPOINT_BRANCHES" ]; then
+            echo "No checkpoint branches found"
+            exit 0
+          fi
+
+          echo "Found checkpoint branches:"
+          echo "$CHECKPOINT_BRANCHES"
+          echo ""
+
+          DELETED_COUNT=0
+          SKIPPED_COUNT=0
+
+          for BRANCH in $CHECKPOINT_BRANCHES; do
+            echo "Checking branch: $BRANCH"
+
+            # Check if branch is merged to main
+            if git branch -r --merged origin/main | grep -q "origin/$BRANCH"; then
+              echo "  → Branch is merged"
+
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "  → [DRY RUN] Would delete: $BRANCH"
+                DELETED_COUNT=$((DELETED_COUNT + 1))
+              else
+                echo "  → Deleting branch: $BRANCH"
+                if git push origin --delete "$BRANCH"; then
+                  echo "  ✓ Deleted successfully"
+                  DELETED_COUNT=$((DELETED_COUNT + 1))
+                else
+                  echo "  ✗ Failed to delete"
+                  SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+                fi
+              fi
+            else
+              echo "  → Branch not merged, skipping"
+              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+            fi
+            echo ""
+          done
+
+          echo "========================================"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY RUN SUMMARY:"
+            echo "  Would delete: $DELETED_COUNT branch(es)"
+          else
+            echo "CLEANUP SUMMARY:"
+            echo "  Deleted: $DELETED_COUNT branch(es)"
+          fi
+          echo "  Skipped: $SKIPPED_COUNT branch(es)"
+          echo "========================================"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ github.event.pull_request.head.ref }}';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✓ Checkpoint branch \`${branchName}\` has been automatically deleted after merge.`
+            });

@@ -1,0 +1,231 @@
+# Completeness Review Configuration
+# Controls behavior of tools/review-completeness.sh
+
+# General Settings
+general:
+  # Automatically fix issues when possible (e.g., create missing files)
+  auto_fix: false
+
+  # Exit with error on warnings (not just issues)
+  strict_mode: false
+
+  # Verbose output
+  verbose: false
+
+# Thresholds - Time-based checks
+thresholds:
+  # How old can session log be before warning? (in minutes)
+  session_log_max_age: 120  # 2 hours
+
+  # How old can CURRENT_STATUS.md be before warning? (in minutes)
+  current_status_max_age: 120  # 2 hours
+
+  # How old can checkpoint be before suggesting new one? (in minutes)
+  checkpoint_max_age: 240  # 4 hours
+
+  # How many uncommitted files before warning?
+  max_uncommitted_files: 0  # Warn on any uncommitted
+
+  # How many untracked files before warning?
+  max_untracked_files: 3  # Allow a few temp files
+
+# Enabled Checks
+# Set to false to disable specific checks
+enabled_checks:
+  git_state: true
+  documentation: true
+  foundation_artifacts: true
+  quality: true
+  session_completeness: true
+
+# Git State Checks
+git:
+  # Check for uncommitted changes
+  check_uncommitted: true
+
+  # Check for untracked files
+  check_untracked: true
+
+  # Check for unpushed commits
+  check_unpushed: true
+
+  # Ignored file patterns (treated as OK if untracked)
+  ignored_patterns:
+    - "*.swp"
+    - "*.swo"
+    - ".DS_Store"
+    - "*.log"
+    - ".env.local"
+    - "tmp/*"
+    - "temp/*"
+
+# Documentation Checks
+documentation:
+  # Check session log updated recently
+  check_session_log: true
+
+  # Check CURRENT_STATUS.md updated recently
+  check_current_status: true
+
+  # Require ADRs for significant work
+  require_adrs: true
+
+  # Check traceability links complete
+  check_traceability: true
+
+  # Required documentation files (must exist)
+  required_files:
+    - "FOUNDATION.md"
+    - "README.md"
+    - "docs/PRODUCT_VISION.md"
+    - "sessions/CURRENT_STATUS.md"
+
+# Foundation Artifacts Checks
+foundation_artifacts:
+  # Check if ideas should be logged
+  check_ideas: true
+
+  # Check if backlog needs update
+  check_backlog: true
+
+  # Check if checkpoint needed
+  check_checkpoint: true
+
+  # Suggest checkpoint creation after this many commits
+  commits_before_checkpoint: 10
+
+# Quality Checks
+quality:
+  # Run foundation validation
+  run_foundation_validation: true
+
+  # Check for breaking changes documentation
+  check_breaking_changes: true
+
+  # Require test coverage for new scripts (when tests exist)
+  require_tests: false  # Not enforced yet, aspirational
+
+# Session Completeness Checks
+session:
+  # Check all todos completed or deferred
+  check_todos: true
+
+  # Check no unanswered questions
+  check_questions: true
+
+  # Check next actions documented
+  check_next_actions: true
+
+  # Check no open blockers
+  check_blockers: true
+
+# Interactive Mode Settings
+interactive:
+  # Prompt for subjective questions
+  # If false, skip prompts and only run automated checks
+  enable_prompts: true
+
+  # Questions to ask in interactive mode
+  prompts:
+    - id: "significant_decisions"
+      question: "Were significant technical decisions made?"
+      help: "ADRs should be created for architectural decisions"
+
+    - id: "future_ideas"
+      question: "Did you encounter ideas for future exploration?"
+      help: "Log in ideas/ so they're not forgotten"
+
+    - id: "backlog_items"
+      question: "Did you identify work for later (backlog items)?"
+      help: "Add to backlog/BACKLOG.md or create item"
+
+    - id: "phase_transition"
+      question: "Is this a phase transition or major milestone?"
+      help: "Create checkpoint to preserve state"
+
+    - id: "breaking_changes"
+      question: "Are breaking changes documented with migration path?"
+      help: "Document: what breaks, how to migrate, why necessary"
+
+    - id: "unanswered_questions"
+      question: "Are there unanswered questions or blockers?"
+      help: "Document in session log or create backlog item"
+
+    - id: "next_actions_clear"
+      question: "Are next actions clear for resuming work?"
+      help: "Future sessions need to know where to start"
+
+    - id: "todos_complete"
+      question: "Are all todos completed or explicitly deferred?"
+      help: "Work is truly complete when todos are done"
+
+# Scheduled Run Settings (for GitHub Actions)
+scheduled:
+  # Enable scheduled completeness checks
+  enabled: true
+
+  # Cron schedule (default: weekly on Monday at 9am UTC)
+  schedule: "0 9 * * 1"
+
+  # Create GitHub issue if problems found
+  create_issue: true
+
+  # Issue labels for scheduled checks
+  issue_labels:
+    - "automated"
+    - "completeness-check"
+    - "health"
+
+  # Assignees for issues (empty = no assignment)
+  issue_assignees: []
+
+# Reporting Settings
+reporting:
+  # Generate report file
+  generate_report: false
+
+  # Report output directory
+  report_dir: "reports/completeness"
+
+  # Report format (text, json, html)
+  report_format: "text"
+
+  # Include passing checks in report
+  include_passing: false
+
+# Auto-fix Settings
+auto_fix:
+  # Create missing session log
+  create_session_log: false
+
+  # Update CURRENT_STATUS.md automatically
+  update_current_status: false
+
+  # Create missing checkpoint
+  create_checkpoint: false
+
+# Custom Checks (Advanced)
+# Add project-specific checks here
+custom_checks: {}
+  # Example: Check for database migrations
+  # - name: "pending_migrations"
+  #   script: "./tools/check-migrations.sh"
+  #   enabled: false
+
+# ==============================================================================
+# Notes for AI Agents:
+# - This configuration controls completeness review behavior
+# - Update when: thresholds too strict/lenient, disabling noisy checks,
+#   adding project checks, or workflow patterns change
+# - Best practices: Keep thresholds reasonable, don't disable checks permanently
+#   (fix root cause instead), document custom checks, review config periodically
+#
+# For humans:
+# - This file makes completeness review configurable
+# - Adjust thresholds based on team workflow
+# - Enable/disable checks as needed
+# - Scheduled runs provide health monitoring
+#
+# Last Updated: 2025-11-11
+# Status: Active
+# ==============================================================================

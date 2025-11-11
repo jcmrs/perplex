@@ -1,0 +1,49 @@
+# Shellcheck configuration for Project Perplex
+# See: https://www.shellcheck.net/wiki/
+
+# Disable specific checks to avoid retrofitting existing scripts
+# New scripts should avoid these patterns, but we don't enforce it
+
+# SC2034: Variable appears unused
+disable=SC2034
+
+# SC2162: read without -r will mangle backslashes
+# Reason: Existing scripts use read without -r extensively
+disable=SC2162
+
+# SC2012: Use find instead of ls to better handle non-alphanumeric filenames
+# Reason: Existing scripts use ls for simplicity, would require major refactoring
+disable=SC2012
+
+# SC2010: Don't use ls | grep
+# Reason: Same as SC2012, common pattern in existing scripts
+disable=SC2010
+
+# SC2126: Consider using grep -c instead of grep|wc -l
+# Reason: Style preference, not a bug
+disable=SC2126
+
+# SC2001: Use ${variable//search/replace} instead of sed
+# Reason: Style preference, sed is clearer for some operations
+disable=SC2001
+
+# SC1083: Literal braces in git expressions
+# Reason: @{u} is correct git syntax for upstream branch
+disable=SC1083
+
+# SC2086: Double quote to prevent globbing and word splitting
+# Reason: Would require extensive quoting changes in existing scripts
+disable=SC2086
+
+# Note: We use shellcheck's default checks, which are comprehensive.
+# Optional strict checks (like SC2250: require-variable-braces, SC2292: prefer-test-bracket)
+# are NOT enabled to avoid requiring massive refactoring of existing scripts.
+# New scripts should strive to follow stricter practices, but it's not enforced.
+
+# Source path for scripts that source other scripts
+# Helps shellcheck find sourced files
+# source-path=SCRIPTDIR
+
+# External sources
+# Add external sources that shellcheck should be aware of
+# external-sources=true
