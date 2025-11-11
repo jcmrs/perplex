@@ -163,9 +163,10 @@ jobs:
           TAG_NAME="checkpoint-${{ steps.params.outputs.phase }}-${{ github.run_number }}"
           RELEASE_NAME="Checkpoint: ${{ steps.params.outputs.description }}"
 
-          RELEASE_BODY="## Checkpoint: ${{ steps.params.outputs.description }}
+          cat > /tmp/release-notes.md <<'RELEASE_EOF'
+          ## Checkpoint: ${{ steps.params.outputs.description }}
 
-          **Phase:** ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
+          **Phase:** ${{ steps.params.outputs.phase }} to ${{ steps.params.outputs.next_phase }}
 
           ### Summary
           ${{ steps.params.outputs.summary }}
@@ -178,11 +179,12 @@ jobs:
           **Trigger:** ${{ steps.params.outputs.trigger }}
           **Created:** $(date -u +"%Y-%m-%d %H:%M UTC")
 
-          See checkpoint files in \`checkpoints/\` directory for full details."
+          See checkpoint files in `checkpoints/` directory for full details.
+          RELEASE_EOF
 
           gh release create "$TAG_NAME" \
             --title "$RELEASE_NAME" \
-            --notes "$RELEASE_BODY"
+            --notes-file /tmp/release-notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
