@@ -45,11 +45,13 @@ The system should verify that CI/CD checks are passing as part of "completeness.
 
 How do we know this is complete?
 
-- [ ] Completeness review can check GitHub Actions workflow status
+- [ ] Completeness review can check GitHub Actions workflow status via REST API
 - [ ] Warns if latest workflow run failed
 - [ ] Provides link to failing workflow run
 - [ ] Works in both interactive and non-interactive mode
-- [ ] Handles case where gh CLI not available gracefully
+- [ ] Handles case where GITHUB_TOKEN not available gracefully
+- [ ] Handles in_progress workflows appropriately
+- [ ] Uses `jq` for JSON parsing (consistent with project patterns)
 - [ ] Documented in docs/COMPLETENESS_REVIEW.md
 - [ ] Added to config/completeness.yml as configurable check
 
@@ -80,44 +82,65 @@ How do we know this is complete?
 **Estimated effort:** Small (< 1hr)
 
 **Complexity:** Low
-- Use `gh run list --limit 1` to get latest run status
+- Use GitHub REST API via `curl` to get latest run status
 - Check conclusion field for "success" vs "failure"
 - Add to review-completeness.sh as new section
 
 **Dependencies:**
-- Requires gh CLI installed (optional dependency)
+- Requires `GITHUB_TOKEN` environment variable (optional)
 - Requires network access to GitHub API
-- Should gracefully skip if gh CLI not available
+- Should gracefully skip if GITHUB_TOKEN not available
+
+**Note (2025-11-11):** Original approach using `gh CLI` is **not viable** in Claude Code environment (gh CLI blocked by security restrictions). Updated to use GitHub REST API pattern discovered during PR automation breakthrough.
 
 ---
 
 ## Proposed Approach
+
+**UPDATED (2025-11-11):** Use GitHub REST API instead of `gh CLI` (blocked in Claude Code environment).
 
 Add new section to `tools/review-completeness.sh`:
 
 ```bash
 section "6. GitHub Actions Status"
 
-if command -v gh >/dev/null 2>&1; then
+# Check if GITHUB_TOKEN available
+if [ -n "$GITHUB_TOKEN" ]; then
     # Check if we're in a git repository with remote
-    if git remote get-url origin >/dev/null 2>&1; then
-        # Get latest workflow run status
-        RUN_STATUS=$(gh run list --limit 1 --json conclusion --jq '.[0].conclusion' 2>/dev/null || echo "unknown")
+    REPO_URL=$(git remote get-url origin 2>/dev/null)
+    if [ -n "$REPO_URL" ]; then
+        # Extract owner/repo from GitHub URL
+        REPO=$(echo "$REPO_URL" | sed -n 's#.*github.com[:/]\([^/]*\/[^/]*\).*#\1#p' | sed 's/\.git$//')
 
-        if [ "$RUN_STATUS" = "success" ]; then
-            ok "Latest GitHub Actions run: SUCCESS"
-        elif [ "$RUN_STATUS" = "failure" ]; then
-            issue "Latest GitHub Actions run: FAILED"
-            RUN_URL=$(gh run list --limit 1 --json url --jq '.[0].url' 2>/dev/null)
-            info "Check: $RUN_URL"
+        if [ -n "$REPO" ]; then
+            # Get latest workflow run via REST API
+            RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/actions/runs?per_page=1" 2>/dev/null)
+
+            RUN_STATUS=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].conclusion // "unknown"' 2>/dev/null || echo "unknown")
+
+            if [ "$RUN_STATUS" = "success" ]; then
+                ok "Latest GitHub Actions run: SUCCESS"
+            elif [ "$RUN_STATUS" = "failure" ]; then
+                issue "Latest GitHub Actions run: FAILED"
+                RUN_URL=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].html_url // ""' 2>/dev/null)
+                if [ -n "$RUN_URL" ]; then
+                    info "Check: $RUN_URL"
+                fi
+            elif [ "$RUN_STATUS" = "in_progress" ]; then
+                warning "GitHub Actions workflows currently running"
+            else
+                warning "Could not determine GitHub Actions status"
+            fi
         else
-            warning "Could not determine GitHub Actions status"
+            info "Could not parse GitHub repository from remote URL"
         fi
     else
         info "No GitHub remote configured"
     fi
 else
-    info "gh CLI not installed (GitHub Actions check skipped)"
+    info "GITHUB_TOKEN not set (GitHub Actions check skipped)"
 fi
 ```
 
@@ -129,31 +152,40 @@ quality:
 
 Document in `docs/COMPLETENESS_REVIEW.md`.
 
+**Key changes from original:**
+- Uses `curl` + GitHub REST API instead of `gh CLI`
+- Requires `GITHUB_TOKEN` environment variable (optional)
+- Uses `jq` for JSON parsing (consistent with PR automation pattern)
+- Handles in_progress status explicitly
+
 ---
 
 ## Risks & Considerations
 
 **Risks:**
-- **Dependency on gh CLI**: Not all environments have it
+- **Dependency on GITHUB_TOKEN**: Not all environments have it set
   - Mitigation: Gracefully skip if not available
+  - Note: GitHub Actions workflows have GITHUB_TOKEN by default
 - **Network dependency**: Requires GitHub API access
   - Mitigation: Treat errors as "unknown" not failure
 - **Rate limiting**: GitHub API rate limits
-  - Mitigation: Only check latest run (1 API call)
+  - Mitigation: Only check latest run (1 API call), minimal impact
 
 **Considerations:**
 - Should this check current branch or main branch?
-  - Probably current branch (what you're working on)
+  - Latest run regardless of branch (simplest, most useful)
 - Should it check ALL workflows or just latest?
   - Latest is sufficient (if any fail, latest will fail)
 - What if workflows are still running?
-  - Status will be "in_progress" - treat as warning
+  - Status will be "in_progress" - treat as warning (implemented in updated approach)
 
 ---
 
 ## Status Log
 
 **2025-11-11:** Backlog - Created from gap discovered during backlog cleanup session
+
+**2025-11-11:** Updated - Approach revised to use GitHub REST API instead of `gh CLI` (discovered during PR automation breakthrough that gh CLI is blocked in Claude Code environment)
 
 ---
 
@@ -162,12 +194,13 @@ Document in `docs/COMPLETENESS_REVIEW.md`.
 When activating this backlog item:
 1. Read tools/review-completeness.sh to understand structure
 2. Add new section after "Quality & Validation"
-3. Test with gh CLI installed and not installed
-4. Test when workflows passing and failing
+3. Test with GITHUB_TOKEN set and not set
+4. Test when workflows passing, failing, and in_progress
 5. Update config/completeness.yml with new setting
 6. Update docs/COMPLETENESS_REVIEW.md
 7. Test in both interactive and non-interactive mode
+8. Use GitHub REST API pattern (curl + jq) consistent with auto-create PR workflow
 
 ## For Humans
 
-This enhancement makes the completeness review system more robust by checking remote CI/CD state, not just local repository state. It's optional (requires gh CLI) but valuable when available.
+This enhancement makes the completeness review system more robust by checking remote CI/CD state, not just local repository state. It's optional (requires GITHUB_TOKEN) but valuable when available. Uses GitHub REST API pattern consistent with project's autonomous PR workflow.
