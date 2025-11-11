@@ -1,0 +1,61 @@
+# YAML linting configuration for Project Perplex
+# See: https://yamllint.readthedocs.io/
+
+extends: default
+
+rules:
+  # Line length
+  line-length:
+    max: 120
+    level: warning  # Don't fail on long lines, just warn
+    allow-non-breakable-inline-mappings: true
+
+  # Indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Comments
+  comments:
+    min-spaces-from-content: 1
+    require-starting-space: true
+
+  # Trailing spaces
+  trailing-spaces: enable
+
+  # Empty lines
+  empty-lines:
+    max: 2
+
+  # Document start (---)
+  document-start:
+    present: false  # Don't require --- at start
+
+  # Truthy values (yes/no vs true/false)
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+    check-keys: false
+
+  # Brackets
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+
+  # Braces
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+
+  # Key duplicates
+  key-duplicates: enable
+
+  # Octal values
+  octal-values:
+    forbid-implicit-octal: true
+
+# Ignore certain files/paths
+ignore: |
+  .github/
+  node_modules/
+  vendor/

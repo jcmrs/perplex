@@ -1,0 +1,69 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install testing dependencies
+        run: |
+          # Install shellcheck
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+          # Install bats-core
+          git clone --depth 1 --branch v1.10.0 https://github.com/bats-core/bats-core.git /tmp/bats-core
+          sudo /tmp/bats-core/install.sh /usr/local
+
+          # Install yamllint
+          pip install yamllint
+
+      - name: Verify installations
+        run: |
+          echo "Shellcheck version:"
+          shellcheck --version
+          echo ""
+          echo "Bats version:"
+          bats --version
+          echo ""
+          echo "Yamllint version:"
+          yamllint --version
+
+      - name: Run shellcheck
+        run: ./tests/run-tests.sh --shellcheck
+
+      - name: Run bats tests
+        run: ./tests/run-tests.sh --bats
+
+      - name: Run YAML validation
+        run: ./tests/run-tests.sh --yaml
+
+      - name: Run all tests (combined)
+        run: ./tests/run-tests.sh --verbose
+
+  # Separate job for test coverage (future)
+  # coverage:
+  #   name: Test Coverage
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     # Add coverage reporting here

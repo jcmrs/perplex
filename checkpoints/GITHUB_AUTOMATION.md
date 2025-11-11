@@ -270,9 +270,9 @@ The checkpoint automation workflow uses a **PR-based pattern** instead of direct
 **Recommended Improvements:** (Tracked in backlog/ITEM-013)
 
 **HIGH Priority:**
-1. Branch cleanup - Delete checkpoint branches after merge
-2. Error handling - Surface failures via PR comments/labels
-3. Documentation - Document process (✅ this section)
+1. ✅ Branch cleanup - Delete checkpoint branches after merge (implemented: `.github/workflows/cleanup-checkpoint-branches.yml`)
+2. ⚠️ Error handling - Surface failures via PR comments/labels (deferred: test-first approach, add when real errors encountered)
+3. ✅ Documentation - Document process (this section)
 
 **MEDIUM Priority:**
 4. Retry mechanisms - Handle transient `gh pr create` failures
@@ -298,8 +298,37 @@ The checkpoint automation workflow uses a **PR-based pattern** instead of direct
 **Current Status:**
 - Workflow validated as sound (2025-11-11)
 - Functional and following best practices
-- Improvements tracked in backlog for post-testing implementation
+- Branch cleanup automation implemented (2025-11-11)
+- Further improvements tracked in backlog for post-testing implementation
 - Philosophy: Test in practice before adding optimization complexity
+
+### Branch Cleanup Automation
+
+Merged checkpoint branches are automatically deleted to keep repository clean.
+
+**Workflow:** `.github/workflows/cleanup-checkpoint-branches.yml`
+
+**Triggers:**
+- Automatic: When checkpoint PR closes (merged)
+- Manual: Workflow dispatch to cleanup all merged checkpoint branches
+
+**Features:**
+- Deletes branch immediately after checkpoint PR merge
+- Posts confirmation comment on PR
+- Manual mode with dry-run option
+- Skips branches not yet merged
+- Graceful failure (doesn't break workflow if delete fails)
+
+**Manual Cleanup:**
+```bash
+# Via GitHub UI: Actions → Cleanup Checkpoint Branches → Run workflow
+
+# Dry run to see what would be deleted
+gh workflow run cleanup-checkpoint-branches.yml -f dry_run=true
+
+# Actual cleanup
+gh workflow run cleanup-checkpoint-branches.yml -f dry_run=false
+```
 
 ---
 

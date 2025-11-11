@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CODEOWNERS file
 - Contributing guidelines
 - Changelog structure
+- **Testing infrastructure (ITEM-001)**: shellcheck, bats-core, yamllint with test runner, helpers, examples, and GitHub Actions workflow
+- **Testing configuration**: .shellcheckrc and .yamllint.yml
+- **Testing documentation**: Comprehensive tests/README.md with philosophy and guidelines
+- **Testing setup script**: tools/setup-testing.sh for dependency installation
+- **Completeness review enhancements (ITEM-012)**: config/completeness.yml for configuration, scheduled-completeness.yml for weekly health checks, reporting framework, hybrid mode
+- **Checkpoint automation improvements (ITEM-013)**: cleanup-checkpoint-branches.yml for automatic branch cleanup, enhanced documentation with Copilot insights
 
 #### Foundation Systems
 - Directory structure with purpose documentation
@@ -41,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Decisions (ADRs)
 - ADR-001: Discovery-Driven Development with Lean Principles
 - ADR-002: Foundation Enhancements (enforcement, traceability, continuity)
+- ADR-003: CLAUDE.md Architecture - Table of Contents Pattern
+- ADR-004: Testing Infrastructure (shellcheck, bats, yamllint)
+- ADR-005: Completeness Review Configuration & Enhanced Automation
 
 ### Phase: Discovery (Not Started)
 
@@ -130,5 +139,5 @@ This changelog provides high-level view of project evolution. For detailed techn
 
 ---
 
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-11
 **Current Version:** 0.1.0 (Foundation)

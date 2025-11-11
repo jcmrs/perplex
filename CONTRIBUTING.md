@@ -190,7 +190,36 @@ When implementing features:
 
 ### Testing
 
-(Standards TBD based on tech stack choice)
+**Test Infrastructure:** shellcheck, bats-core, yamllint
+
+**Run tests:**
+```bash
+# All tests
+./tests/run-tests.sh
+
+# Specific test type
+./tests/run-tests.sh --shellcheck
+./tests/run-tests.sh --bats
+./tests/run-tests.sh --yaml
+```
+
+**Add tests:**
+- Create `.bats` files in `tests/tools/` for new scripts
+- Use helpers from `tests/helpers/test-helpers.bash`
+- See `tests/README.md` for comprehensive guide
+
+**Testing Standards:**
+- Add tests for new shell scripts (use bats)
+- Run shellcheck before committing
+- Update tests when fixing bugs
+- Focus on high-value paths, not 100% coverage
+
+**CI/CD:**
+- Tests run automatically on PR
+- Must pass before merge
+- See `.github/workflows/tests.yml`
+
+See [`tests/README.md`](tests/README.md) for complete testing guide.
 
 ---
 
@@ -378,5 +407,5 @@ Contributors are recognized through:
 
 ---
 
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-11
 **Status:** Active

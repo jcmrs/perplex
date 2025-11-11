@@ -95,6 +95,162 @@ COMPLETENESS_NON_INTERACTIVE=true ./tools/review-completeness.sh
 - `0` - No issues found (or only warnings)
 - `1` - Critical issues found
 
+## Configuration
+
+The completeness review system is now configurable via `config/completeness.yml`.
+
+### Configurable Options
+
+**Thresholds:**
+- Session log age before warning (default: 120 minutes)
+- CURRENT_STATUS.md age before warning (default: 120 minutes)
+- Checkpoint age before suggesting new one (default: 240 minutes)
+- Maximum uncommitted files (default: 0)
+- Maximum untracked files (default: 3)
+
+**Enabled Checks:**
+- Enable/disable entire check categories
+- Toggle specific checks within categories
+- Add custom project-specific checks
+
+**Interactive Mode:**
+- Configure which prompts to show
+- Customize prompt questions and help text
+- Enable hybrid mode (auto-check basics, prompt for subjective)
+
+**Scheduled Runs:**
+- Weekly health checks via GitHub Actions
+- Automatic issue creation for recurring problems
+- Customizable schedule and labels
+
+**Reporting:**
+- Generate reports in text/JSON/HTML format
+- Include/exclude passing checks
+- Save reports to configurable directory
+
+See `config/completeness.yml` for all options and documentation.
+
+### Customizing Thresholds
+
+Edit `config/completeness.yml`:
+
+```yaml
+thresholds:
+  session_log_max_age: 240  # 4 hours instead of 2
+  checkpoint_max_age: 480   # 8 hours instead of 4
+```
+
+### Disabling Specific Checks
+
+```yaml
+enabled_checks:
+  git_state: true
+  documentation: true
+  foundation_artifacts: false  # Disable this category
+  quality: true
+  session_completeness: true
+```
+
+## Scheduled Health Checks
+
+The system runs automated weekly health checks via GitHub Actions.
+
+**Schedule:** Every Monday at 9am UTC (configurable in `config/completeness.yml`)
+
+**What it does:**
+1. Runs completeness review in non-interactive mode
+2. Analyzes repository state across all checks
+3. Creates GitHub issue if problems found
+4. Uploads report as workflow artifact
+
+**Issue Creation:**
+- Automatic when exit code != 0
+- Includes full completeness output
+- Tagged with `automated`, `completeness-check`, `health`
+- Contains actionable next steps
+
+**Workflow:** `.github/workflows/scheduled-completeness.yml`
+
+### Manual Trigger
+
+You can manually trigger the scheduled check:
+
+```bash
+# Via GitHub UI: Actions → Scheduled Completeness Check → Run workflow
+
+# Or via gh CLI:
+gh workflow run scheduled-completeness.yml
+```
+
+## Reporting
+
+Generate completeness reports for record-keeping or analysis.
+
+### Enable Reporting
+
+Edit `config/completeness.yml`:
+
+```yaml
+reporting:
+  generate_report: true
+  report_dir: "reports/completeness"
+  report_format: "text"  # or "json", "html"
+  include_passing: false  # Only show issues/warnings
+```
+
+### Report Formats
+
+**Text:** Human-readable, plain text
+```
+=== Completeness Review Report ===
+Date: 2025-11-11
+Status: PASSED (2 warnings)
+
+Warnings:
+- Session log updated 90 minutes ago
+- No checkpoint in last 5 hours
+```
+
+**JSON:** Machine-readable for automation
+```json
+{
+  "date": "2025-11-11",
+  "status": "passed",
+  "warnings": 2,
+  "issues": 0,
+  "checks": [...]
+}
+```
+
+**HTML:** Web-viewable dashboard (future enhancement)
+
+## Hybrid Mode
+
+Hybrid mode balances automation with human insight.
+
+**How it works:**
+1. Automated checks run first (git state, file existence, etc.)
+2. Only prompt for subjective questions (decisions, ideas, etc.)
+3. Configurable which prompts to enable
+
+**Enable/Configure:**
+
+```yaml
+interactive:
+  enable_prompts: true  # Enable hybrid mode
+
+  prompts:
+    - id: "significant_decisions"
+      question: "Were significant technical decisions made?"
+      help: "ADRs should be created for architectural decisions"
+      # Add enabled: false to skip this prompt
+```
+
+**Benefits:**
+- Faster completion (skip obvious automated checks)
+- Focus human attention on judgment calls
+- Maintain thoroughness without tedium
+
 ## Understanding Results
 
 ### ✅ OK - No action needed

@@ -1,0 +1,24 @@
+# Shellcheck configuration for Project Perplex
+# See: https://www.shellcheck.net/wiki/
+
+# Disable specific checks
+
+# SC2034: Variable appears unused
+# Reason: Common in config/setup scripts where variables are sourced
+disable=SC2034
+
+# SC2155: Declare and assign separately to avoid masking return values
+# Reason: Sometimes intentional for brevity in simple cases
+# disable=SC2155
+
+# Enable all optional checks
+# This catches additional issues beyond the default set
+enable=all
+
+# Source path for scripts that source other scripts
+# Helps shellcheck find sourced files
+# source-path=SCRIPTDIR
+
+# External sources
+# Add external sources that shellcheck should be aware of
+# external-sources=true
