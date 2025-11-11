@@ -1,0 +1,35 @@
+{
+  "checkpoint_id": "checkpoint-20251111-190023-pr-6-merged",
+  "timestamp": "2025-11-11T19:00:23Z",
+  "phase": "foundation",
+  "next_phase": "foundation",
+
+  "critical_files": [
+    {"path": "FOUNDATION.md", "reason": "Core principles", "priority": "critical"},
+    {"path": "docs/PRODUCT_VISION.md", "reason": "Mission and goals", "priority": "critical"}
+  ],
+
+  "active_work": {
+    "focus": "Continue with next PR or task in backlog",
+    "blockers": [],
+    "next_steps": []
+  },
+
+  "relationships": {
+    "2025-11-10-foundation-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-10-foundation-methodology": {"type": "decision", "status": "active"},
+    "2025-11-11-claude-md-architecture": {"type": "decision", "status": "active"}
+  },
+
+  "skip_for_now": [
+    "*/TEMPLATE.md",
+    "sessions/session-*.md",
+    "examples/*"
+  ],
+
+  "git_state": {
+    "branch": "main",
+    "last_commit": "ffbf4a7",
+    "last_commit_message": "Add automated checkpoint: PR #5 merged (#6)"
+  }
+}
