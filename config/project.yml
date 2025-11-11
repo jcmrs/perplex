@@ -92,6 +92,24 @@ session_management:
   current_status_file: "sessions/CURRENT_STATUS.md"
   session_directory: "sessions"
 
+checkpoints:
+  enabled: true
+  idempotency_hours: 2  # Minimum hours between checkpoints (prevents duplicates)
+  session_end_prompt: true  # Prompt for checkpoint at session end
+  auto_commit: false  # Automatically commit checkpoint files (future feature)
+  triggers:
+    session_end: true  # Create checkpoint option at session end
+    phase_change: false  # Auto-create on phase transitions (Phase 2 - not yet implemented)
+    manual: true  # Manual checkpoint creation always available
+  default_critical_files:
+    - "FOUNDATION.md"
+    - "docs/PRODUCT_VISION.md"
+    - "sessions/CURRENT_STATUS.md"
+  default_skip_patterns:
+    - "*/TEMPLATE.md"
+    - "sessions/session-*.md"
+    - "examples/*"
+
 # Feature flags for phased development
 features:
   manual_capture: true

@@ -20,6 +20,42 @@ else
     NON_INTERACTIVE=false
 fi
 
+# Idempotency check: Don't create if one exists recently
+CHECKPOINT_IDEMPOTENCY_HOURS=${CHECKPOINT_IDEMPOTENCY_HOURS:-2}
+if [ -f "checkpoints/LATEST.md" ]; then
+    if [ "$(uname)" = "Darwin" ]; then
+        # macOS
+        LATEST_CHECKPOINT_TIME=$(stat -f %m checkpoints/LATEST.md 2>/dev/null || echo 0)
+    else
+        # Linux
+        LATEST_CHECKPOINT_TIME=$(stat -c %Y checkpoints/LATEST.md 2>/dev/null || echo 0)
+    fi
+    CURRENT_TIME=$(date +%s)
+    TIME_DIFF=$((CURRENT_TIME - LATEST_CHECKPOINT_TIME))
+    THRESHOLD_SECONDS=$((CHECKPOINT_IDEMPOTENCY_HOURS * 3600))
+
+    if [ "$TIME_DIFF" -lt "$THRESHOLD_SECONDS" ]; then
+        HOURS_AGO=$((TIME_DIFF / 3600))
+        MINUTES_AGO=$(( (TIME_DIFF % 3600) / 60 ))
+        echo "ℹ️  Checkpoint created ${HOURS_AGO}h ${MINUTES_AGO}m ago (within ${CHECKPOINT_IDEMPOTENCY_HOURS}h threshold)"
+        echo ""
+
+        if [ "$NON_INTERACTIVE" = "true" ]; then
+            # In non-interactive mode, skip silently
+            echo "Skipping checkpoint creation (idempotency check)"
+            exit 0
+        else
+            # In interactive mode, ask if they want to override
+            read -p "Create checkpoint anyway? (y/n): " OVERRIDE
+            if [ "$OVERRIDE" != "y" ]; then
+                echo "Checkpoint creation cancelled."
+                exit 0
+            fi
+            echo ""
+        fi
+    fi
+fi
+
 # Get checkpoint description
 DESCRIPTION="${CHECKPOINT_DESCRIPTION:-$1}"
 if [ -z "$DESCRIPTION" ]; then

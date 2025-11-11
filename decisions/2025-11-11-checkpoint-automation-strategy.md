@@ -1,7 +1,7 @@
 # ADR-006: Checkpoint Automation Strategy
 
 **Date:** 2025-11-11
-**Status:** Proposed
+**Status:** Accepted (Phase 1 Implemented)
 **Deciders:** AI Agent + Human Partner
 
 ## Context
@@ -349,3 +349,48 @@ Please review:
 - Is the idempotency threshold (2 hours default) appropriate?
 
 Your feedback will shape the final implementation.
+
+---
+
+## Implementation Status
+
+**Phase 1: Session-End Checkpoint Integration - ✅ COMPLETE (2025-11-11)**
+
+**What was implemented:**
+1. ✅ Idempotency check in `tools/create-checkpoint.sh`
+   - Default threshold: 2 hours (configurable via `CHECKPOINT_IDEMPOTENCY_HOURS`)
+   - Prevents duplicate checkpoints
+   - Cross-platform support (Linux and macOS)
+   - Interactive override option (non-interactive auto-skips)
+
+2. ✅ Session-end checkpoint integration in `tools/session-end.sh`
+   - Optional checkpoint creation prompt after validation/completeness
+   - Automatic mode using environment variables
+   - Reminds user to commit checkpoint files
+   - Respects idempotency check
+
+3. ✅ Configuration added to `config/project.yml`
+   - `checkpoints` section with all settings
+   - Idempotency threshold configurable
+   - Trigger toggles (session_end, phase_change, manual)
+   - Default critical files and skip patterns
+
+4. ✅ Documentation updated in `checkpoints/README.md`
+   - Session-end trigger documented
+   - Idempotency safeguard explained
+   - Configuration examples provided
+   - Phase 2 (phase-change) marked as future work
+
+**Testing:**
+- Idempotency check tested (prevents duplicates within threshold)
+- Session-end integration tested (prompts correctly, creates checkpoint)
+- Configuration defaults tested (works out of box)
+
+**Phase 2: Phase-Change Detection - 🔜 PENDING**
+- Will be implemented after testing Phase 1 in practice
+- See ADR for design (monitor `config/project.yml` phase field changes)
+
+**Phase 3: Enhanced Configuration - 🔜 PENDING**
+- Extended configuration options
+- Auto-commit feature
+- Additional safeguards based on Phase 1/2 learnings
