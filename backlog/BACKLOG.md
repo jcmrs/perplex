@@ -1,7 +1,7 @@
 # Backlog - Master List
 
 **Last Updated:** 2025-11-11
-**Total Items:** 12
+**Total Items:** 13
 
 ---
 
@@ -100,11 +100,21 @@
 **Priority:** Medium - Integration gaps fixed (HIGH priority complete), remaining are enhancements
 **Related:** See docs/COMPLETENESS_REVIEW_FOUNDATION_ANALYSIS.md for full analysis
 
+### ITEM-013: Checkpoint Automation Improvements
+**Status:** Backlog
+**Effort:** Medium
+**Target:** After Initial Testing
+**Description:** Improve checkpoint automation workflow based on GitHub Copilot third-party review. Includes: (1) HIGH PRIORITY: Add branch cleanup automation to delete merged checkpoint branches, (2) HIGH PRIORITY: Add error handling and notification for failed checkpoint creation, (3) HIGH PRIORITY: Update checkpoint documentation with Copilot insights, (4) MEDIUM PRIORITY: Add retry mechanisms for transient gh pr create failures, (5) MEDIUM PRIORITY: Add rate limit handling for rapid batch merges, (6) MEDIUM PRIORITY: Auto-close stale checkpoint PRs after configurable timeout, (7) LOW PRIORITY: Package checkpoint logic into composite action for reuse, (8) LOW PRIORITY: Investigate auto-merge for checkpoint PRs (requires GitHub App setup)
+**Rationale:** GitHub Copilot validated PR-based checkpoint approach as "canonical pattern" and "sound" but identified specific improvement opportunities. Current workflow is functional and follows GitHub best practices. These are optimizations based on expert third-party review.
+**Priority:** Medium - Current workflow validated as sound, these are enhancements for production hardening
+**Related:** Copilot feedback captured in session-20251111-foundation-completion.md
+**Test First:** Run workflow in practice to identify actual vs. theoretical issues before implementation
+
 ---
 
 ## 📊 Summary by Status
 
-- **Backlog:** 7 items
+- **Backlog:** 8 items
 - **Active:** 0 items
 - **Complete:** 2 items
 - **Discarded:** 0 items
@@ -113,8 +123,8 @@
 ## 📊 Summary by Priority
 
 - **High:** 1 item
-- **Medium:** 3 items (2 complete, 1 backlog)
-- **Low/Deferred:** 7 items (3 deferred, 4 backlog)
+- **Medium:** 4 items (2 complete, 2 backlog)
+- **Low/Deferred:** 8 items (3 deferred, 5 backlog)
 
 ---
 
