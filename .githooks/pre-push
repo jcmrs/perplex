@@ -1,0 +1,55 @@
+#!/bin/bash
+# Pre-Push Hook - Completeness Review
+# Runs before git push to check for potential gaps
+# Non-blocking: Shows warnings but allows push to proceed
+
+set +e  # Don't exit on errors - this is advisory only
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Pre-Push: Completeness Review"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Get project root
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# Check if completeness review script exists
+if [ ! -f "tools/review-completeness.sh" ]; then
+    echo "⚠️  Completeness review script not found"
+    echo "   Skipping completeness check"
+    echo ""
+    exit 0
+fi
+
+# Run completeness review in non-interactive mode
+echo "Running completeness review (non-blocking)..."
+echo ""
+
+COMPLETENESS_NON_INTERACTIVE=true bash tools/review-completeness.sh
+
+COMPLETENESS_EXIT=$?
+
+echo ""
+
+if [ $COMPLETENESS_EXIT -eq 0 ]; then
+    echo "✅ Completeness check passed"
+elif [ $COMPLETENESS_EXIT -eq 1 ]; then
+    echo "⚠️  Completeness check found issues"
+    echo ""
+    echo "   This is a WARNING, not a blocker."
+    echo "   Push will proceed, but consider addressing issues."
+    echo ""
+    echo "   To review interactively, run:"
+    echo "   ./tools/review-completeness.sh"
+else
+    echo "⚠️  Completeness check encountered an error"
+    echo "   Push will proceed anyway"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Always exit 0 - we don't block pushes, just warn
+exit 0

@@ -1,7 +1,7 @@
 # Backlog - Master List
 
 **Last Updated:** 2025-11-11
-**Total Items:** 11
+**Total Items:** 12
 
 ---
 
@@ -91,11 +91,20 @@
 **Rationale:** Currently relying on GitHub UI configuration (verified working). This would add programmatic verification and tighter CI integration for additional robustness
 **Priority:** Low - Current GitHub-enforced protection is sufficient for foundation phase
 
+### ITEM-012: Completeness Review Configuration & Enhanced Automation
+**Status:** Backlog
+**Effort:** Medium
+**Target:** Early Discovery Phase
+**Description:** Enhance completeness review system configurability and automation. Includes: (1) Create config/completeness.yml for configurable thresholds and checks, (2) Add scheduled completeness runs (weekly health check), (3) Create completeness dashboard/reporting, (4) Auto-create issues for recurring gaps, (5) Hybrid mode for interactive prompts (auto-check basics, prompt only for subjective items)
+**Rationale:** Five Cornerstones analysis revealed Integration (1/5) and Configurability (2/5) gaps. HIGH priority integration gaps (git hooks, GitHub Actions, session-end enforcement) have been addressed. Remaining gaps are configurability (hardcoded thresholds) and enhanced automation (scheduled runs, reporting).
+**Priority:** Medium - Integration gaps fixed (HIGH priority complete), remaining are enhancements
+**Related:** See docs/COMPLETENESS_REVIEW_FOUNDATION_ANALYSIS.md for full analysis
+
 ---
 
 ## 📊 Summary by Status
 
-- **Backlog:** 6 items
+- **Backlog:** 7 items
 - **Active:** 0 items
 - **Complete:** 2 items
 - **Discarded:** 0 items
@@ -104,8 +113,8 @@
 ## 📊 Summary by Priority
 
 - **High:** 1 item
-- **Medium:** 2 items (2 complete)
-- **Low/Deferred:** 6 items (3 deferred, 3 backlog)
+- **Medium:** 3 items (2 complete, 1 backlog)
+- **Low/Deferred:** 7 items (3 deferred, 4 backlog)
 
 ---
 
