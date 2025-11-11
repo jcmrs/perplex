@@ -48,6 +48,28 @@ else
 fi
 
 echo ""
+read -p "🔍 Run completeness review? (Checks for forgotten items) (y/n) " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    if [ -f "tools/review-completeness.sh" ]; then
+        bash tools/review-completeness.sh
+        COMPLETENESS_RESULT=$?
+        echo ""
+        if [ $COMPLETENESS_RESULT -ne 0 ]; then
+            read -p "Completeness check found issues. Continue anyway? (y/n) " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                echo "❌ Session end cancelled. Address completeness issues first."
+                exit 1
+            fi
+        fi
+    else
+        echo "⚠️  Completeness review script not found (tools/review-completeness.sh)"
+    fi
+fi
+
+echo ""
 echo "📊 Session Summary:"
 echo "─────────────────────────────────────────"
 
