@@ -24,7 +24,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS="linux"
 fi
 
-echo "Detected OS: $OS"
+echo "Detected OS: ${OS}"
 echo ""
 
 # Function to check if command exists
@@ -57,7 +57,7 @@ echo -e "${BLUE}Installing shellcheck...${NC}"
 if command_exists shellcheck; then
     success "shellcheck already installed ($(shellcheck --version | head -1))"
 else
-    if [ "$OS" = "macos" ]; then
+    if [[ "${OS}" = "macos" ]]; then
         if command_exists brew; then
             info "Installing via Homebrew..."
             brew install shellcheck
@@ -65,7 +65,7 @@ else
         else
             warning "Homebrew not found. Please install from: https://www.shellcheck.net/"
         fi
-    elif [ "$OS" = "linux" ]; then
+    elif [[ "${OS}" = "linux" ]]; then
         if command_exists apt-get; then
             info "Installing via apt..."
             sudo apt-get update
@@ -90,15 +90,15 @@ install_bats_from_source() {
     BATS_VERSION="v1.10.0"
     TEMP_DIR=$(mktemp -d)
 
-    info "Cloning bats-core $BATS_VERSION..."
-    git clone --depth 1 --branch "$BATS_VERSION" https://github.com/bats-core/bats-core.git "$TEMP_DIR"
+    info "Cloning bats-core ${BATS_VERSION}..."
+    git clone --depth 1 --branch "${BATS_VERSION}" https://github.com/bats-core/bats-core.git "${TEMP_DIR}"
 
-    cd "$TEMP_DIR" || exit 1
+    cd "${TEMP_DIR}" || exit 1
     info "Installing to /usr/local..."
     sudo ./install.sh /usr/local
 
     cd - >/dev/null || exit 1
-    rm -rf "$TEMP_DIR"
+    rm -rf "${TEMP_DIR}"
 
     success "bats-core installed from source"
 }
@@ -108,7 +108,7 @@ echo -e "${BLUE}Installing bats-core...${NC}"
 if command_exists bats; then
     success "bats already installed ($(bats --version))"
 else
-    if [ "$OS" = "macos" ]; then
+    if [[ "${OS}" = "macos" ]]; then
         if command_exists brew; then
             info "Installing via Homebrew..."
             brew install bats-core
@@ -138,7 +138,7 @@ else
         # Check if pip user bin is in PATH
         if ! command_exists yamllint; then
             warning "yamllint installed but not in PATH"
-            warning "Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
+            warning "Add to PATH: export PATH=\"\${HOME}/.local/bin:\${PATH}\""
         fi
     elif command_exists pip; then
         info "Installing via pip..."
@@ -147,7 +147,7 @@ else
 
         if ! command_exists yamllint; then
             warning "yamllint installed but not in PATH"
-            warning "Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
+            warning "Add to PATH: export PATH=\"\${HOME}/.local/bin:\${PATH}\""
         fi
     else
         warning "pip not found. Please install Python and pip first"
