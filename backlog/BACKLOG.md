@@ -59,8 +59,9 @@
 **Description:** Add GitHub Actions workflow status check to completeness review system. Currently checks local state but not remote CI/CD status.
 **Rationale:** Gap discovered during backlog cleanup - completeness review passed locally but GitHub Actions tests were failing. System should verify CI/CD checks are passing.
 **Priority:** Medium - Proven valuable gap, but not blocking (can manually check GitHub Actions)
-**Dependencies:** Requires gh CLI (optional), network access to GitHub API
+**Dependencies:** Requires GITHUB_TOKEN (optional), network access to GitHub API
 **Related:** ITEM-012 (Completeness Review Enhancements completed)
+**Updated (2025-11-11):** Approach revised to use GitHub REST API instead of gh CLI (gh CLI blocked in Claude Code environment - discovered during PR automation breakthrough)
 
 ---
 
@@ -102,12 +103,13 @@
 **Description:** Document repository recovery procedures beyond context recovery (corruption, accidental deletion, etc.)
 
 ### ITEM-011: Branch Protection Verification & CI Status Checks
-**Status:** Backlog
-**Effort:** Medium
+**Status:** ❌ **DISCARDED** (2025-11-11)
+**Effort:** Medium (was estimated)
 **Target:** CI/CD Enhancement Phase
-**Description:** Add automated verification of branch protection settings and configure workflows as required status checks. Includes: (1) Script to verify branch protection via GitHub API, (2) Configure workflows to report as required status checks for branch protection, (3) Automated alerts if protection settings change unexpectedly
-**Rationale:** Currently relying on GitHub UI configuration (verified working). This would add programmatic verification and tighter CI integration for additional robustness
-**Priority:** Low - Current GitHub-enforced protection is sufficient for foundation phase
+**Description:** Add automated verification of branch protection settings and configure workflows as required status checks.
+**Discard Reason:** **Superseded by autonomous PR workflow.** PR-based automation (auto-create PR + auto-merge + validation workflows) provides superior safety mechanism compared to branch protection verification. Branch protection verification addresses the wrong problem - PR workflow handles safety through validation gates, not configuration monitoring. See `backlog/items/ITEM-011.md` for full rationale.
+**Original Priority:** Low
+**Discarded:** 2025-11-11 (during backlog review post-PR automation breakthrough)
 
 ### ITEM-012: Completeness Review Configuration & Enhanced Automation
 **Status:** ✅ Complete
@@ -136,23 +138,23 @@
 
 ## 📊 Summary by Status
 
-- **Backlog:** 5 items
+- **Backlog:** 4 items
 - **Active:** 0 items
 - **Complete:** 6 items
-- **Discarded:** 0 items
+- **Discarded:** 1 item (ITEM-011)
 - **Deferred:** 3 items
 
 ## 📊 Summary by Priority
 
 - **High:** 1 item (complete)
 - **Medium:** 5 items (4 complete, 1 backlog)
-- **Low/Deferred:** 8 items (3 deferred, 4 backlog, 1 complete)
+- **Low/Deferred:** 8 items (3 deferred, 3 backlog, 1 complete, 1 discarded)
 
 ---
 
 ## Backlog Health
 
-**Last Review:** 2025-11-11
+**Last Review:** 2025-11-11 (post-PR automation breakthrough)
 **Next Review:** After Discovery Phase Complete
 
 **Notes:**
@@ -161,6 +163,9 @@
 - Deferred items have clear activation triggers
 - 6 items completed during backlog cleanup session (ITEM-001, ITEM-002, ITEM-003, ITEM-004, ITEM-005, ITEM-012, ITEM-013)
 - 1 item completed during foundation phase (ITEM-009)
+- **1 item discarded (ITEM-011):** Superseded by autonomous PR workflow (2025-11-11)
+- **1 item updated (ITEM-014):** Approach revised to use GitHub REST API instead of gh CLI (2025-11-11)
+- **Key learning:** gh CLI blocked in Claude Code environment - use GitHub REST API + curl + jq pattern instead
 
 ---
 
