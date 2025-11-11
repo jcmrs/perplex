@@ -76,6 +76,48 @@ else
 fi
 
 echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Checkpoint Creation (Optional)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Checkpoints preserve project state for session continuity."
+echo "Create checkpoint if this is a milestone (phase transition, major feature, etc.)"
+echo ""
+read -p "Create checkpoint for this session? (y/n): " CREATE_CHECKPOINT
+echo ""
+
+if [[ $CREATE_CHECKPOINT =~ ^[Yy]$ ]]; then
+    CHECKPOINT_DESC="session-end-$(date +%Y%m%d)"
+    echo "Creating checkpoint: $CHECKPOINT_DESC"
+    echo ""
+
+    if [ -f "tools/create-checkpoint.sh" ]; then
+        # Run create-checkpoint.sh with session-end specific values
+        export CHECKPOINT_NON_INTERACTIVE=true
+        export CHECKPOINT_DESCRIPTION="$CHECKPOINT_DESC"
+        export CHECKPOINT_SUMMARY="Session ended on $(date +%Y-%m-%d). See session log for details."
+        export CHECKPOINT_FOCUS="Review session log and continue work"
+
+        bash tools/create-checkpoint.sh
+        CHECKPOINT_RESULT=$?
+
+        if [ $CHECKPOINT_RESULT -eq 0 ]; then
+            echo ""
+            echo "✅ Checkpoint created successfully"
+            echo ""
+            echo "📝 Don't forget to commit the checkpoint files:"
+            echo "   git add checkpoints/"
+            echo "   git commit -m \"Add checkpoint: $CHECKPOINT_DESC\""
+        else
+            echo ""
+            echo "⚠️  Checkpoint creation skipped or failed"
+        fi
+    else
+        echo "❌ Checkpoint script not found (tools/create-checkpoint.sh)"
+    fi
+fi
+
+echo ""
 echo "📊 Session Summary:"
 echo "─────────────────────────────────────────"
 

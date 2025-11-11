@@ -57,20 +57,51 @@ New session uses checkpoint as entry point:
 
 ## Checkpoint Triggers
 
-### Manual
+### Session-End (Primary Automated Trigger)
 ```bash
-./tools/create-checkpoint.sh "phase-complete" "Foundation complete, ready for discovery"
+./tools/session-end.sh
+# Prompts: "Create checkpoint for this session? (y/n)"
 ```
 
-### Automated (Integrated)
-- Phase completion (via session-end script)
-- Major milestone completion
-- Before risky operations
-- Context window warnings (if detectable)
+**When session-end runs:**
+1. Validation and completeness review complete
+2. Optional checkpoint creation prompt appears
+3. If accepted, checkpoint created automatically
+4. Idempotency check prevents duplicates (2-hour threshold)
 
-### GitHub Integration
-- PR merge to main → checkpoint
-- Release tags → checkpoint
+**Use for:** End of productive sessions, phase completions, major milestones
+
+### Manual (Ad-hoc Milestones)
+```bash
+./tools/create-checkpoint.sh "milestone-description"
+```
+
+**Interactive mode:** Script prompts for all details
+**Non-interactive mode:** Set environment variables:
+```bash
+export CHECKPOINT_NON_INTERACTIVE=true
+export CHECKPOINT_DESCRIPTION="milestone-name"
+export CHECKPOINT_SUMMARY="What was accomplished"
+export CHECKPOINT_FOCUS="What to do next"
+./tools/create-checkpoint.sh
+```
+
+### Idempotency Safeguard
+Checkpoints respect a cooldown period (default: 2 hours):
+- If checkpoint exists within threshold, creation skipped
+- Prevents accidental duplicates
+- Configurable via `CHECKPOINT_IDEMPOTENCY_HOURS` environment variable
+
+```bash
+# Override idempotency threshold (in hours)
+export CHECKPOINT_IDEMPOTENCY_HOURS=4
+./tools/create-checkpoint.sh "description"
+```
+
+### Future: Phase-Change Detection (ADR-006 Phase 2)
+- Automatic checkpoint when `config/project.yml` phase changes
+- Milestone-driven, not continuous
+- Implementation pending
 
 ---
 
