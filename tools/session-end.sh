@@ -93,9 +93,11 @@ if [[ $CREATE_CHECKPOINT =~ ^[Yy]$ ]]; then
 
     if [ -f "tools/create-checkpoint.sh" ]; then
         # Run create-checkpoint.sh with session-end specific values
+        CHECKPOINT_SUMMARY="Session ended on $(date +%Y-%m-%d). See session log for details."
+
         export CHECKPOINT_NON_INTERACTIVE=true
         export CHECKPOINT_DESCRIPTION="$CHECKPOINT_DESC"
-        export CHECKPOINT_SUMMARY="Session ended on $(date +%Y-%m-%d). See session log for details."
+        export CHECKPOINT_SUMMARY
         export CHECKPOINT_FOCUS="Review session log and continue work"
 
         bash tools/create-checkpoint.sh
