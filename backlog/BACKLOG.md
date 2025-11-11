@@ -1,7 +1,7 @@
 # Backlog - Master List
 
 **Last Updated:** 2025-11-11
-**Total Items:** 10
+**Total Items:** 11
 
 ---
 
@@ -83,11 +83,19 @@
 **Target:** Maintenance Phase
 **Description:** Document repository recovery procedures beyond context recovery (corruption, accidental deletion, etc.)
 
+### ITEM-011: Branch Protection Verification & CI Status Checks
+**Status:** Backlog
+**Effort:** Medium
+**Target:** CI/CD Enhancement Phase
+**Description:** Add automated verification of branch protection settings and configure workflows as required status checks. Includes: (1) Script to verify branch protection via GitHub API, (2) Configure workflows to report as required status checks for branch protection, (3) Automated alerts if protection settings change unexpectedly
+**Rationale:** Currently relying on GitHub UI configuration (verified working). This would add programmatic verification and tighter CI integration for additional robustness
+**Priority:** Low - Current GitHub-enforced protection is sufficient for foundation phase
+
 ---
 
 ## 📊 Summary by Status
 
-- **Backlog:** 5 items
+- **Backlog:** 6 items
 - **Active:** 0 items
 - **Complete:** 2 items
 - **Discarded:** 0 items
@@ -97,7 +105,7 @@
 
 - **High:** 1 item
 - **Medium:** 2 items (2 complete)
-- **Low/Deferred:** 5 items (3 deferred, 2 backlog)
+- **Low/Deferred:** 6 items (3 deferred, 3 backlog)
 
 ---
 
