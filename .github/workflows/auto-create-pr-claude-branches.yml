@@ -1,0 +1,94 @@
+name: Auto-Create PR for Claude Branches
+
+# Trigger when AI agent pushes to claude/* branches
+on:
+  push:
+    branches:
+      - 'claude/*'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pr:
+    name: Create Pull Request for Claude Branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if PR already exists
+        id: check_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+
+          # Check if PR already exists for this branch
+          EXISTING_PR=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:${BRANCH_NAME}&state=open" \
+            | jq -r '.[0].number // "none"')
+
+          if [ "$EXISTING_PR" != "none" ]; then
+            echo "pr_exists=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$EXISTING_PR" >> $GITHUB_OUTPUT
+            echo "✅ PR already exists: #$EXISTING_PR"
+          else
+            echo "pr_exists=false" >> $GITHUB_OUTPUT
+            echo "No existing PR found for branch: $BRANCH_NAME"
+          fi
+
+      - name: Create Pull Request via GitHub API
+        if: steps.check_pr.outputs.pr_exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B "$GITHUB_SHA" || echo "Automated changes")
+
+          # Extract title from first line of commit message
+          PR_TITLE=$(echo "$COMMIT_MESSAGE" | head -n1)
+
+          # Use remaining lines as body, or default message
+          PR_BODY=$(echo "$COMMIT_MESSAGE" | tail -n +3)
+          if [ -z "$PR_BODY" ]; then
+            PR_BODY="Automated PR created by Claude Code agent.
+
+Branch: \`${BRANCH_NAME}\`
+Commit: ${GITHUB_SHA:0:7}
+
+This PR was automatically created by the auto-create-pr workflow.
+The auto-merge workflow will validate and merge if tests pass."
+          fi
+
+          # Create PR using GitHub REST API
+          RESPONSE=$(curl -X POST -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls" \
+            -d "{
+              \"title\": \"$PR_TITLE\",
+              \"body\": \"$PR_BODY\",
+              \"head\": \"${BRANCH_NAME}\",
+              \"base\": \"main\"
+            }")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          RESPONSE_BODY=$(echo "$RESPONSE" | head -n-1)
+
+          if [ "$HTTP_CODE" = "201" ]; then
+            PR_NUMBER=$(echo "$RESPONSE_BODY" | jq -r '.number')
+            PR_URL=$(echo "$RESPONSE_BODY" | jq -r '.html_url')
+            echo "✅ Pull Request created successfully!"
+            echo "PR #${PR_NUMBER}: ${PR_URL}"
+          else
+            echo "❌ Failed to create PR (HTTP $HTTP_CODE)"
+            echo "$RESPONSE_BODY" | jq -r '.message // "Unknown error"'
+            exit 1
+          fi
+
+      - name: PR Already Exists
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: |
+          echo "ℹ️  PR #${{ steps.check_pr.outputs.pr_number }} already exists for this branch"
+          echo "Skipping PR creation (idempotency check passed)"
