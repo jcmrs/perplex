@@ -311,6 +311,60 @@ else
 fi
 
 # ============================================
+# 6. MASTER DOCUMENT CURRENCY
+# ============================================
+section "6. Master Document Currency"
+
+# Check README.md freshness
+if [ -f "README.md" ]; then
+    # Extract last updated date from README
+    README_DATE=$(grep -E "^\*\*Last Updated:\*\*" README.md | sed 's/\*\*Last Updated:\*\* //' || echo "")
+
+    if [ -n "$README_DATE" ]; then
+        # Calculate age in days (cross-platform)
+        if [ "$(uname)" = "Darwin" ]; then
+            README_TIMESTAMP=$(date -j -f "%Y-%m-%d" "$README_DATE" +%s 2>/dev/null || echo "0")
+        else
+            README_TIMESTAMP=$(date -d "$README_DATE" +%s 2>/dev/null || echo "0")
+        fi
+        CURRENT_TIMESTAMP=$(date +%s)
+
+        if [ "$README_TIMESTAMP" -gt 0 ]; then
+            README_AGE_DAYS=$(( (CURRENT_TIMESTAMP - README_TIMESTAMP) / 86400 ))
+
+            if [ "$README_AGE_DAYS" -gt 7 ]; then
+                warning "README.md last updated $README_AGE_DAYS days ago"
+
+                # Check if significant commits since last README update
+                RECENT_COMMITS=$(git log --since="$README_DATE" --oneline 2>/dev/null | wc -l | tr -d ' ')
+                if [ "$RECENT_COMMITS" -gt 5 ]; then
+                    warning "$RECENT_COMMITS commits since README update - likely needs updating"
+                    info "Consider updating: Project Status, Progress Metrics, Current Milestones"
+                fi
+            else
+                ok "README.md updated recently ($README_AGE_DAYS days ago)"
+            fi
+        else
+            warning "Could not parse README.md 'Last Updated' date"
+            info "Ensure format is: **Last Updated:** YYYY-MM-DD"
+        fi
+    else
+        warning "README.md missing 'Last Updated' date"
+        info "Add at bottom: **Last Updated:** YYYY-MM-DD"
+    fi
+else
+    issue "README.md not found!"
+fi
+
+# Check CONTRIBUTING.md if it exists
+if [ -f "CONTRIBUTING.md" ]; then
+    ok "CONTRIBUTING.md exists"
+    # Could add staleness check here too if CONTRIBUTING has Last Updated
+else
+    info "CONTRIBUTING.md not found (acceptable if not created yet)"
+fi
+
+# ============================================
 # SUMMARY
 # ============================================
 section "Summary"

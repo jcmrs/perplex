@@ -78,6 +78,18 @@ documentation:
     - "FOUNDATION.md"
     - "README.md"
     - "docs/PRODUCT_VISION.md"
+
+  # Master Document Currency (entry points that must stay current)
+  check_master_documents: true
+  master_documents:
+    - path: "README.md"
+      max_age_days: 7  # Warn if older than 7 days
+      warn_commit_threshold: 5  # Warn if 5+ commits since last update
+      purpose: "Universal entry point for all users (AI and human)"
+    - path: "CONTRIBUTING.md"
+      max_age_days: 30  # Less critical, can be older
+      warn_commit_threshold: 10
+      purpose: "Entry point for contributors"
     - "sessions/CURRENT_STATUS.md"
 
 # Foundation Artifacts Checks

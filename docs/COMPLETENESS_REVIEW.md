@@ -20,7 +20,7 @@ This system is inspired by the [Serena MCP Server](https://github.com/oraios/ser
 
 ## What It Checks
 
-The completeness review examines five critical areas:
+The completeness review examines six critical areas:
 
 ### 1. Git State
 - ✅ Working directory clean (no uncommitted changes)
@@ -51,6 +51,14 @@ The completeness review examines five critical areas:
 - ✅ Questions answered or filed to backlog
 - ✅ Next actions clear for resuming work
 - ✅ No open blockers without mitigation plan
+
+### 6. Master Document Currency **(NEW - 2025-11-11)**
+- ✅ README.md updated recently (warns if >7 days old with significant commits)
+- ✅ Other entry-point documents current (CONTRIBUTING.md, etc.)
+- ✅ "Last Updated" dates present and accurate
+- ✅ Master documents reflect recent achievements and current state
+
+**Why this matters:** Master documents (README, CONTRIBUTING) are entry points for ALL users—AI agents, humans, new contributors. Outdated entry points create false first impressions and undermine trust in documentation. This check ensures the universal entry point stays current.
 
 ## When to Use
 
