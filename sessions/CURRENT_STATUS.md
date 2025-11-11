@@ -1,8 +1,8 @@
 # Current Project Status
 
-**Last Updated:** 2025-11-11 02:37 UTC
+**Last Updated:** 2025-11-11 19:02 UTC
 **Phase:** foundation
-**Branch:** claude/perplex-initial-setup-011CUzxDPZiWB31A6DM5T2Mc
+**Branch:** claude/fix-checkpoint-automation-011CUzxDPZiWB31A6DM5T2Mc
 
 ## Quick Context
 
@@ -17,11 +17,11 @@ Project Perplex is bridging local AI development tools with Perplexity AI's rese
 
 ### Recent Commits
 ```
-dae6c1d Add learning capture system (ITEM-009)
-ce5990f Add manual checkpoint: foundation-complete-branch-management
-086c505 Add branch management completion guide
-e5b6f3e Add foundation PR details for main branch establishment
-d2e7ff9 Add CLAUDE.md orchestration layer for session continuity
+63d3b28 Document API instability and cognitive degradation correlation
+f708b3d Fix: Restore correct checkpoint PR workflow after merge conflict
+6864620 Merge branch 'main' into claude/fix-checkpoint-automation-011CUzxDPZiWB31A6DM5T2Mc
+6ec46f8 Inline PR body in API call to match working comment pattern
+bfe3b63 Use actions/github-script for checkpoint PR creation
 ```
 
 ### Statistics
