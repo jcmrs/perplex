@@ -147,15 +147,11 @@ jobs:
 
           git commit --no-gpg-sign -m "$COMMIT_MSG"
 
-      - name: Push checkpoint to main
-        if: github.event_name == 'workflow_dispatch'
+      - name: Push checkpoint
         run: |
+          # For manual triggers or PR merges, push to main
+          # (PR is already merged to main at this point)
           git push origin main
-
-      - name: Push checkpoint to PR branch
-        if: github.event_name == 'pull_request'
-        run: |
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
       - name: Create GitHub Release
         if: github.event.inputs.create_release == 'true'
