@@ -159,11 +159,67 @@ jobs:
 
           git commit --no-gpg-sign -m "$COMMIT_MSG"
 
-      - name: Push checkpoint
+      - name: Push checkpoint branch
+        if: steps.checkpoint_branch.outputs.skip != 'true'
         run: |
-          # For manual triggers or PR merges, push to main
-          # (PR is already merged to main at this point)
-          git push origin main
+          git push origin ${{ steps.checkpoint_branch.outputs.branch_name }}
+
+      - name: Create checkpoint PR
+        if: steps.checkpoint_branch.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Automated Checkpoint: ${{ steps.params.outputs.description }}',
+              head: '${{ steps.checkpoint_branch.outputs.branch_name }}',
+              base: 'main',
+              body: `## Automated Checkpoint
+
+              **Description:** ${{ steps.params.outputs.description }}
+              **Phase Transition:** ${{ steps.params.outputs.phase }} to ${{ steps.params.outputs.next_phase }}
+              **Trigger:** ${{ steps.params.outputs.trigger }}
+
+              ### Summary
+              ${{ steps.params.outputs.summary }}
+
+              ### Next Focus
+              ${{ steps.params.outputs.focus }}
+
+              ---
+
+              **Created by:** GitHub Actions (checkpoint-automation workflow)
+              **Branch:** \`${{ steps.checkpoint_branch.outputs.branch_name }}\`
+
+              This checkpoint preserves project state at this moment. Review the checkpoint files for full context:
+              - \`checkpoints/LATEST.md\` - Checkpoint summary
+              - \`checkpoints/LATEST-graph.json\` - Memory graph
+
+              **To resume from this checkpoint:**
+              \`\`\`bash
+              ./tools/resume-from-checkpoint.sh
+              \`\`\`
+
+              ---
+
+              ### Checkpoint Review Checklist
+              - [ ] Checkpoint description accurate
+              - [ ] Phase transition correct
+              - [ ] Critical files list appropriate
+              - [ ] Memory graph relationships valid
+              - [ ] Ready to merge
+
+              Once approved and merged, this checkpoint becomes the new restoration point for future sessions.`
+            });
+
+            // Add labels to the created PR
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['automated', 'checkpoint']
+            });
 
       - name: Create GitHub Release
         if: github.event.inputs.create_release == 'true'
