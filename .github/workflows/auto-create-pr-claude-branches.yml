@@ -51,16 +51,7 @@ jobs:
           # Use remaining lines as body, or default message
           PR_BODY=$(echo "$COMMIT_MESSAGE" | tail -n +3)
           if [ -z "$PR_BODY" ]; then
-            PR_BODY=$(cat <<EOF
-Automated PR created by Claude Code agent.
-
-Branch: ${BRANCH_NAME}
-Commit: ${GITHUB_SHA:0:7}
-
-This PR was automatically created by the auto-create-pr workflow.
-The auto-merge workflow will validate and merge if tests pass.
-EOF
-)
+            PR_BODY=$(printf "Automated PR created by Claude Code agent.\n\nBranch: %s\nCommit: %s\n\nThis PR was automatically created by the auto-create-pr workflow.\nThe auto-merge workflow will validate and merge if tests pass." "${BRANCH_NAME}" "${GITHUB_SHA:0:7}")
           fi
 
           # Create PR using GitHub REST API
