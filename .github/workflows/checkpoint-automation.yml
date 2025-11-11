@@ -167,34 +167,32 @@ jobs:
       - name: Create checkpoint PR
         if: steps.checkpoint_branch.outputs.skip != 'true'
         run: |
-          PR_TITLE="Automated Checkpoint: ${{ steps.params.outputs.description }}"
-
-          PR_BODY="$(cat <<PR_EOF
+          cat > /tmp/pr-body.md <<'EOF'
 ## Automated Checkpoint
 
-**Description:** ${{ steps.params.outputs.description }}
-**Phase Transition:** ${{ steps.params.outputs.phase }} to ${{ steps.params.outputs.next_phase }}
-**Trigger:** ${{ steps.params.outputs.trigger }}
+**Description:** DESCRIPTION_PLACEHOLDER
+**Phase Transition:** PHASE_PLACEHOLDER to NEXT_PHASE_PLACEHOLDER
+**Trigger:** TRIGGER_PLACEHOLDER
 
 ### Summary
-${{ steps.params.outputs.summary }}
+SUMMARY_PLACEHOLDER
 
 ### Next Focus
-${{ steps.params.outputs.focus }}
+FOCUS_PLACEHOLDER
 
 ---
 
 **Created by:** GitHub Actions (checkpoint-automation workflow)
-**Branch:** \\\`${{ steps.checkpoint_branch.outputs.branch_name }}\\\`
+**Branch:** `BRANCH_PLACEHOLDER`
 
 This checkpoint preserves project state at this moment. Review the checkpoint files for full context:
-- \\\`checkpoints/LATEST.md\\\` - Checkpoint summary
-- \\\`checkpoints/LATEST-graph.json\\\` - Memory graph
+- `checkpoints/LATEST.md` - Checkpoint summary
+- `checkpoints/LATEST-graph.json` - Memory graph
 
 **To resume from this checkpoint:**
-\\\`\\\`\\\`bash
+```bash
 ./tools/resume-from-checkpoint.sh
-\\\`\\\`\\\`
+```
 
 ---
 
@@ -206,12 +204,19 @@ This checkpoint preserves project state at this moment. Review the checkpoint fi
 - [ ] Ready to merge
 
 Once approved and merged, this checkpoint becomes the new restoration point for future sessions.
-PR_EOF
-)"
+EOF
+
+          sed -i "s|DESCRIPTION_PLACEHOLDER|${{ steps.params.outputs.description }}|g" /tmp/pr-body.md
+          sed -i "s|PHASE_PLACEHOLDER|${{ steps.params.outputs.phase }}|g" /tmp/pr-body.md
+          sed -i "s|NEXT_PHASE_PLACEHOLDER|${{ steps.params.outputs.next_phase }}|g" /tmp/pr-body.md
+          sed -i "s|TRIGGER_PLACEHOLDER|${{ steps.params.outputs.trigger }}|g" /tmp/pr-body.md
+          sed -i "s|SUMMARY_PLACEHOLDER|${{ steps.params.outputs.summary }}|g" /tmp/pr-body.md
+          sed -i "s|FOCUS_PLACEHOLDER|${{ steps.params.outputs.focus }}|g" /tmp/pr-body.md
+          sed -i "s|BRANCH_PLACEHOLDER|${{ steps.checkpoint_branch.outputs.branch_name }}|g" /tmp/pr-body.md
 
           gh pr create \
-            --title "$PR_TITLE" \
-            --body "$PR_BODY" \
+            --title "Automated Checkpoint: ${{ steps.params.outputs.description }}" \
+            --body-file /tmp/pr-body.md \
             --base main \
             --head "${{ steps.checkpoint_branch.outputs.branch_name }}" \
             --label "automated" \
