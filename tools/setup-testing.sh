@@ -85,6 +85,24 @@ fi
 
 echo ""
 
+# Function to install bats from source
+install_bats_from_source() {
+    BATS_VERSION="v1.10.0"
+    TEMP_DIR=$(mktemp -d)
+
+    info "Cloning bats-core $BATS_VERSION..."
+    git clone --depth 1 --branch "$BATS_VERSION" https://github.com/bats-core/bats-core.git "$TEMP_DIR"
+
+    cd "$TEMP_DIR" || exit 1
+    info "Installing to /usr/local..."
+    sudo ./install.sh /usr/local
+
+    cd - >/dev/null || exit 1
+    rm -rf "$TEMP_DIR"
+
+    success "bats-core installed from source"
+}
+
 # 2. Install bats
 echo -e "${BLUE}Installing bats-core...${NC}"
 if command_exists bats; then
@@ -104,23 +122,6 @@ else
         install_bats_from_source
     fi
 fi
-
-install_bats_from_source() {
-    BATS_VERSION="v1.10.0"
-    TEMP_DIR=$(mktemp -d)
-
-    info "Cloning bats-core $BATS_VERSION..."
-    git clone --depth 1 --branch "$BATS_VERSION" https://github.com/bats-core/bats-core.git "$TEMP_DIR"
-
-    cd "$TEMP_DIR" || exit 1
-    info "Installing to /usr/local..."
-    sudo ./install.sh /usr/local
-
-    cd - >/dev/null || exit 1
-    rm -rf "$TEMP_DIR"
-
-    success "bats-core installed from source"
-}
 
 echo ""
 
