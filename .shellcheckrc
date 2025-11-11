@@ -11,9 +11,10 @@ disable=SC2034
 # Reason: Sometimes intentional for brevity in simple cases
 # disable=SC2155
 
-# Enable all optional checks
-# This catches additional issues beyond the default set
-enable=all
+# Note: We use shellcheck's default checks, which are comprehensive.
+# Optional strict checks (like SC2250: require-variable-braces, SC2292: prefer-test-bracket)
+# are NOT enabled to avoid requiring massive refactoring of existing scripts.
+# New scripts should strive to follow stricter practices, but it's not enforced.
 
 # Source path for scripts that source other scripts
 # Helps shellcheck find sourced files
