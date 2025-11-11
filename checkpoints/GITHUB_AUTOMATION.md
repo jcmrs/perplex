@@ -226,6 +226,83 @@ Releases make checkpoints discoverable in GitHub's Releases tab and provide a pe
 
 ---
 
+## Architecture & Design Validation
+
+### PR-Based Checkpoint Approach
+
+The checkpoint automation workflow uses a **PR-based pattern** instead of direct pushes to main:
+
+**Why PR-Based?**
+- Branch protection on `main` prevents direct pushes (even from `github-actions[bot]`)
+- GitHub by design does not allow automation to bypass branch protection without elevated permissions
+- PR-based approach is the **canonical pattern** (validated by GitHub Copilot review)
+
+**How It Works:**
+1. On trigger (PR merge or manual dispatch), create checkpoint files
+2. Create timestamped branch: `automated-checkpoint-YYYYMMDD-HHMMSS`
+3. Commit checkpoint files to that branch
+4. Push branch to remote
+5. Create PR using `gh pr create` with labels (`automated`, `checkpoint`)
+6. Comment on original merged PR with checkpoint PR link
+7. Human reviews checkpoint PR
+8. Merge checkpoint PR → checkpoint becomes active
+
+**Trade-offs:**
+- ✅ Respects branch protection (PRs required)
+- ✅ Maintains full automation (no manual fallback)
+- ✅ Audit trail via PRs
+- ✅ Human oversight before checkpoint finalization
+- ⚠️ Added complexity: Requires second PR merge after original PR
+- ⚠️ Slight delay: Checkpoint not immediately active
+
+### Third-Party Validation (GitHub Copilot)
+
+**Review Date:** 2025-11-11
+**Reviewer:** GitHub Copilot (AI-assisted third opinion)
+**Verdict:** ✅ **"Sound, canonical, and compatible with GitHub's governance model"**
+
+**Key Findings:**
+- PR-based checkpoint automation is the **gold standard** for stateful automation under branch protection
+- No critical issues or anti-patterns identified
+- Current branch protection strategy (PRs required, no approval for single-user) is appropriate for AI-first workflow
+- Workflow follows GitHub Actions best practices
+
+**Recommended Improvements:** (Tracked in backlog/ITEM-013)
+
+**HIGH Priority:**
+1. Branch cleanup - Delete checkpoint branches after merge
+2. Error handling - Surface failures via PR comments/labels
+3. Documentation - Document process (✅ this section)
+
+**MEDIUM Priority:**
+4. Retry mechanisms - Handle transient `gh pr create` failures
+5. Rate limit handling - Important for rapid batch merges
+6. Auto-close stale checkpoint PRs - Timeout for unmerged checkpoints
+
+**LOW Priority:**
+7. Composite action - Package logic for reuse (wait until needed)
+8. Auto-merge checkpoint PRs - Requires GitHub App (complex for single-user)
+
+### Design Decisions
+
+**Why Not Alternatives?**
+
+| Approach | Why Not Used |
+|----------|--------------|
+| Direct push to main | Blocked by branch protection (GH006 error) |
+| Push to PR branch | Branch deleted after merge |
+| GitHub App with elevated perms | Overkill for single-user, security/maintenance overhead |
+| Releases instead of PRs | Not reviewable/modifiable, no human workflow |
+| Tags/orphan branches | Adds complexity, not easily reviewable |
+
+**Current Status:**
+- Workflow validated as sound (2025-11-11)
+- Functional and following best practices
+- Improvements tracked in backlog for post-testing implementation
+- Philosophy: Test in practice before adding optimization complexity
+
+---
+
 ## Related Documentation
 
 - [Checkpoint System README](README.md) - Core checkpoint concepts
