@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Memory Graph",
+  "description": "Relationship map and context guide for checkpoint-based session continuity",
+
+  "type": "object",
+  "required": ["checkpoint_id", "timestamp", "phase", "critical_files", "relationships"],
+
+  "properties": {
+    "checkpoint_id": {
+      "type": "string",
+      "description": "Unique identifier matching checkpoint filename"
+    },
+
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when checkpoint was created"
+    },
+
+    "phase": {
+      "type": "string",
+      "enum": ["foundation", "discovery", "implementation", "maintenance"],
+      "description": "Current project phase"
+    },
+
+    "next_phase": {
+      "type": "string",
+      "description": "Upcoming phase or null if unknown"
+    },
+
+    "critical_files": {
+      "type": "array",
+      "description": "Files that MUST be read for this phase",
+      "items": {
+        "type": "object",
+        "required": ["path", "reason"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Relative path from project root"
+          },
+          "sections": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "description": "Specific line ranges or sections (optional)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why this file is critical"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "important", "optional"],
+            "default": "critical"
+          }
+        }
+      }
+    },
+
+    "active_work": {
+      "type": "object",
+      "description": "Current state of work",
+      "properties": {
+        "focus": {
+          "type": "string",
+          "description": "Primary focus for next session"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What's blocking progress"
+        },
+        "next_steps": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Actionable next steps"
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "object",
+      "description": "Map of entity IDs to their relationships",
+      "patternProperties": {
+        "^(ADR|REQ|ITEM|Idea|EXP)-.*": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["decision", "requirement", "backlog", "idea", "experiment"]
+            },
+            "status": {
+              "type": "string",
+              "description": "Current status of this entity"
+            },
+            "relates_to": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Related concepts or entities"
+            },
+            "informs": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "What this entity informs or affects"
+            },
+            "depends_on": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Dependencies"
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why this relationship matters"
+            }
+          }
+        }
+      }
+    },
+
+    "skip_for_now": {
+      "type": "array",
+      "description": "Files/patterns to skip (token efficiency)",
+      "items": {"type": "string"}
+    },
+
+    "mental_models": {
+      "type": "array",
+      "description": "Key conceptual frameworks",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concept": {"type": "string"},
+          "explanation": {"type": "string"}
+        }
+      }
+    },
+
+    "git_state": {
+      "type": "object",
+      "description": "Git repository state",
+      "properties": {
+        "branch": {"type": "string"},
+        "last_commit": {"type": "string"},
+        "commits_since_last_checkpoint": {"type": "integer"}
+      }
+    }
+  }
+}
