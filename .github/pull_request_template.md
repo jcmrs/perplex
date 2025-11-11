@@ -3,6 +3,21 @@
 ## Summary
 <!-- Brief overview of what this PR accomplishes -->
 
+## Checkpoint Context
+<!-- Help maintain project continuity -->
+
+**Latest Checkpoint:** [See automated comment below for current checkpoint]
+
+**Checkpoint Recommendation:**
+- [ ] No checkpoint needed (incremental change)
+- [ ] Minor checkpoint (after merge via automation)
+- [ ] Major checkpoint needed (use manual workflow after merge with custom inputs)
+
+**If major checkpoint needed, provide:**
+- Phase transition? (e.g., foundation → discovery)
+- Milestone reached? (e.g., "MVP complete", "v1.0 released")
+- Summary for checkpoint: [What was accomplished?]
+
 ## Changes
 <!-- List significant changes, grouped by type -->
 
@@ -84,6 +99,7 @@
 - [ ] Foundation validation passes
 - [ ] Session log updated
 - [ ] Traceability links complete
+- [ ] Checkpoint recommendation provided (see Checkpoint Context section)
 
 ---
 

@@ -133,7 +133,7 @@ checkpoints/
 
 ## Usage
 
-### Creating Checkpoint
+### Creating Checkpoint (Local)
 
 ```bash
 # Manual creation
@@ -146,6 +146,16 @@ checkpoints/
 ./tools/session-end.sh
 # Prompts: "Create checkpoint? (y/n)"
 ```
+
+### Creating Checkpoint (GitHub)
+
+Checkpoints are automatically created on GitHub when PRs merge. For major milestones, use manual workflow dispatch.
+
+**See:** [GitHub Automation Guide](GITHUB_AUTOMATION.md) for complete details on:
+- Automatic checkpoint creation on PR merge
+- Manual checkpoint workflow for milestones
+- Checkpoint info on new PRs
+- Best practices and troubleshooting
 
 ### Resuming from Checkpoint
 

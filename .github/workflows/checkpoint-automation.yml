@@ -1,0 +1,212 @@
+name: Checkpoint Automation
+
+on:
+  # Manual trigger with customizable inputs
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'Checkpoint description (e.g., "foundation complete", "v1.0 release")'
+        required: true
+        type: string
+      phase:
+        description: 'Current project phase'
+        required: true
+        type: choice
+        options:
+          - foundation
+          - discovery
+          - implementation
+          - validation
+          - production
+      next_phase:
+        description: 'Next project phase'
+        required: true
+        type: choice
+        options:
+          - discovery
+          - implementation
+          - validation
+          - production
+          - maintenance
+      summary:
+        description: '30-second summary of current state'
+        required: true
+        type: string
+      focus:
+        description: 'Primary focus for next session'
+        required: true
+        type: string
+      critical_files:
+        description: 'Critical files (format: path:reason,path:reason)'
+        required: false
+        type: string
+        default: 'FOUNDATION.md:Core principles,docs/PRODUCT_VISION.md:Mission and goals'
+      skip_patterns:
+        description: 'Skip patterns (comma-separated)'
+        required: false
+        type: string
+        default: '*/TEMPLATE.md,sessions/session-*.md,examples/*'
+      create_release:
+        description: 'Create GitHub release for this checkpoint'
+        required: false
+        type: boolean
+        default: false
+
+  # Automatic trigger on PR merge to main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-checkpoint:
+    # Only run on merged PRs or manual dispatch
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set checkpoint parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use workflow inputs
+            echo "description=${{ github.event.inputs.description }}" >> $GITHUB_OUTPUT
+            echo "phase=${{ github.event.inputs.phase }}" >> $GITHUB_OUTPUT
+            echo "next_phase=${{ github.event.inputs.next_phase }}" >> $GITHUB_OUTPUT
+            echo "summary=${{ github.event.inputs.summary }}" >> $GITHUB_OUTPUT
+            echo "focus=${{ github.event.inputs.focus }}" >> $GITHUB_OUTPUT
+            echo "critical_files=${{ github.event.inputs.critical_files }}" >> $GITHUB_OUTPUT
+            echo "skip_patterns=${{ github.event.inputs.skip_patterns }}" >> $GITHUB_OUTPUT
+            echo "trigger=Manual (GitHub Actions)" >> $GITHUB_OUTPUT
+            echo "create_release=${{ github.event.inputs.create_release }}" >> $GITHUB_OUTPUT
+          else
+            # PR merge - auto-generate checkpoint
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            PHASE=$(grep "phase:" config/project.yml | awk '{print $2}' | tr -d '"' || echo "unknown")
+
+            echo "description=PR #${{ github.event.pull_request.number }} merged" >> $GITHUB_OUTPUT
+            echo "phase=$PHASE" >> $GITHUB_OUTPUT
+            echo "next_phase=$PHASE" >> $GITHUB_OUTPUT
+            echo "summary=Automated checkpoint after PR #${{ github.event.pull_request.number }} merge: $PR_TITLE" >> $GITHUB_OUTPUT
+            echo "focus=Continue with next PR or task in backlog" >> $GITHUB_OUTPUT
+            echo "critical_files=FOUNDATION.md:Core principles,docs/PRODUCT_VISION.md:Mission and goals" >> $GITHUB_OUTPUT
+            echo "skip_patterns=*/TEMPLATE.md,sessions/session-*.md,examples/*" >> $GITHUB_OUTPUT
+            echo "trigger=Automated (PR #${{ github.event.pull_request.number }} merge)" >> $GITHUB_OUTPUT
+            echo "create_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create checkpoint
+        env:
+          CHECKPOINT_NON_INTERACTIVE: 'true'
+          CHECKPOINT_DESCRIPTION: ${{ steps.params.outputs.description }}
+          CHECKPOINT_PHASE: ${{ steps.params.outputs.phase }}
+          CHECKPOINT_NEXT_PHASE: ${{ steps.params.outputs.next_phase }}
+          CHECKPOINT_SUMMARY: ${{ steps.params.outputs.summary }}
+          CHECKPOINT_FOCUS: ${{ steps.params.outputs.focus }}
+          CHECKPOINT_CRITICAL_FILES: ${{ steps.params.outputs.critical_files }}
+          CHECKPOINT_SKIP_PATTERNS: ${{ steps.params.outputs.skip_patterns }}
+          CHECKPOINT_TRIGGER: ${{ steps.params.outputs.trigger }}
+          CHECKPOINT_CREATED_BY: 'github-actions[bot]'
+        run: |
+          chmod +x tools/create-checkpoint.sh
+          ./tools/create-checkpoint.sh
+
+      - name: Commit checkpoint files
+        run: |
+          git add checkpoints/
+          if git diff --staged --quiet; then
+            echo "No checkpoint files to commit"
+            exit 0
+          fi
+
+          git commit --no-gpg-sign -m "$(cat <<'EOF'
+          Add automated checkpoint: ${{ steps.params.outputs.description }}
+
+          Checkpoint created automatically by GitHub Actions.
+
+          Trigger: ${{ steps.params.outputs.trigger }}
+          Phase: ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
+
+          Summary: ${{ steps.params.outputs.summary }}
+          EOF
+          )"
+
+      - name: Push checkpoint to main
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git push origin main
+
+      - name: Push checkpoint to PR branch
+        if: github.event_name == 'pull_request'
+        run: |
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+      - name: Create GitHub Release
+        if: steps.params.outputs.create_release == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: checkpoint-${{ steps.params.outputs.phase }}-${{ github.run_number }}
+          release_name: Checkpoint: ${{ steps.params.outputs.description }}
+          body: |
+            ## Checkpoint: ${{ steps.params.outputs.description }}
+
+            **Phase:** ${{ steps.params.outputs.phase }} → ${{ steps.params.outputs.next_phase }}
+
+            ### Summary
+            ${{ steps.params.outputs.summary }}
+
+            ### Next Focus
+            ${{ steps.params.outputs.focus }}
+
+            ---
+
+            **Trigger:** ${{ steps.params.outputs.trigger }}
+            **Created:** ${{ github.event.repository.updated_at }}
+
+            See checkpoint files in `checkpoints/` directory for full details.
+          draft: false
+          prerelease: false
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ✅ Checkpoint Created
+
+              A new checkpoint has been created automatically after this PR merge.
+
+              **Checkpoint:** ${{ steps.params.outputs.description }}
+              **Phase:** ${{ steps.params.outputs.phase }}
+
+              To resume from this checkpoint in your next session:
+              \`\`\`bash
+              ./tools/resume-from-checkpoint.sh
+              \`\`\`
+
+              Or review the checkpoint directly: \`checkpoints/LATEST.md\`
+              `
+            })

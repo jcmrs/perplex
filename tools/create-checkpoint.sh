@@ -12,9 +12,21 @@ echo "Create Checkpoint"
 echo "=========================================="
 echo ""
 
+# Detect non-interactive mode
+NON_INTERACTIVE=${CHECKPOINT_NON_INTERACTIVE:-false}
+if [ ! -t 0 ] || [ "$NON_INTERACTIVE" = "true" ]; then
+    NON_INTERACTIVE=true
+else
+    NON_INTERACTIVE=false
+fi
+
 # Get checkpoint description
-DESCRIPTION="$1"
+DESCRIPTION="${CHECKPOINT_DESCRIPTION:-$1}"
 if [ -z "$DESCRIPTION" ]; then
+    if [ "$NON_INTERACTIVE" = "true" ]; then
+        echo "❌ Error: CHECKPOINT_DESCRIPTION required in non-interactive mode"
+        exit 1
+    fi
     read -p "Checkpoint description: " DESCRIPTION
     if [ -z "$DESCRIPTION" ]; then
         DESCRIPTION="checkpoint"
@@ -52,34 +64,71 @@ echo "   Ideas: $IDEA_COUNT"
 echo "   Backlog items: $BACKLOG_COUNT"
 echo ""
 
-# Interactive mode: ask for key information
-echo "Please provide checkpoint details:"
-echo ""
+# Get checkpoint details (from env vars or interactively)
+if [ "$NON_INTERACTIVE" = "true" ]; then
+    # Non-interactive mode: require all inputs from environment variables
+    PHASE="${CHECKPOINT_PHASE:-$PHASE}"
+    NEXT_PHASE="${CHECKPOINT_NEXT_PHASE:-discovery}"
+    SUMMARY="${CHECKPOINT_SUMMARY}"
+    FOCUS="${CHECKPOINT_FOCUS}"
+    SKIP_PATTERNS="${CHECKPOINT_SKIP_PATTERNS:-*/TEMPLATE.md,sessions/session-*.md,examples/*}"
 
-read -p "Current phase [default: $PHASE]: " PHASE_INPUT
-PHASE=${PHASE_INPUT:-$PHASE}
-
-read -p "Next phase [default: discovery]: " NEXT_PHASE
-NEXT_PHASE=${NEXT_PHASE:-discovery}
-
-read -p "30-second summary: " SUMMARY
-
-read -p "Primary focus for next session: " FOCUS
-
-echo ""
-echo "Critical files to read (one per line, empty line when done):"
-CRITICAL_FILES=()
-while true; do
-    read -p "  File path: " FILE
-    if [ -z "$FILE" ]; then
-        break
+    if [ -z "$SUMMARY" ]; then
+        echo "❌ Error: CHECKPOINT_SUMMARY required in non-interactive mode"
+        exit 1
     fi
-    read -p "    Reason: " REASON
-    CRITICAL_FILES+=("$FILE|$REASON")
-done
+    if [ -z "$FOCUS" ]; then
+        echo "❌ Error: CHECKPOINT_FOCUS required in non-interactive mode"
+        exit 1
+    fi
 
-echo ""
-read -p "What to skip (comma-separated patterns): " SKIP_PATTERNS
+    # Parse critical files from JSON array env var
+    CRITICAL_FILES=()
+    if [ -n "$CHECKPOINT_CRITICAL_FILES" ]; then
+        # Expected format: FOUNDATION.md:Core principles,PRODUCT_VISION.md:Mission and goals
+        IFS=',' read -ra FILE_PAIRS <<< "$CHECKPOINT_CRITICAL_FILES"
+        for pair in "${FILE_PAIRS[@]}"; do
+            FILE=$(echo "$pair" | cut -d':' -f1)
+            REASON=$(echo "$pair" | cut -d':' -f2-)
+            CRITICAL_FILES+=("$FILE|$REASON")
+        done
+    else
+        # Use defaults
+        CRITICAL_FILES+=(
+            "FOUNDATION.md|Core principles and imperatives"
+            "docs/PRODUCT_VISION.md|Mission and goals"
+        )
+    fi
+else
+    # Interactive mode: ask for key information
+    echo "Please provide checkpoint details:"
+    echo ""
+
+    read -p "Current phase [default: $PHASE]: " PHASE_INPUT
+    PHASE=${PHASE_INPUT:-$PHASE}
+
+    read -p "Next phase [default: discovery]: " NEXT_PHASE
+    NEXT_PHASE=${NEXT_PHASE:-discovery}
+
+    read -p "30-second summary: " SUMMARY
+
+    read -p "Primary focus for next session: " FOCUS
+
+    echo ""
+    echo "Critical files to read (one per line, empty line when done):"
+    CRITICAL_FILES=()
+    while true; do
+        read -p "  File path: " FILE
+        if [ -z "$FILE" ]; then
+            break
+        fi
+        read -p "    Reason: " REASON
+        CRITICAL_FILES+=("$FILE|$REASON")
+    done
+
+    echo ""
+    read -p "What to skip (comma-separated patterns): " SKIP_PATTERNS
+fi
 
 # Create checkpoint markdown file
 cat > "$CHECKPOINT_FILE" <<EOF
@@ -206,8 +255,8 @@ See memory graph: \`$(basename "$GRAPH_FILE")\`
 
 ## Checkpoint Metadata
 
-**Created by:** $(whoami) (AI Agent)
-**Trigger:** Manual
+**Created by:** ${CHECKPOINT_CREATED_BY:-$(whoami) (AI Agent)}
+**Trigger:** ${CHECKPOINT_TRIGGER:-Manual}
 **Memory graph:** \`$(basename "$GRAPH_FILE")\`
 
 ---
