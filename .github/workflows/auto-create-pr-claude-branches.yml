@@ -54,18 +54,20 @@ jobs:
             PR_BODY=$(printf "Automated PR created by Claude Code agent.\n\nBranch: %s\nCommit: %s\n\nThis PR was automatically created by the auto-create-pr workflow.\nThe auto-merge workflow will validate and merge if tests pass." "${BRANCH_NAME}" "${GITHUB_SHA:0:7}")
           fi
 
-          # Create PR using GitHub REST API
+          # Create PR using GitHub REST API with properly escaped JSON
+          JSON_PAYLOAD=$(jq -n \
+            --arg title "$PR_TITLE" \
+            --arg body "$PR_BODY" \
+            --arg head "${BRANCH_NAME}" \
+            --arg base "main" \
+            '{title: $title, body: $body, head: $head, base: $base}')
+
           RESPONSE=$(curl -X POST -s -w "\n%{http_code}" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${{ github.repository }}/pulls" \
-            -d "{
-              \"title\": \"$PR_TITLE\",
-              \"body\": \"$PR_BODY\",
-              \"head\": \"${BRANCH_NAME}\",
-              \"base\": \"main\"
-            }")
+            -d "$JSON_PAYLOAD")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           RESPONSE_BODY=$(echo "$RESPONSE" | head -n-1)
