@@ -110,9 +110,8 @@ git push origin v0.1.0-foundation
 
    **Protect matching branches:**
    - ✅ **Require a pull request before merging**
-     - ✅ Require approvals: **1**
-     - ✅ Dismiss stale pull request approvals when new commits are pushed
-     - ❌ Require review from Code Owners (optional - can enable later)
+     - ⚠️  **Require approvals: 0** (AI-First configuration - see rationale below)
+     - ❌ Require review from Code Owners (not needed for single-user AI-first project)
 
    - ✅ **Require status checks to pass before merging**
      - ✅ Require branches to be up to date before merging
@@ -137,9 +136,49 @@ git push origin v0.1.0-foundation
 **Expected Result:**
 - Direct pushes to `main` blocked
 - All changes must go through PR
-- PRs require 1 approval
-- Status checks must pass
+- PRs merge automatically after status checks pass (no human approval required)
+- Status checks must pass (foundation validation, tests)
 - Linear history enforced
+
+**Why "Require approvals: 0"? (AI-First Rationale)**
+
+This project uses **"Require approvals: 0"** intentionally, not by oversight. Here's why:
+
+**Traditional Multi-User Projects:**
+- Team: Multiple human developers
+- Risk: Unreviewed code reaching production
+- Safety: Human code review (approvals required)
+- Configuration: Require approvals = 1 or 2 ✅
+
+**AI-First Single-User Projects (This Project):**
+- Team: AI agent + human strategic partner
+- Risk: Unvalidated changes, AI errors
+- Safety: **Automated validation** (tests, foundation checks)
+- Configuration: Require approvals = 0 ✅
+
+**Why this works:**
+- ✅ Safety through automation (tests, validation, checks)
+- ✅ PR-based workflow (audit trail, can revert)
+- ✅ Truly autonomous operation (AI-First principle)
+- ✅ Human provides strategy, not gate-keeping
+- ✅ Linear history (clean, easy to revert if needed)
+
+**What happens with approvals = 1:**
+- ❌ Human must approve every PR (bottleneck)
+- ❌ AI cannot operate autonomously (defeats purpose)
+- ❌ Violates AI-First foundation principle
+- ❌ Creates friction in autonomous workflow
+
+**Safety is maintained through:**
+1. All tests must pass (shellcheck, yamllint, bats)
+2. Foundation validation must pass
+3. PR-based workflow (visibility, audit trail)
+4. Linear history (easy to revert)
+5. No force pushes or deletions allowed
+
+**Human role:** Strategic partner who monitors (dashboard, PR list), can revert if issues found, provides direction—not execution gate-keeper.
+
+See `docs/WORKFLOW_GAP_ANALYSIS.md` for complete analysis of approval requirements.
 
 ---
 
@@ -188,10 +227,11 @@ After completing the above steps:
 - [ ] GitHub Release created for v0.1.0-foundation
 - [ ] Branch protection enabled on `main`
 - [ ] Direct pushes to `main` blocked (test by trying)
-- [ ] PRs to `main` require approval
-- [ ] Status checks configured (or will be added when workflows run)
+- [ ] PRs to `main` require 0 approvals (AI-First configuration)
+- [ ] Status checks configured and required (foundation validation, tests)
 - [ ] Linear history enforced
 - [ ] GitHub Actions workflows enabled and visible
+- [ ] Auto-merge workflow completes end-to-end (test with a PR)
 - [ ] Feature branch cleaned up (optional)
 
 ---
@@ -200,8 +240,8 @@ After completing the above steps:
 
 ✅ **Stable main branch** - Protected baseline for all future work
 ✅ **Foundation release** - v0.1.0-foundation tagged and documented
-✅ **PR workflow enforced** - All changes via PR, approval required
-✅ **Quality gates active** - Validation, status checks, linear history
+✅ **Autonomous PR workflow** - AI agent operates independently, no human gate-keeping
+✅ **Quality gates active** - Validation, status checks, linear history (safety through automation)
 ✅ **Clean history** - Linear, no messy merges
 ✅ **Ready for discovery** - Foundation complete, next phase can begin
 
