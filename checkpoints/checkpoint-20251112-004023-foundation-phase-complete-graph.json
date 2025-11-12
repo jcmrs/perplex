@@ -1,0 +1,38 @@
+{
+  "checkpoint_id": "checkpoint-20251112-004023-foundation-phase-complete",
+  "timestamp": "2025-11-12T00:40:23Z",
+  "phase": "foundation",
+  "next_phase": "discovery",
+
+  "critical_files": [
+    {"path": "FOUNDATION.md", "reason": "Core principles and imperatives", "priority": "critical"},
+    {"path": "docs/PRODUCT_VISION.md", "reason": "Mission and goals", "priority": "critical"}
+  ],
+
+  "active_work": {
+    "focus": "Begin discovery phase per PRODUCT_VISION.md. Start with Question 1: What technical integration paths exist for Perplexity AI?",
+    "blockers": [],
+    "next_steps": []
+  },
+
+  "relationships": {
+    "2025-11-10-foundation-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-10-foundation-methodology": {"type": "decision", "status": "active"},
+    "2025-11-11-checkpoint-automation-strategy": {"type": "decision", "status": "active"},
+    "2025-11-11-claude-md-architecture": {"type": "decision", "status": "active"},
+    "2025-11-11-completeness-review-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-11-testing-infrastructure": {"type": "decision", "status": "active"}
+  },
+
+  "skip_for_now": [
+    "*/TEMPLATE.md",
+    "sessions/session-*.md",
+    "examples/*"
+  ],
+
+  "git_state": {
+    "branch": "claude/archive-phantom-workflow-gap-011CV2dMZNr7eHmriBCfPXFe",
+    "last_commit": "9f4d55f",
+    "last_commit_message": "Archive phantom workflow gap analysis and document real timing observation"
+  }
+}
