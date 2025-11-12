@@ -122,6 +122,31 @@ User provides to Claude Code
 
 **WHAT NOW:** Establish Stage 1 deliverables before any coding
 
+### Pivot 7: Serena vs MCP Memory Server
+**Discovery:** Serena is NOT a memory system - it's a code intelligence tool
+
+**What happened:**
+- Researched Serena GitHub repository expecting memory storage features
+- Found: Serena is LSP-based semantic code manipulation (find_symbol, edit code, etc.)
+- The `.serena/memories/` directory contains development docs, not runtime agent memory
+- MemoriesManager API mentioned in DeepWiki docs doesn't exist in repository
+
+**The actual memory system:**
+- **@modelcontextprotocol/server-memory** - Official Anthropic MCP memory server
+- Knowledge graph-based persistent memory
+- JSONL storage format (line-delimited JSON)
+- Entities (name, entityType, observations[])
+- Relations (from, to, relationType)
+- 9 tools: create, read, update, delete, search
+
+**WHY this matters:**
+- Integration target is MCP memory server, not Serena
+- Memory graph schema must match MCP memory server format
+- perplex-reader imports to MCP memory server (not Serena)
+- Serena can still be used (for code intelligence), but memory is separate
+
+**WHAT changed:** From "integrate with Serena memory API" to "integrate with MCP memory server format"
+
 ---
 
 ## Key Insights (WHY Things Matter)
@@ -196,53 +221,64 @@ User provides to Claude Code
 
 ## Open Loops (What's Unresolved)
 
-### 1. Which Development Methodology?
-**Question:** SDD? Lean? Shape Up? Agile adapted for AI?
-**Why unresolved:** Need to research which is suitable for AI-first
-**Impact:** Can't define atomic tasks until methodology chosen
-**Next:** Research AI-first development methodologies
+### ~~1. Which Development Methodology?~~ ✅ RESOLVED
+~~**Question:** SDD? Lean? Shape Up? Agile adapted for AI?~~
+**RESOLVED:** Spec-Driven Development (SDD) with GitHub Spec Kit
+**Resolution:** 4 phases (Specify → Plan → Tasks → Implement), living specs, atomic tasks, checkpoints
 
-### 2. Technology Stack
-**Question:** Python (proven but legacy concerns)? Deno (modern but feasibility unknown)? Other?
-**Why unresolved:** Need to validate what Claude Code Web environment supports
-**Impact:** Can't write specs until tech decided
-**Next:** Check environment constraints, evaluate options
+### ~~2. Technology Stack~~ ✅ RESOLVED
+~~**Question:** Python (proven but legacy concerns)? Deno (modern but feasibility unknown)? Other?~~
+**RESOLVED:** Python 3.11 + uv package manager
+**Resolution:** Environment validated, matches Serena stack, modern Python (not legacy 2.x)
 
-### 3. Serena Integration Depth
-**Question:** Simple prompt? Serena plugin? Hybrid?
-**Why unresolved:** Need to understand Serena's extensibility API
-**Impact:** Affects perplex-reader design
-**Next:** Deep dive into Serena documentation
+### ~~3. Serena Integration Depth~~ ✅ RESOLVED (CORRECTED)
+~~**Question:** Simple prompt? Serena plugin? Hybrid?~~
+**RESOLVED:** Integration target is MCP memory server, not Serena
+**Resolution:** Serena = code intelligence tool (LSP). Memory = @modelcontextprotocol/server-memory (JSONL knowledge graph)
 
-### 4. Memory Graph Schema
-**Question:** Exact JSON structure for Serena compatibility
-**Why unresolved:** Need to understand Serena's memory format
-**Impact:** Transformer output format depends on this
-**Next:** Research Serena memory API
+### 4. Memory Graph Schema ⏳ IN PROGRESS
+**Question:** Exact JSON/JSONL structure for MCP memory server compatibility
+**Current understanding:**
+- JSONL format (line-delimited JSON)
+- Entities: {name, entityType, observations[]}
+- Relations: {from, to, relationType}
+- 9 tools available for create/read/update/delete/search
+**Remaining work:** Define exact schema for perplex-transformer output, validate against MCP memory server expectations
 
 ---
 
 ## What NOW (Immediate Next Steps)
 
-### Step 1: Understand AI-First Methodologies
-**Action:** Research development frameworks suitable for AI agents
-**Why:** Need named, clear methodology to prevent drift
-**Output:** Methodology comparison and recommendation
+### ~~Step 1: Understand AI-First Methodologies~~ ✅ COMPLETE
+~~**Action:** Research development frameworks suitable for AI agents~~
+**COMPLETED:** GitHub Spec Kit (SDD) selected and documented in STAGE1_DELIVERABLES.md
 
-### Step 2: Validate Technology Stack
-**Action:** Check Deno feasibility, evaluate Python concerns, consider alternatives
-**Why:** Can't write specs without knowing implementation tech
-**Output:** Technology decision (ADR)
+### ~~Step 2: Validate Technology Stack~~ ✅ COMPLETE
+~~**Action:** Check Deno feasibility, evaluate Python concerns, consider alternatives~~
+**COMPLETED:** Python 3.11 + uv validated and documented in ADR-009
 
-### Step 3: Deep Dive Serena
-**Action:** Read Serena docs comprehensively (architecture, memory API, extensibility)
-**Why:** Integration point must be understood precisely
-**Output:** Serena integration specification
+### ~~Step 3: Deep Dive Serena~~ ✅ COMPLETE (CORRECTED)
+~~**Action:** Read Serena docs comprehensively (architecture, memory API, extensibility)~~
+**COMPLETED:** Discovered Serena is code intelligence, not memory. MCP memory server is integration target.
 
-### Step 4: Define Stage 1 Deliverables
-**Action:** Specify exactly what documents/ADRs/specs are needed
-**Why:** Clear targets prevent scope creep in methodology phase
-**Output:** Stage 1 checklist
+### ~~Step 4: Define Stage 1 Deliverables~~ ✅ COMPLETE
+~~**Action:** Specify exactly what documents/ADRs/specs are needed~~
+**COMPLETED:** STAGE1_DELIVERABLES.md created with complete checklist
+
+### Step 5: Define MCP Memory Graph Schema ⏳ CURRENT
+**Action:** Create formal JSON/JSONL schema for memory graphs compatible with @modelcontextprotocol/server-memory
+**Why:** perplex-transformer needs output format specification
+**Output:** Memory graph schema document
+
+### Step 6: Install GitHub Spec Kit
+**Action:** Install `specify` CLI and configure for perplex projects
+**Why:** Need tooling to proceed with Phase 2 (Plan)
+**Output:** Working Spec Kit installation
+
+### Step 7: Write Phase 1 Specifications
+**Action:** Create 1-specify.md for perplex-transformer and perplex-reader
+**Why:** High-level what/why must be documented before planning
+**Output:** Two specification documents for user review
 
 ---
 
@@ -252,7 +288,7 @@ User provides to Claude Code
 1. **No Perplexity API** - Cost prohibitive
 2. **Token efficiency required** - Context window is precious
 3. **Non-technical user** - Must be understandable and maintainable
-4. **Serena integration** - All projects already use it
+4. **MCP memory server integration** - All projects use MCP memory for persistent knowledge graphs
 5. **Holistic + AI-First + Five Cornerstones** - Foundation imperatives
 
 ### Soft Constraints (Preferences)
