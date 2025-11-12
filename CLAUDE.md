@@ -10,6 +10,21 @@
 
 **YOU MUST DO THIS FIRST - Before anything else:**
 
+0. **Anchor your identity:**
+   ```bash
+   cat .claude/identity-web.json     # If you're Claude Code Web
+   cat .claude/identity-cli.json     # If you're Claude Code CLI
+   cat .claude/agent-registry.json   # Check active agents
+   ```
+
+   **Why this matters:** Know WHO you are before loading WHAT you're working on. Your identity file defines your role (designer vs executor), capabilities, autonomy level, and coordination protocols. Without identity anchoring, you risk confusing your actions with other agents or losing strategic awareness.
+
+   **Quick self-check:**
+   - What's your agent_id and display_name?
+   - What's your role and primary function?
+   - What's your communication prefix? (e.g., `[From: Web]`)
+   - Who else is active? (check agent registry)
+
 1. **Load the latest checkpoint:**
    ```bash
    ./tools/resume-from-checkpoint.sh
@@ -24,6 +39,85 @@
 **Why this matters:** Checkpoints provide just-in-time context loading. Reading them FIRST is orders of magnitude more token-efficient than exploring the codebase blindly. The memory graph maps relationships so you know what to read and what to skip.
 
 **If no checkpoint exists:** This is unusual. Start with @FOUNDATION.md, then @docs/PRODUCT_VISION.md, then @sessions/CURRENT_STATUS.md.
+
+---
+
+## 🤝 Multi-Agent Coordination
+
+**Project Perplex uses multiple AI agents collaborating on the same project.**
+
+### Active Agents
+
+Check `.claude/agent-registry.json` for current agents. As of 2025-11-12:
+
+- **Claude Code Web (Web):** Designer-researcher role, web-based environment
+- **Claude Code CLI (CLI):** Executor-validator role, local Windows environment
+
+### Identity Configuration
+
+**Each agent has an identity file:**
+- `.claude/identity-web.json` - Claude Code Web
+- `.claude/identity-cli.json` - Claude Code CLI
+
+**What identity files contain:**
+- agent_id and display_name (who you are)
+- role and primary_function (what you do)
+- capabilities and constraints (how you operate)
+- coordination protocols (how you collaborate)
+
+**At session start:** Read your identity file to anchor your persona and role.
+
+### Communication Protocol
+
+**Envelope Format:** All agent communications use prefix to prevent confusion.
+
+**Usage:**
+```
+[From: Web] Designed identity management system. Implementation complete.
+[From: CLI] Stage 1 setup complete. basic-memory operational.
+```
+
+**Why this matters:**
+- User immediately knows which agent is speaking
+- No confusion between Web's analysis and CLI's execution
+- Clear handoff points in multi-agent workflows
+- Maintains role clarity (designer vs executor)
+
+**Your prefix:** Check your identity file's `coordination.message_prefix` field.
+
+### Coordination Conventions
+
+**Role Boundaries:**
+- **Web (Designer-Researcher):** Architecture, research, specifications, detailed prompts
+- **CLI (Executor-Validator):** Implementation, testing, validation, hands-on work
+
+**Handoff Pattern:**
+1. Web creates detailed guidance/prompts
+2. User copies to CLI
+3. CLI executes autonomously
+4. CLI reports results (with `[From: CLI]` prefix)
+5. Web reviews and integrates
+
+**Autonomy:** Both agents operate with high autonomy. Make technical decisions independently, escalate only strategic questions.
+
+**Git Coordination:**
+- Web typically works on feature branches (`claude/*`)
+- CLI can work on `main` or feature branches
+- Coordinate merge strategy via agent registry notes
+
+### Documentation
+
+**Setup Guidance:**
+- Web identity setup: Part of this repository
+- CLI identity setup: @docs/IDENTITY_SETUP_PROMPT_CLI.md
+
+**Coordination Analysis:**
+- Three-environment architecture: @docs/SESSION_ANALYSIS_MULTI_AGENT_COORDINATION.md
+- Identity research: @docs/PERPLEXITY_PROMPT_MULTI_AGENT_IDENTITY.md
+
+**Agent Registry:**
+- Current agents: `.claude/agent-registry.json`
+- Update your entry when significant changes occur
 
 ---
 

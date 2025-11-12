@@ -1,0 +1,60 @@
+{
+  "$schema": "./registry-schema.json",
+  "registry_version": "1.0",
+  "project": "perplex",
+  "created": "2025-11-12T19:47:00Z",
+  "last_updated": "2025-11-12T19:47:00Z",
+  "agents": [
+    {
+      "agent_id": "web-claude-designer-001",
+      "display_name": "Claude Code Web",
+      "short_name": "Web",
+      "status": "active",
+      "environment": "web-browser",
+      "role": "designer-researcher",
+      "identity_file": ".claude/identity-web.json",
+      "git_branch": "claude/perplexity-ai-integration-011CV35RoubgSRMHNVuYa7Si",
+      "first_active": "2025-11-12T00:00:00Z",
+      "last_active": "2025-11-12T19:47:00Z",
+      "coordination": {
+        "message_prefix": "[From: Web]",
+        "handoff_method": "detailed-prompts-via-user"
+      }
+    },
+    {
+      "agent_id": "cli-claude-executor-001",
+      "display_name": "Claude Code CLI",
+      "short_name": "CLI",
+      "status": "active",
+      "environment": "local-windows",
+      "role": "executor-validator",
+      "identity_file": ".claude/identity-cli.json",
+      "git_branch": "main",
+      "first_active": "2025-11-12T18:44:00Z",
+      "last_active": "2025-11-12T18:44:00Z",
+      "coordination": {
+        "message_prefix": "[From: CLI]",
+        "handoff_method": "direct-execution"
+      },
+      "notes": "Completed Stage 1 setup. Identity file to be created."
+    }
+  ],
+  "coordination_protocols": {
+    "communication_pattern": "envelope-format",
+    "handoff_via": "human-intermediary",
+    "identity_anchoring": "startup-read-identity-file",
+    "conflict_resolution": "explicit-coordination-via-registry"
+  },
+  "conventions": {
+    "message_format": "[From: {short_name}] message content",
+    "identity_files": ".claude/identity-{environment}.json",
+    "startup_protocol": "Read identity file, announce self, check registry",
+    "coordination_file": ".claude/agent-registry.json"
+  },
+  "metadata": {
+    "purpose": "Track and coordinate multiple AI agents on Project Perplex",
+    "version": "1.0",
+    "maintained_by": "All active agents",
+    "update_protocol": "Agent updates own entry when significant change"
+  }
+}

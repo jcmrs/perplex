@@ -2,8 +2,10 @@
 # Defines who reviews changes to specific files/directories
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# Default owner for everything
-* @jcmrs
+# AI-First Strategy:
+# - No blanket ownership (enables auto-merge for routine work)
+# - Strategic files require human review (foundation, config, workflows, decisions)
+# - Balance between AI autonomy and strategic oversight
 
 # Foundation and core configuration
 # Strategic documents require human review
