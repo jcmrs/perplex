@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(git clone:*)",
+      "Bash(git fetch:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(rm:*)",
+      "Bash(node --version:*)",
+      "Bash(uvx:*)",
+      "Bash(./tools/resume-from-checkpoint.sh:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(command -v:*)",
+      "Bash(command -v uvx:*)",
+      "Bash(command:*)",
+      "Bash(py --list:*)",
+      "Bash(where:*)",
+      "Bash(py -3.13:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(PROJECT=perplex uvx basic-memory mcp:*)",
+      "Bash(PROJECT=perplex uvx basic-memory status:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

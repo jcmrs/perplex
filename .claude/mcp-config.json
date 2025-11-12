@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "perplex-memory": {
+      "command": "uvx",
+      "args": ["basic-memory", "mcp"],
+      "env": {
+        "PROJECT": "perplex"
+      }
+    }
+  }
+}
