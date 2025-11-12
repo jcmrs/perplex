@@ -83,16 +83,26 @@ git push -u origin claude/feature-description-sessionid
 ### Requirements
 
 **One-Time Repository Setup:**
-1. Go to **Settings** → **Actions** → **General**
-2. Under **Workflow permissions**, enable:
-   - ✅ "Allow GitHub Actions to create and approve pull requests"
+
+1. **GitHub Actions permissions:**
+   - Go to **Settings** → **Actions** → **General**
+   - Under **Workflow permissions**, enable:
+     - ✅ "Allow GitHub Actions to create and approve pull requests"
+
+2. **Branch Protection for `main`:**
+   - Go to **Settings** → **Branches** → Add rule for `main`
+   - ✅ Require PR before merging
+   - ⚠️  Require approvals: **0** (AI-First configuration)
+   - ✅ Require status checks: foundation validation, tests
+   - ✅ Require linear history
+   - See `docs/BRANCH_MANAGEMENT_COMPLETION.md` for detailed setup
 
 **Git Hooks (Local):**
 - Pre-push: Validates before pushing
 - Pre-commit: Foundation validation
 - Commit-msg: Message quality check
 
-**All automated!** No manual steps in execution loop.
+**After setup:** Fully autonomous! No manual steps in execution loop.
 
 ---
 
@@ -353,22 +363,75 @@ git fetch --prune
 
 ---
 
-## Guardrails vs Branch Protection
+## Branch Protection Configuration
 
-**What We're Replacing:**
-- ❌ GitHub branch protection (UI-based, blocks AI)
-- ❌ Manual PR review requirement
+**Status:** ✅ Branch protection enabled with AI-First configuration
 
-**What We're Adding:**
-- ✅ Automated pre-push validation (git hooks)
-- ✅ Automated commit quality checks (git hooks)
-- ✅ Force push prevention (git hooks)
-- ✅ Completeness review integration (git hooks)
+**Configuration (AI-First Autonomous Workflow):**
+- ✅ Require PR before merging (audit trail, can revert)
+- ⚠️  **Require approvals: 0** (not 1 - enables autonomous operation)
+- ✅ Require status checks to pass (foundation validation, tests)
+- ✅ Require branches to be up to date before merging
+- ✅ Require linear history (clean git history)
+- ❌ Allow force pushes (disabled - safety)
+- ❌ Allow deletions (disabled - safety)
 
-**Key Difference:**
-- Branch protection = external enforcement (GitHub blocks push)
-- Git hooks = internal enforcement (local validation before push)
-- Git hooks = AI-controllable (can bypass with `--no-verify` when justified)
+**Why "Require approvals: 0"?**
+
+This is **intentional AI-First configuration**, not an oversight:
+
+**Safety through automation:**
+- All tests must pass (shellcheck, yamllint, bats)
+- Foundation validation must pass
+- PR-based workflow (visibility, audit trail)
+- Linear history (easy to revert if needed)
+
+**Autonomous operation:**
+- AI agent can merge PRs without human gate-keeping
+- No bottleneck in execution loop
+- Aligns with AI-First foundation principle
+
+**Human role:**
+- Strategic partner who monitors
+- Can revert PRs if issues found
+- Provides direction, not execution approval
+
+**Traditional "Require approvals: 1" would:**
+- ❌ Create human bottleneck
+- ❌ Block autonomous operation
+- ❌ Violate AI-First principle
+- ❌ Require human for every change
+
+See `docs/WORKFLOW_GAP_ANALYSIS.md` and `docs/BRANCH_MANAGEMENT_COMPLETION.md` for detailed rationale.
+
+---
+
+## Layered Safety Approach
+
+**Layer 1: Local Git Hooks (Pre-Push)**
+- Pre-push validation (foundation check, completeness review warning)
+- Pre-commit validation (foundation structure)
+- Commit message quality check
+- AI-controllable (can bypass with `--no-verify` when justified)
+
+**Layer 2: GitHub Actions (On Push)**
+- Tests workflow (shellcheck, yamllint, bats)
+- Foundation validation workflow
+- Runs on every push, reports on PR
+
+**Layer 3: Branch Protection (On Merge)**
+- Requires PR (no direct push to main)
+- Requires status checks passing (Layer 2 must succeed)
+- Linear history enforced
+- No approvals required (AI-First configuration)
+
+**Layer 4: Auto-Merge Workflow (After Validation)**
+- Waits for all checks to pass
+- Merges PR automatically
+- Deletes branch after merge
+- No human intervention required
+
+**Result:** Multiple safety layers without human bottleneck
 
 ---
 
