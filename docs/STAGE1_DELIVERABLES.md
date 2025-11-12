@@ -202,23 +202,35 @@ perplex-reader/  (NEW - sub-project 2)
 
 ---
 
-## Deliverable 5: Serena Integration Specification
+## Deliverable 5: MCP Memory Server Integration Specification
 
-**Status:** PENDING (needs research)
+**Status:** IN PROGRESS (research complete, schema definition remaining)
+
+**Critical Discovery:**
+- Serena is code intelligence tool (LSP-based), NOT memory storage
+- Actual integration target: **@modelcontextprotocol/server-memory** (official Anthropic)
+- Memory = separate MCP server from Serena
 
 **What's needed:**
-1. Understand Serena's memory API
-2. Define memory graph format (Serena-compatible)
-3. Specify import mechanism (prompt vs plugin)
-4. Document integration contract
+1. ✅ Understand MCP memory server architecture
+2. ⏳ Define memory graph format (MCP-compatible)
+3. ⏳ Specify import mechanism (create_entities, create_relations tools)
+4. ⏳ Document integration contract
 
-**Research required:**
-- [ ] Read Serena documentation comprehensively
-- [ ] Understand memory storage format
-- [ ] Identify extension points (if building plugin)
-- [ ] Define JSON schema for memory graphs
+**Research completed:**
+- ✅ MCP memory server uses JSONL format (line-delimited JSON)
+- ✅ Entities structure: {name, entityType, observations[]}
+- ✅ Relations structure: {from, to, relationType}
+- ✅ 9 tools available: create_entities, create_relations, add_observations, delete_*, read_graph, search_nodes, open_nodes
+- ✅ Storage: memory.jsonl file (configurable via MEMORY_FILE_PATH)
 
-**Output:** Integration specification document
+**Remaining work:**
+- [ ] Define exact JSON schema for perplex-transformer output
+- [ ] Specify mapping from Perplexity conversations to MCP entities/relations
+- [ ] Document entity types and relation types taxonomy
+- [ ] Define observation format for research findings
+
+**Output:** MCP Memory Graph Schema document
 
 ---
 
@@ -278,33 +290,41 @@ without:
 # perplex-reader Specification
 
 ## What
-Import memory graphs from perplex-transformer into Serena MCP memory system
-for target projects, preserving attribution and provenance.
+Import memory graphs from perplex-transformer into MCP memory server
+(@modelcontextprotocol/server-memory) for target projects, preserving
+attribution and provenance.
 
 ## Why
-Local AI agents query Serena for memory. Research from Perplexity must be
-accessible via Serena's memory tools without consuming AI context during import.
+Local AI agents query MCP memory server for persistent knowledge. Research from
+Perplexity must be accessible via MCP memory tools without consuming AI context
+during import.
 
 ## Success Criteria
-- Input: JSON memory graph from perplex-transformer
-- Process: Import to Serena without using LLM context (plugin approach)
-  OR via clear prompt (simple approach)
-- Output: Serena memories created with proper attribution
-- Validation: Can query memories via Serena tools
-- Token efficiency: Import doesn't fill AI's context window
+- Input: JSONL memory graph from perplex-transformer
+- Process: Use MCP memory server tools (create_entities, create_relations)
+- Output: Entities and relations created in MCP memory server
+- Validation: Can query memories via search_nodes and read_graph tools
+- Token efficiency: Import uses MCP tools, not LLM context window
 
 ## User Journey
-Option A (Simple):
-1. User places memory graph in ProjectA/.serena/imports/
+Option A (Simple - Prompt-Based):
+1. User places memory graph in ProjectA/.mcp/imports/perplexity-research.jsonl
 2. User prompts Claude Code: "Import the Perplexity research"
-3. Claude Code reads graph, saves to Serena memories
-4. User can query: "What research about X?"
+3. Claude Code reads JSONL, uses create_entities and create_relations tools
+4. MCP memory server stores entities/relations
+5. User can query: "What research about X?"
 
-Option B (Plugin):
-1. User places memory graph in ProjectA/.serena/imports/
-2. Claude Code uses import_memory_graph tool
-3. Serena imports directly (no LLM context used)
-4. Returns: "Imported X entities, Y relationships"
+Option B (Automated Script):
+1. User runs: ./perplex-reader/import.py ProjectA/.mcp/imports/research.jsonl
+2. Script reads JSONL, calls MCP memory server tools programmatically
+3. Returns: "Imported X entities, Y relationships"
+4. No AI context consumed
+
+Option C (MCP Tool Extension):
+1. Build perplex-reader as MCP server with import_perplexity_research tool
+2. Claude Code calls tool directly: import_perplexity_research(file_path)
+3. Tool handles import using MCP memory server API
+4. Returns summary of import
 ```
 
 ---
@@ -332,10 +352,10 @@ Option B (Plugin):
 - [ ] Configuration templates ready
 
 ### Integration
-- [ ] Serena memory API understood
-- [ ] Memory graph JSON schema defined
-- [ ] Integration contract specified
-- [ ] Import mechanism decided (prompt vs plugin)
+- [x] MCP memory server API understood (@modelcontextprotocol/server-memory)
+- [ ] Memory graph JSONL schema defined (entities, relations, observations)
+- [ ] Integration contract specified (MCP tools: create_entities, create_relations)
+- [ ] Import mechanism decided (prompt-based, script, or MCP tool extension)
 
 ### Specifications
 - [ ] perplex-transformer spec (Phase 1: Specify) complete
@@ -359,10 +379,11 @@ Option B (Plugin):
 2. ✅ Technology decided (Python 3.11 + uv)
 3. ✅ Process memory documented
 4. ⏳ Spec Kit installed and working
-5. ⏳ Serena integration understood
-6. ⏳ Sub-project specs (Phase 1) written and approved
-7. ⏳ All checklists above completed
-8. ⏳ User validates: "This prevents the losing sight pattern"
+5. ✅ MCP memory server integration understood (CORRECTED: was "Serena")
+6. ⏳ Memory graph JSONL schema defined
+7. ⏳ Sub-project specs (Phase 1) written and approved
+8. ⏳ All checklists above completed
+9. ⏳ User validates: "This prevents the losing sight pattern"
 
 **Then and only then:** Move to Stage 2 (implementation)
 
@@ -384,14 +405,14 @@ Option B (Plugin):
    - Smaller scope, faster completion
 
 3. **Integration:**
-   - Test transformer → reader → Serena → Claude Code query
+   - Test transformer → reader → MCP memory server → Claude Code query
    - Validate end-to-end with real Perplexity conversation
    - Iterate based on findings
 
 **Trust enabled:**
 - User trusts the foundation
 - AI trusts the specs (clear, named, atomic)
-- AI trusts its environment (Serena, Spec Kit, process memory)
+- AI trusts its environment (MCP memory server, Spec Kit, process memory)
 - AI trusts itself (can validate work via tests)
 
 ---
@@ -402,7 +423,8 @@ Option B (Plugin):
 1. ✅ Document methodology (done - Spec Kit SDD)
 2. ✅ Decide technology (done - Python 3.11 + uv)
 3. ✅ Create Stage 1 deliverables doc (this file)
-4. ⏳ Research Serena integration (next)
+4. ✅ Research MCP memory server integration (CORRECTED: was "Serena")
+5. ⏳ Define memory graph JSONL schema (next)
 
 ### Next Session
 5. Install Spec Kit CLI
