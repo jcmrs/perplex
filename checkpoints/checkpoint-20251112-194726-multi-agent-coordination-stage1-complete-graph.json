@@ -1,0 +1,43 @@
+{
+  "checkpoint_id": "checkpoint-20251112-194726-multi-agent-coordination-stage1-complete",
+  "timestamp": "2025-11-12T19:47:26Z",
+  "phase": "foundation",
+  "next_phase": "discovery",
+
+  "critical_files": [
+    {"path": "FOUNDATION.md", "reason": "core principles", "priority": "critical"},
+    {"path": "docs/PRODUCT_VISION.md", "reason": "mission", "priority": "critical"},
+    {"path": "ideas/idea-002-ai-agent-onboarding-protocol.md", "reason": "onboarding protocol", "priority": "critical"},
+    {"path": "docs/SESSION_ANALYSIS_MULTI_AGENT_COORDINATION.md", "reason": "coordination analysis", "priority": "critical"},
+    {"path": "docs/PERPLEXITY_PROMPT_MULTI_AGENT_IDENTITY.md", "reason": "identity research", "priority": "critical"}
+  ],
+
+  "active_work": {
+    "focus": "Implement identity configuration files (.claude/identity-web.json, identity-cli.json) and coordinate local CLI git workflow",
+    "blockers": [],
+    "next_steps": []
+  },
+
+  "relationships": {
+    "2025-11-10-foundation-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-10-foundation-methodology": {"type": "decision", "status": "active"},
+    "2025-11-11-checkpoint-automation-strategy": {"type": "decision", "status": "active"},
+    "2025-11-11-claude-md-architecture": {"type": "decision", "status": "active"},
+    "2025-11-11-completeness-review-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-11-testing-infrastructure": {"type": "decision", "status": "active"},
+    "2025-11-12-basic-memory-as-stage1-foundation": {"type": "decision", "status": "active"},
+    "2025-11-12-perplexity-integration-architecture": {"type": "decision", "status": "active"}
+  },
+
+  "skip_for_now": [
+    "*/TEMPLATE.md",
+    "sessions/session-2025111*.md",
+    "examples/*"
+  ],
+
+  "git_state": {
+    "branch": "claude/perplexity-ai-integration-011CV35RoubgSRMHNVuYa7Si",
+    "last_commit": "3d021e4",
+    "last_commit_message": "Document multi-agent coordination and capture onboarding protocol"
+  }
+}
