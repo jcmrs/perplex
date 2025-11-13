@@ -1,18 +1,85 @@
 #!/bin/bash
-# Pre-Push Hook - Completeness Review
-# Runs before git push to check for potential gaps
-# Non-blocking: Shows warnings but allows push to proceed
-
-set +e  # Don't exit on errors - this is advisory only
-
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Pre-Push: Completeness Review"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+# Pre-Push Hook - Branch Enforcement + Completeness Review
+# Part 1: Branch enforcement (BLOCKING)
+# Part 2: Completeness review (NON-BLOCKING)
 
 # Get project root
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Pre-Push: Branch Enforcement + Completeness"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+#================================
+# PART 1: Branch Enforcement (BLOCKING)
+#================================
+
+echo "Part 1: Branch Convention Enforcement"
+echo "--------------------------------------"
+echo ""
+
+# Read push details from stdin
+while read local_ref local_sha remote_ref remote_sha; do
+    # Extract branch name from ref
+    if [[ $remote_ref =~ refs/heads/(.+)$ ]]; then
+        branch="${BASH_REMATCH[1]}"
+
+        # Block direct pushes to main or master
+        if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+            echo "❌ ERROR: Direct push to $branch is not allowed!"
+            echo ""
+            echo "AI agents must use claude/* branch convention:"
+            echo ""
+            echo "  For Claude Code Web:"
+            echo "    git checkout -b claude/description-sessionid"
+            echo ""
+            echo "  For Claude Code CLI:"
+            echo "    git checkout -b claude/cli-description-\$(date +%s)"
+            echo ""
+            echo "Then push to your branch:"
+            echo "  git push -u origin <your-claude-branch>"
+            echo ""
+            echo "GitHub automation will:"
+            echo "  1. Auto-create PR"
+            echo "  2. Run validation tests"
+            echo "  3. Auto-merge if passing"
+            echo "  4. Delete branch after merge"
+            echo ""
+            echo "This prevents:"
+            echo "  - Bypassing validation workflows"
+            echo "  - Breaking main branch"
+            echo "  - Losing PR audit trail"
+            echo ""
+            echo "See: docs/THREE_ENVIRONMENT_COORDINATION.md"
+            echo "See: docs/LOCAL_AUTOMATION_STRATEGY.md"
+            echo ""
+            exit 1
+        fi
+
+        # Validate claude/* branch naming for AI agents
+        if [[ "$branch" == claude/* ]]; then
+            echo "✅ Valid claude branch: $branch"
+        else
+            echo "✅ Pushing to branch: $branch"
+        fi
+    fi
+done
+
+echo ""
+echo "✅ Branch enforcement passed"
+echo ""
+
+#================================
+# PART 2: Completeness Review (NON-BLOCKING)
+#================================
+
+set +e  # Don't exit on errors - this is advisory only
+
+echo "Part 2: Completeness Review"
+echo "----------------------------"
+echo ""
 
 # Check if completeness review script exists
 if [ ! -f "tools/review-completeness.sh" ]; then
