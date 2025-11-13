@@ -85,6 +85,11 @@ agents:
           coordination: "Web owns coordination.yml, CLI owns mcp-config.json"
           notes: "Each agent manages own identity file"
 
+        - path: ".github/"
+          reason: "GitHub workflows and automation configuration"
+          coordination: "Web designs workflows, CLI can update for tooling needs"
+          notes: "Requires careful coordination to avoid workflow conflicts"
+
       files:
         - "sessions/CURRENT_STATUS.md"
         - ".claude/agent-registry.json"
