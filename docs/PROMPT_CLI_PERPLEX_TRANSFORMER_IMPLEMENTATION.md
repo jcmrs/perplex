@@ -92,23 +92,43 @@ This shows:
 
 ---
 
-## Step 1: Get the Specification
+## Step 1: Sync with Repository
 
-**The spec exists on Web's branch. Fetch it:**
+**FIRST - Get all recent updates from Web's work:**
 
 ```bash
-# Fetch Web's branch
+# 1. Sync with main branch first (in case there are merged updates)
+git fetch origin main
+git pull origin main  # If you're on main
+
+# 2. Fetch Web's feature branch with all recent work
 git fetch origin claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si
 
-# Get ONLY the spec file from Web's branch
-git checkout FETCH_HEAD -- specs/001-perplex-transformer/spec.md
+# 3. Get ALL relevant files from Web's branch
+git checkout FETCH_HEAD -- \
+  specs/001-perplex-transformer/spec.md \
+  tools/agent-check-registry.sh \
+  docs/PROMPT_CLI_PERPLEX_TRANSFORMER_IMPLEMENTATION.md \
+  docs/PROMPT_CLI_PERPLEX_TRANSFORMER_SPECIFICATION.md
 
-# Verify it exists and is complete
-ls -lh specs/001-perplex-transformer/spec.md
-wc -l specs/001-perplex-transformer/spec.md  # Should be ~401 lines
+# 4. Verify what you got
+ls -lh specs/001-perplex-transformer/spec.md          # Spec (401 lines)
+ls -lh tools/agent-check-registry.sh                  # Bug fixes
+ls -lh docs/PROMPT_CLI_PERPLEX_TRANSFORMER_*.md       # This prompt + obsolete marker
 ```
 
-**Expected result:** `specs/001-perplex-transformer/spec.md` exists locally with 401 lines.
+**What you're getting:**
+- ✅ **spec.md** (401 lines) - The complete specification
+- ✅ **agent-check-registry.sh** - Bug fixes for integer expression errors
+- ✅ **PROMPT_CLI_PERPLEX_TRANSFORMER_IMPLEMENTATION.md** - This comprehensive prompt
+- ✅ **PROMPT_CLI_PERPLEX_TRANSFORMER_SPECIFICATION.md** - Obsolete prompt (marked, with root cause analysis)
+
+**Why all these files:**
+- spec.md: You need this to create plan.md
+- agent-check-registry.sh: Bug fixes so scripts work correctly
+- Prompt files: Complete guidance + lessons learned from what went wrong
+
+**Expected result:** All 4 files exist locally and are up-to-date with Web's latest work.
 
 ---
 
@@ -502,9 +522,14 @@ specs/001-perplex-transformer/spec.md:
 cat .claude/identity-cli.json
 bash tools/agent-check-registry.sh
 
-# 1. Get spec
+# 1. Sync with repository (get all recent updates from Web)
+git fetch origin main
+git pull origin main  # If on main
 git fetch origin claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si
-git checkout FETCH_HEAD -- specs/001-perplex-transformer/spec.md
+git checkout FETCH_HEAD -- \
+  specs/001-perplex-transformer/spec.md \
+  tools/agent-check-registry.sh \
+  docs/PROMPT_CLI_PERPLEX_TRANSFORMER_*.md
 
 # 2. Read spec (all 401 lines)
 cat specs/001-perplex-transformer/spec.md
