@@ -1,42 +1,68 @@
 # Phase 7: Validation & Testing
 
-**Agents:** CDIR (you) + CEXE (first boot)
-**Prerequisites:** Phase 6 complete
-**Branch:** CDIR: `claude/design-three-agent-config`, CEXE: `claude/impl-migration-test` (NEW)
-**Duration:** 60-90 min
+**Agents:** CDIR (PowerShell Terminal 1) + CEXE (PowerShell Terminal 2, first boot)
+**Prerequisites:** Phase 6 complete (GitHub workflows updated)
+**Execution Environment:** Two PowerShell Terminal Windows
+**OS:** Windows
+**Project Path:** `C:\Development\perplex`
+**Branches:** CDIR: `claude/design-three-agent-config`, CEXE: `claude/impl-migration-test` (NEW)
+**Duration Estimate:** 60-90 minutes
+
+---
+
+## IMPORTANT: Environment Setup
+
+**You are running on Windows with TWO PowerShell terminal windows.**
+
+**Terminal 1 (CDIR):** Already open and active (you are here)
+**Terminal 2 (CEXE):** Will be opened during Part B
+
+**File Editing:** Use text editor (VS Code, Notepad++, etc.) for complex files
+**PowerShell Commands:** Used for both terminals
 
 ---
 
 ## Mission
 
-Test three-agent coordination with a test specification.
+Test three-agent coordination workflow: CDIR creates spec → CEXE creates plan → CDIR validates → CEXE implements → CDIR validates final.
 
 ---
 
-## Part A: CDIR Preparation
+## Part A: CDIR Preparation (PowerShell Terminal 1)
 
-### 1. Verify Phase 6
-```bash
-cat .claude/migration-phase-6-complete.txt
+### Step 1: Verify Phase 6 Complete
+
+```powershell
+cat .claude\migration-phase-6-complete.txt
+git log --oneline -1 | Select-String "Phase 6"
 ```
 
-### 2. Push Configuration Branch
-```bash
+Should show Phase 6 marker and recent commit.
+
+---
+
+### Step 2: Push Configuration Branch
+
+```powershell
 git push -u origin claude/design-three-agent-config
 ```
 
-GitHub will:
-- Auto-create PR
+**GitHub will automatically:**
+- Create PR (auto-create-pr workflow)
 - Run workspace validation
-- Show PR in GitHub
+- Show PR in GitHub Actions tab
 
-### 3. Create Test Specification
+---
 
-```bash
-mkdir -p specs/000-migration-test
+### Step 3: Create Test Specification
+
+```powershell
+mkdir specs\000-migration-test -Force
 ```
 
-Create `specs/000-migration-test/spec.md`:
+**Create file:** `specs\000-migration-test\spec.md`
+
+**Open in text editor and add:**
 
 ```markdown
 # Specification: Migration Validation Test
@@ -67,14 +93,15 @@ Validate three-agent coordination: CDIR → CEXE → CDIR workflow.
 ## Requirements
 
 **Functional:**
-- Create simple function: `def hello_world(): return "Hello from CEXE"`
+- Create simple Python function: `def hello_world(): return "Hello from CEXE"`
 - Write test: `test_hello_world()`
-- Pass test
+- Test must pass
 
 **Non-Functional:**
 - Coordination via agent registry
 - Handoff markers created
 - Workspace boundaries respected
+- Envelope communication format used
 
 ## Out of Scope
 
@@ -91,11 +118,16 @@ CDIR validates:
 - Migration can proceed to production
 ```
 
-### 4. Update Agent Registry
+**Save the file.**
 
-Edit `.claude/agent-registry.json`:
+---
 
-**CDIR section:**
+### Step 4: Update Agent Registry
+
+**Open `.claude\agent-registry.json` in text editor**
+
+**Find CDIR entry (agent_id: "cli-claude-director-001") and update `workspace` section:**
+
 ```json
 "workspace": {
   "current_work_branch": "claude/design-three-agent-config",
@@ -112,12 +144,21 @@ Edit `.claude/agent-registry.json`:
 }
 ```
 
-### 5. Create Handoff Marker
+**Save the file.**
 
-```bash
-mkdir -p .claude/handoffs
+---
 
-cat > .claude/handoffs/spec-000-to-cexe.json <<EOF
+### Step 5: Create Handoff Marker
+
+```powershell
+mkdir .claude\handoffs -Force
+```
+
+**Create file:** `.claude\handoffs\spec-000-to-cexe.json`
+
+**Open in text editor and add:**
+
+```json
 {
   "handoff_id": "spec-000-migration-test",
   "from_agent": "cli-claude-director-001",
@@ -133,125 +174,210 @@ cat > .claude/handoffs/spec-000-to-cexe.json <<EOF
   ],
   "next_action": "CEXE creates plan.md"
 }
-EOF
 ```
 
-### 6. Commit Test Spec
-```bash
-git add specs/000-migration-test/spec.md
-git add .claude/agent-registry.json
-git add .claude/handoffs/spec-000-to-cexe.json
+**Save the file.**
 
+---
+
+### Step 6: Commit Test Specification
+
+```powershell
+git add specs\000-migration-test\spec.md
+git add .claude\agent-registry.json
+git add .claude\handoffs\spec-000-to-cexe.json
+git status
+```
+
+**Commit:**
+```powershell
 git commit --no-gpg-sign -m "[CDIR] Create test specification 000-migration-test
 
-Test spec to validate three-agent coordination.
+Test spec to validate three-agent coordination workflow.
+
+Success criteria: 10 items covering full CDIR ↔ CEXE cycle
+Requirements: Simple hello_world function with test
 
 Handoff: CDIR → CEXE (spec complete)
 Next: CEXE creates plan.md
 
 Migration Phase: 7A of 9
-Agent: CDIR
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: claude/design-three-agent-config
+Environment: Windows PowerShell at C:\Development\perplex
 "
 
 git push
 ```
 
-### 7. Announce Handoff
+---
+
+### Step 7: Announce Handoff to User
+
+**Print this message:**
 
 ```
 [From: CDIR] Test specification 000-migration-test created.
 
-Specification: specs/000-migration-test/spec.md
+Specification: specs\000-migration-test\spec.md
 Status: spec-complete
 Handoff: Ready for CEXE
 
-CEXE: Please read spec and create plan.md
+Agent Registry Updated:
+- CDIR: spec-complete, pending handoff to CEXE
+- Handoff marker created: .claude\handoffs\spec-000-to-cexe.json
 
-Next: User opens Terminal-2 for CEXE first boot
+Next Action: User opens PowerShell Terminal Window 2 for CEXE first boot
+
+Instructions for User:
+1. Open NEW PowerShell terminal window (Terminal 2)
+2. Navigate to: cd C:\Development\perplex
+3. Follow Part B instructions in Terminal 2
 ```
+
+**STOP HERE.** User needs to open Terminal 2 before continuing.
 
 ---
 
-## Part B: CEXE First Boot (User Action)
+## Part B: CEXE First Boot (PowerShell Terminal 2)
 
-**User:** Open new terminal (Terminal-2)
+**USER ACTION REQUIRED:** Open a NEW PowerShell terminal window (this will be Terminal 2 for CEXE).
 
-**Paste into Terminal-2:**
-```bash
-cd /home/user/perplex
+**In the new PowerShell Terminal 2, run:**
+
+```powershell
+# Navigate to project
+cd C:\Development\perplex
 
 # CEXE reads identity
-cat .claude/identity-cli-executor.json
+cat .claude\identity-cli-executor.json
 
-# CEXE announces
-echo "[From: CEXE] Identity anchored. CLI-Executor operational."
-echo "Agent ID: cli-claude-executor-001"
-echo "Terminal: Terminal-2"
-echo "Role: executor-validator"
+# CEXE announces first boot
+Write-Host "[From: CEXE] Identity anchored. CLI-Executor operational." -ForegroundColor Green
+Write-Host "Agent ID: cli-claude-executor-001"
+Write-Host "Short Name: CEXE"
+Write-Host "Terminal: PowerShell-Terminal-2"
+Write-Host "Role: executor-validator"
+Write-Host "Environment: Windows PowerShell at C:\Development\perplex"
 ```
 
 ---
 
-## Part C: CEXE Execution (Terminal-2)
+## Part C: CEXE Reads Spec and Creates Plan (PowerShell Terminal 2)
 
-### 1. Check Agent Registry
-```bash
-cat .claude/agent-registry.json | jq '.agents[] | select(.agent_id=="cli-claude-director-001") | .workspace'
+### Step 1: Check Agent Registry for Handoff
+
+```powershell
+# Read CDIR's workspace to see pending handoff
+cat .claude\agent-registry.json | Select-String -Context 0,20 "cli-claude-director-001"
 ```
 
-See CDIR's pending handoff: spec-000-migration-test
+You should see CDIR's `pending_handoffs` with spec-000-migration-test.
 
-### 2. Check Handoff Marker
-```bash
-cat .claude/handoffs/spec-000-to-cexe.json
+---
+
+### Step 2: Check Handoff Marker
+
+```powershell
+cat .claude\handoffs\spec-000-to-cexe.json
 ```
 
-### 3. Read Test Spec
-```bash
-cat specs/000-migration-test/spec.md
+Confirms: CDIR → CEXE handoff for spec 000.
+
+---
+
+### Step 3: Read Test Specification
+
+```powershell
+cat specs\000-migration-test\spec.md
 ```
 
-### 4. Create Feature Branch
-```bash
+Read and understand:
+- Purpose: Validate three-agent coordination
+- Requirements: Simple hello_world function
+- Success criteria: 10 items
+
+---
+
+### Step 4: Create Implementation Branch
+
+```powershell
 git fetch origin
 git checkout -b claude/impl-migration-test
 ```
 
-### 5. Create Plan
-Create `specs/000-migration-test/plan.md`:
+**CEXE now on:** `claude/impl-migration-test` branch
+
+---
+
+### Step 5: Create Technical Plan
+
+**Create file:** `specs\000-migration-test\plan.md`
+
+**Open in text editor and add:**
 
 ```markdown
 # Technical Plan: Migration Test
+
+**Agent:** CEXE (cli-claude-executor-001)
+**Created:** 2025-11-13
+**Status:** Planning
 
 ## Architecture
 
 Simple Python module with hello_world function and test.
 
+**File Structure:**
+```
+src/
+  hello.py         # Contains hello_world() function
+tests/
+  test_hello.py    # Contains test_hello_world() test
+```
+
 ## Implementation Steps
 
-1. Create `src/hello.py` with hello_world function
-2. Create `tests/test_hello.py` with test
+1. Create `src\hello.py` with hello_world() function
+   - Function returns: "Hello from CEXE"
+2. Create `tests\test_hello.py` with test_hello_world()
+   - Test asserts: hello_world() == "Hello from CEXE"
 3. Run test, verify passing
+4. Commit implementation
 
 ## Dependencies
 
-- Python 3.x
-- pytest (if available)
+- Python 3.x (already available)
+- pytest (if available, otherwise use direct import)
 
 ## Testing Strategy
 
-- Unit test: test_hello_world()
-- Expected: "Hello from CEXE"
+- **Unit test:** test_hello_world()
+- **Expected result:** "Hello from CEXE"
+- **Validation:** Test passes without errors
 
 ## Risks
 
-None (simple test)
+None (simple test for coordination validation)
+
+## Validation Criteria
+
+For CDIR to validate:
+- Plan fulfills spec requirements
+- Implementation approach is sound
+- Testing strategy is adequate
 ```
 
-### 6. Update Agent Registry
-Edit `.claude/agent-registry.json`:
+**Save the file.**
 
-**CEXE section:**
+---
+
+### Step 6: Update Agent Registry
+
+**Open `.claude\agent-registry.json` in text editor**
+
+**Find CEXE entry (agent_id: "cli-claude-executor-001") and update `workspace` section:**
+
 ```json
 "workspace": {
   "current_work_branch": "claude/impl-migration-test",
@@ -268,217 +394,587 @@ Edit `.claude/agent-registry.json`:
 }
 ```
 
-### 7. Commit Plan
-```bash
-git add specs/000-migration-test/plan.md
-git add .claude/agent-registry.json
+**Save the file.**
 
+---
+
+### Step 7: Commit Plan
+
+```powershell
+git add specs\000-migration-test\plan.md
+git add .claude\agent-registry.json
+git status
+```
+
+**Commit:**
+```powershell
 git commit --no-gpg-sign -m "[CEXE] Create technical plan for 000-migration-test
 
-Plan defines simple implementation for coordination test.
+Plan defines simple Python implementation for coordination test.
 
-Handoff: CEXE → CDIR (plan validation)
+Architecture: src\hello.py + tests\test_hello.py
+Testing: pytest or direct import
+
+Handoff: CEXE → CDIR (plan validation required)
+Next: CDIR validates plan against spec
 
 Migration Phase: 7B of 9
-Agent: CEXE
-Terminal: Terminal-2
+Agent: CEXE (cli-claude-executor-001)
+Terminal: PowerShell-Terminal-2
+Branch: claude/impl-migration-test
+Environment: Windows PowerShell at C:\Development\perplex
 "
 
 git push -u origin claude/impl-migration-test
 ```
 
-### 8. Announce
+---
+
+### Step 8: Announce Handoff
+
+**Print this message:**
+
 ```
 [From: CEXE] Plan created for spec 000-migration-test.
 
-Plan: specs/000-migration-test/plan.md
+Plan: specs\000-migration-test\plan.md
 Status: plan-complete
 Handoff: Ready for CDIR validation
 
-CDIR: Please validate plan against spec
+Agent Registry Updated:
+- CEXE: planning, pending handoff to CDIR for validation
+
+Next Action: Switch to Terminal 1 (CDIR) for plan validation
+```
+
+**PAUSE HERE.** Switch back to Terminal 1 (CDIR).
+
+---
+
+## Part D: CDIR Validates Plan (PowerShell Terminal 1)
+
+### Step 1: Fetch and Switch to CEXE's Branch
+
+```powershell
+git fetch origin
+git checkout claude/impl-migration-test
+```
+
+**You are now on CEXE's implementation branch.**
+
+---
+
+### Step 2: Read Plan
+
+```powershell
+cat specs\000-migration-test\plan.md
 ```
 
 ---
 
-## Part D: CDIR Validation (Terminal-1)
+### Step 3: Validate Plan Against Spec
 
-### 1. Pull CEXE's Plan
-```bash
-git fetch origin
-git checkout claude/impl-migration-test
-cat specs/000-migration-test/plan.md
-```
+**Compare plan.md against spec.md:**
 
-### 2. Validate Plan
-Compare plan.md against spec.md:
-- Does plan fulfill requirements?
-- Is approach sound?
-- Any missing elements?
+Questions to ask:
+- ✅ Does plan fulfill spec requirements? (hello_world function + test)
+- ✅ Is implementation approach sound? (simple Python module)
+- ✅ Is testing strategy adequate? (pytest or direct import)
+- ✅ Any missing elements? (None)
 
-### 3. Mark Validated
-Update `.claude/agent-registry.json`:
+**Decision: APPROVED** (plan is sound for test spec)
 
-**CDIR workspace:**
+---
+
+### Step 4: Update Agent Registry with Validation
+
+**Open `.claude\agent-registry.json` in text editor**
+
+**Find CDIR entry and update `workspace`:**
+
 ```json
-"workspace_state": "validating",
-"current_work": "Validated CEXE plan for spec 000 - APPROVED"
+"workspace": {
+  "current_work_branch": "claude/impl-migration-test",
+  "active_specifications": ["000-migration-test"],
+  "workspace_state": "validating",
+  "current_work": "Validated CEXE plan for spec 000 - APPROVED",
+  "next_handoff": "cli-claude-executor-001",
+  "pending_handoffs": []
+}
 ```
 
-### 4. Update Handoff
-Edit `.claude/handoffs/spec-000-to-cexe.json`:
+**Save the file.**
+
+---
+
+### Step 5: Update Handoff Marker with Validation Result
+
+**Open `.claude\handoffs\spec-000-to-cexe.json` in text editor**
+
+**Update:**
+
 ```json
-"status": "validated",
-"validated_by": "cli-claude-director-001",
-"validated_at": "2025-11-13T00:00:00Z",
-"validation_result": "APPROVED - proceed to tasks"
+{
+  "handoff_id": "spec-000-migration-test",
+  "from_agent": "cli-claude-director-001",
+  "to_agent": "cli-claude-executor-001",
+  "artifact": "specs/000-migration-test/spec.md",
+  "trigger": "spec_complete",
+  "timestamp": "2025-11-13T00:00:00Z",
+  "status": "validated",
+  "validated_by": "cli-claude-director-001",
+  "validated_at": "2025-11-13T00:00:00Z",
+  "validation_result": "APPROVED - proceed to tasks and implementation",
+  "next_action": "CEXE creates tasks.md and implements"
+}
 ```
 
-### 5. Commit Validation
-```bash
-git add .claude/agent-registry.json
-git add .claude/handoffs/spec-000-to-cexe.json
+**Save the file.**
 
+---
+
+### Step 6: Commit Validation
+
+```powershell
+git add .claude\agent-registry.json
+git add .claude\handoffs\spec-000-to-cexe.json
+git status
+```
+
+**Commit:**
+```powershell
 git commit --no-gpg-sign -m "[CDIR] Validate CEXE plan for 000-migration-test - APPROVED
 
-Plan validated against spec. CEXE may proceed to tasks.
+Plan validated against spec requirements.
+- Fulfills functional requirements
+- Sound implementation approach
+- Adequate testing strategy
 
-Handoff: CDIR → CEXE (plan validated)
+Validation Result: APPROVED
+Next: CEXE may proceed to create tasks.md and implement
 
 Migration Phase: 7C of 9
-Agent: CDIR
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: claude/impl-migration-test
+Environment: Windows PowerShell at C:\Development\perplex
 "
 
 git push
 ```
 
-### 6. Announce
+---
+
+### Step 7: Announce Approval
+
+**Print this message:**
+
 ```
 [From: CDIR] Plan validated - APPROVED.
 
-CEXE: Proceed to create tasks.md and implement.
+Validation Summary:
+✅ Fulfills spec requirements
+✅ Sound implementation approach
+✅ Adequate testing strategy
+
+CEXE: You are approved to proceed.
+Next Actions:
+1. Create tasks.md
+2. Implement hello_world function
+3. Write and run test
+
+Switch to Terminal 2 (CEXE) to continue.
 ```
+
+**PAUSE HERE.** Switch back to Terminal 2 (CEXE).
 
 ---
 
-## Part E: CEXE Implementation (Terminal-2)
+## Part E: CEXE Implementation (PowerShell Terminal 2)
 
-### 1. Create Tasks
-Create `specs/000-migration-test/tasks.md`:
+### Step 1: Pull Latest Changes
+
+```powershell
+git pull origin claude/impl-migration-test
+```
+
+**Verify CDIR's validation approval is present.**
+
+---
+
+### Step 2: Create Tasks File
+
+**Create file:** `specs\000-migration-test\tasks.md`
+
+**Open in text editor and add:**
 
 ```markdown
 # Tasks: Migration Test
 
-1. [PENDING] Create src/hello.py with hello_world()
-2. [PENDING] Create tests/test_hello.py
+**Status:** In Progress
+
+## Task List
+
+1. [PENDING] Create src\hello.py with hello_world() function
+2. [PENDING] Create tests\test_hello.py with test_hello_world()
 3. [PENDING] Run test, verify passing
-4. [PENDING] Commit implementation
+4. [PENDING] Update agent registry
+5. [PENDING] Commit implementation
 ```
 
-### 2. Implement
-```bash
-mkdir -p src tests
+**Save the file.**
 
-# Create function
-cat > src/hello.py <<EOF
+---
+
+### Step 3: Implement Function
+
+```powershell
+mkdir src -Force
+```
+
+**Create file:** `src\hello.py`
+
+**Content:**
+
+```python
 def hello_world():
     return "Hello from CEXE"
-EOF
+```
 
-# Create test
-cat > tests/test_hello.py <<EOF
+**Save the file.**
+
+---
+
+### Step 4: Implement Test
+
+```powershell
+mkdir tests -Force
+```
+
+**Create file:** `tests\test_hello.py`
+
+**Content:**
+
+```python
 from src.hello import hello_world
 
 def test_hello_world():
     assert hello_world() == "Hello from CEXE"
-EOF
-
-# Run test
-python -m pytest tests/test_hello.py || python -c "from tests.test_hello import test_hello_world; test_hello_world(); print('Test passed')"
+    print("✓ Test passed: hello_world() returns correct value")
 ```
 
-### 3. Mark Tasks Complete
-Update `tasks.md`: Change all to [COMPLETE]
+**Save the file.**
 
-### 4. Commit Implementation
-```bash
-git add specs/000-migration-test/tasks.md
-git add src/hello.py
-git add tests/test_hello.py
+---
 
+### Step 5: Run Test
+
+```powershell
+# Try pytest first, fallback to direct execution
+if (Get-Command pytest -ErrorAction SilentlyContinue) {
+    pytest tests\test_hello.py
+} else {
+    python -c "import sys; sys.path.insert(0, '.'); from tests.test_hello import test_hello_world; test_hello_world(); print('All tests passed')"
+}
+```
+
+**Expected output:** Test passes without errors.
+
+---
+
+### Step 6: Mark Tasks Complete
+
+**Open `specs\000-migration-test\tasks.md` in text editor**
+
+**Update all to [COMPLETE]:**
+
+```markdown
+# Tasks: Migration Test
+
+**Status:** Complete
+
+## Task List
+
+1. [COMPLETE] Create src\hello.py with hello_world() function
+2. [COMPLETE] Create tests\test_hello.py with test_hello_world()
+3. [COMPLETE] Run test, verify passing
+4. [COMPLETE] Update agent registry
+5. [COMPLETE] Commit implementation
+```
+
+**Save the file.**
+
+---
+
+### Step 7: Update Agent Registry
+
+**Open `.claude\agent-registry.json` in text editor**
+
+**Find CEXE entry and update `workspace`:**
+
+```json
+"workspace": {
+  "current_work_branch": "claude/impl-migration-test",
+  "active_specifications": ["000-migration-test"],
+  "workspace_state": "implementing",
+  "current_work": "Implementation complete for spec 000",
+  "next_handoff": "cli-claude-director-001",
+  "pending_handoffs": [{
+    "to": "cli-claude-director-001",
+    "artifact": "Implementation: src/hello.py, tests/test_hello.py",
+    "trigger": "implementation_complete",
+    "timestamp": "2025-11-13T00:00:00Z"
+  }]
+}
+```
+
+**Save the file.**
+
+---
+
+### Step 8: Commit Implementation
+
+```powershell
+git add specs\000-migration-test\tasks.md
+git add src\hello.py
+git add tests\test_hello.py
+git add .claude\agent-registry.json
+git status
+```
+
+**Commit:**
+```powershell
 git commit --no-gpg-sign -m "[CEXE] Implement 000-migration-test
 
-- Created src/hello.py with hello_world()
-- Created tests/test_hello.py
+Implementation:
+- Created src\hello.py with hello_world() function
+- Created tests\test_hello.py with test_hello_world()
 - All tests passing
 
-Handoff: CEXE → CDIR (implementation complete)
+Files:
+- src\hello.py: Returns 'Hello from CEXE'
+- tests\test_hello.py: Validates function output
+
+Handoff: CEXE → CDIR (implementation complete, final validation)
+Next: CDIR validates implementation against spec success criteria
 
 Migration Phase: 7D of 9
-Agent: CEXE
+Agent: CEXE (cli-claude-executor-001)
+Terminal: PowerShell-Terminal-2
+Branch: claude/impl-migration-test
+Environment: Windows PowerShell at C:\Development\perplex
 "
 
 git push
 ```
 
-### 5. Announce
-```
-[From: CEXE] Implementation complete for spec 000.
+---
 
-Implementation: src/hello.py, tests/test_hello.py
-Tests: PASSING
+### Step 9: Announce Completion
+
+**Print this message:**
+
+```
+[From: CEXE] Implementation complete for spec 000-migration-test.
+
+Implementation:
+- src\hello.py (hello_world function)
+- tests\test_hello.py (test)
+
+Test Results: ✅ PASSING
+
 Status: implementation-complete
 Handoff: Ready for CDIR final validation
 
-CDIR: Please validate implementation against spec success criteria
+CDIR: Please validate implementation against spec success criteria.
+
+Switch to Terminal 1 (CDIR) for final validation.
+```
+
+**PAUSE HERE.** Switch back to Terminal 1 (CDIR).
+
+---
+
+## Part F: CDIR Final Validation (PowerShell Terminal 1)
+
+### Step 1: Pull Implementation
+
+```powershell
+git pull origin claude/impl-migration-test
 ```
 
 ---
 
-## Part F: Final Validation (CDIR, Terminal-1)
+### Step 2: Verify Implementation Files
 
-### 1. Pull Implementation
-```bash
-git pull origin claude/impl-migration-test
+```powershell
+cat src\hello.py
+cat tests\test_hello.py
 ```
 
-### 2. Verify
-```bash
-cat src/hello.py
-cat tests/test_hello.py
-python -c "from src.hello import hello_world; print(hello_world())"
+---
+
+### Step 3: Test Implementation
+
+```powershell
+python -c "import sys; sys.path.insert(0, '.'); from src.hello import hello_world; print('Result:', hello_world())"
 ```
 
-### 3. Check Success Criteria
-Review `specs/000-migration-test/spec.md` success criteria:
-- [✓] All 10 criteria met
+**Expected:** `Result: Hello from CEXE`
 
-### 4. Create Phase Marker
-```bash
-echo "Phase 7 complete: $(date)" > .claude/migration-phase-7-complete.txt
+---
+
+### Step 4: Check All Success Criteria
+
+**Open `specs\000-migration-test\spec.md` and verify:**
+
+```
+1. ✅ CDIR created specification
+2. ✅ CEXE read specification from agent registry
+3. ✅ CEXE created plan.md
+4. ✅ CDIR validated plan.md
+5. ✅ CEXE created tasks.md
+6. ✅ CEXE implemented simple test task
+7. ✅ CDIR validated implementation
+8. ✅ Handoff markers worked correctly
+9. ✅ Agent registry tracked coordination
+10. ✅ Workspace boundaries respected
 ```
 
-### 5. Announce
+**All criteria MET: ✅**
+
+---
+
+### Step 5: Create Phase 7 Completion Marker
+
+```powershell
+"Phase 7 complete: $(Get-Date)" | Set-Content -Path .claude\migration-phase-7-complete.txt
+cat .claude\migration-phase-7-complete.txt
 ```
-[From: CDIR] Phase 7 COMPLETE. Three-agent coordination validated.
+
+---
+
+### Step 6: Final Commit
+
+```powershell
+git add .claude\migration-phase-7-complete.txt
+git commit --no-gpg-sign -m "[CDIR] Phase 7 COMPLETE: Three-agent coordination validated
+
+Test Results: ✅ ALL SUCCESS CRITERIA MET
+
+Validation Summary:
+✅ CDIR created specification (spec.md)
+✅ CEXE read spec from agent registry
+✅ CEXE created technical plan (plan.md)
+✅ CDIR validated plan - APPROVED
+✅ CEXE created tasks (tasks.md)
+✅ CEXE implemented (src\hello.py, tests\test_hello.py)
+✅ All tests passing
+✅ Handoff markers worked correctly
+✅ Agent registry coordinated successfully
+✅ Workspace boundaries respected
+
+CDIR ↔ CEXE Coordination: ✅ SUCCESSFUL
+
+Migration validated. Three-agent architecture operational.
+
+Migration Phase: 7 of 9 (COMPLETE)
+Next: Phase 8 - Production Activation
+
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: claude/impl-migration-test
+Environment: Windows PowerShell at C:\Development\perplex
+"
+
+git push
+```
+
+---
+
+### Step 7: Announce Success
+
+**Print this message:**
+
+```
+[From: CDIR] Phase 7 COMPLETE. Three-agent coordination validated successfully.
+
+Test Specification: specs\000-migration-test\spec.md
+Implementation: src\hello.py, tests\test_hello.py
 
 Test Results:
 ✅ CDIR created specification
 ✅ CEXE created plan
-✅ CDIR validated plan
+✅ CDIR validated plan - APPROVED
 ✅ CEXE created tasks
-✅ CEXE implemented
-✅ Tests passing
-✅ Handoffs worked
+✅ CEXE implemented function + test
+✅ All tests PASSING
+✅ Handoffs worked correctly
 ✅ Agent registry coordinated
 ✅ Workspace boundaries respected
-✅ Migration validated
+✅ Envelope communication used
 
-CDIR and CEXE coordination: SUCCESSFUL
+CDIR ↔ CEXE Coordination: ✅ SUCCESSFUL
+
+Two-Agent Workflow Validated:
+- PowerShell Terminal 1 (CDIR): Designer-Researcher
+- PowerShell Terminal 2 (CEXE): Executor-Validator
+- Coordination via agent registry and handoff markers
+- Clear role boundaries maintained
+
+Migration Status: ✅ VALIDATED
+Three-agent architecture: ✅ OPERATIONAL
 
 Ready for Phase 8: Production Activation
 ```
 
 ---
 
+## Validation Checklist
+
+- [ ] Test specification created by CDIR
+- [ ] CEXE read spec from agent registry
+- [ ] CEXE created plan.md
+- [ ] CDIR validated plan (APPROVED)
+- [ ] CEXE created tasks.md
+- [ ] CEXE implemented hello_world function
+- [ ] CEXE wrote test
+- [ ] Test passed
+- [ ] Handoff markers created and updated
+- [ ] Agent registry tracked coordination
+- [ ] Workspace boundaries respected (no violations)
+- [ ] Both terminals coordinated successfully
+- [ ] Phase 7 marker created
+
+---
+
+## If Validation Fails
+
+**Problem: Can't open Terminal 2**
+- Open new PowerShell window manually
+- Navigate to `C:\Development\perplex`
+- Both terminals can operate independently
+
+**Problem: Python import error**
+- Check Python is available: `python --version`
+- Verify file paths are correct (use `\` not `/`)
+- Add current directory to path: `$env:PYTHONPATH = "."`
+
+**Problem: Agent registry conflicts**
+- Both agents can edit agent-registry.json
+- Use text editor, not concurrent edits
+- Git will merge changes if both push
+
+**Problem: Branch confusion**
+- CDIR: `claude/design-three-agent-config`
+- CEXE: `claude/impl-migration-test`
+- Use `git branch` to check current branch
+
+---
+
+**Prepared by:** web-claude-designer-001
+**For:** cli-claude-director-001 + cli-claude-executor-001
+**Environment:** Windows PowerShell (two terminal windows)
+**Project Path:** C:\Development\perplex
 **Phase:** 7 of 9
 **Next:** Phase 8 - Production Activation
