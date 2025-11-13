@@ -1,1 +1,1 @@
-checkpoint-20251113-003309-methodology-architecture-formalized.md
+checkpoint-20251113-142600-workflow-duplication-fix-complete.md
