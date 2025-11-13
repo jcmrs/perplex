@@ -40,6 +40,94 @@ CDIR (Local Terminal 1) - Primary Designer → CEXE (Local Terminal 2) - Primary
 
 ---
 
+## Environment Context
+
+### Execution Environment
+
+**CRITICAL:** This migration executes in a **Windows PowerShell** environment, not Linux/bash.
+
+**Environment Details:**
+- **OS:** Windows
+- **Shell:** PowerShell (Terminal Windows 1 and 2)
+- **Project Path:** `C:\Development\perplex` (NOT `/home/user/perplex`)
+- **Path Separator:** `\` (NOT `/`)
+- **Git:** Windows git (works identically to Linux git)
+- **Python:** Available as `python` or `py`
+
+**Agent Environments:**
+- **CDIR (cli-claude-director-001):** PowerShell Terminal Window 1 at `C:\Development\perplex`
+- **CEXE (cli-claude-executor-001):** PowerShell Terminal Window 2 at `C:\Development\perplex`
+- **Web (web-claude-designer-001):** Browser-based Linux sandbox at `/home/user/perplex` (standby only)
+
+### Critical Environment Distinctions
+
+**PowerShell Syntax:**
+- Commands: Use PowerShell cmdlets or aliases (`cat`, `ls`, `cd` work as aliases)
+- Paths: Use `\` separator (e.g., `.claude\identity-cli-director.json`)
+- Heredocs: Use `@"..."@ | Set-Content` instead of `cat <<EOF`
+- Variables: `$variable` syntax (PowerShell standard)
+- Date: `Get-Date` instead of `date`
+- Remove: `Remove-Item` instead of `rm -rf`
+
+**Shell Scripts (.sh files):**
+- **Do NOT convert to PowerShell (.ps1)**
+- Edit in text editor (VS Code, Notepad++, etc.)
+- Keep bash syntax (Git Bash runs them automatically)
+- Examples: `.githooks/*`, `tools/*.sh`
+
+**GitHub Workflows (.github/workflows/*.yml):**
+- Edit YAML files in text editor
+- Workflows run on GitHub's **Linux runners** (not Windows)
+- Keep bash syntax inside YAML (workflows execute on Linux)
+- Only local verification commands use PowerShell
+
+**Git Operations:**
+- Git commands work identically: `git add`, `git commit`, `git push`, etc.
+- Use Windows paths in commands: `git add .claude\file.json`
+- Git accepts both `/` and `\`, but prefer `\` for clarity
+
+**JSON/YAML Files:**
+- Cross-platform (no conversion needed)
+- Use portable paths in JSON/YAML: `/` or `\` both work
+- Edit in text editor with validation (VS Code recommended)
+
+### Why This Matters
+
+**Migration prompts were originally written for Linux** (`/home/user/perplex`) **but must execute on Windows** (`C:\Development\perplex`).
+
+**Regeneration:** All 9 phase prompts + README have been regenerated with Windows PowerShell syntax.
+
+**What Changed:**
+- Path references: `/home/user/perplex` → `C:\Development\perplex`
+- Path separators: `/` → `\` in commands
+- Bash commands → PowerShell equivalents
+- Heredocs → PowerShell here-strings
+- Environment clarity: Explicit Windows context throughout
+
+**What Stayed the Same:**
+- Git commands (cross-platform)
+- JSON/YAML structure (portable)
+- .sh script content (bash syntax, Git Bash runs)
+- GitHub workflow content (runs on Linux)
+- Architecture logic (environment-agnostic)
+
+### Dual-Environment Awareness
+
+**CDIR/CEXE work on Windows:**
+- All prompts use PowerShell syntax
+- Path: `C:\Development\perplex`
+- Terminal: PowerShell Terminal Windows 1 and 2
+
+**Web works in browser (if activated):**
+- Linux sandbox environment
+- Path: `/home/user/perplex`
+- Uses bash syntax
+- Git synchronizes between environments
+
+**Coordination:** Git is the bridge. Both environments work with same repository, path differences handled by git.
+
+---
+
 ## Foundation Imperatives Validation
 
 ### 1. Holistic System Thinking ✓
