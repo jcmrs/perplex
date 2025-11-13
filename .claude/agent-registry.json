@@ -33,24 +33,32 @@
       "agent_id": "cli-claude-director-001",
       "display_name": "Claude Code CLI-Director",
       "short_name": "CDIR",
-      "status": "active",
+      "status": "waiting",
       "environment": "local-windows",
       "role": "designer-researcher",
       "identity_file": ".claude/identity-cli-director.json",
       "git_branch": "claude/design-three-agent-config",
       "first_active": "2025-11-13T00:00:00Z",
-      "last_active": "2025-11-13T00:00:00Z",
+      "last_active": "2025-11-13T21:10:00Z",
       "coordination": {
         "message_prefix": "[From: CDIR]",
         "handoff_method": "specification-to-implementation"
       },
       "workspace": {
         "current_work_branch": "claude/design-three-agent-config",
-        "active_specifications": [],
-        "workspace_state": "designing",
-        "current_work": "Workspace coordination update",
-        "next_handoff": null,
-        "pending_handoffs": []
+        "active_specifications": ["000-migration-test"],
+        "workspace_state": "waiting-for-handoff",
+        "current_work": "Created spec 000-migration-test, awaiting CEXE implementation",
+        "next_handoff": "to-cexe-for-implementation",
+        "pending_handoffs": [
+          {
+            "spec_id": "000-migration-test",
+            "target_agent": "cli-claude-executor-001",
+            "handoff_type": "specification-to-plan",
+            "created": "2025-11-13T21:10:00Z",
+            "marker_file": ".claude/handoffs/spec-000-to-cexe.json"
+          }
+        ]
       },
       "terminal": "PowerShell-Terminal-1"
     },
