@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: perplex-validation
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
