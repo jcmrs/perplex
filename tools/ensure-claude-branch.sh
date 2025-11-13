@@ -14,27 +14,20 @@ if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
     echo "AI agents should work on claude/* branches."
     echo ""
 
-    # Detect agent type from identity file
-    AGENT_TYPE="unknown"
-    if [ -f ".claude/identity-web.json" ]; then
-        AGENT_TYPE="web"
-    elif [ -f ".claude/identity-cli.json" ]; then
-        AGENT_TYPE="cli"
-    fi
+    # Detect agent type from identity file (three-agent architecture)
+    AGENT_ID="unknown"
+    AGENT_NAME="Unknown"
+    BRANCH_PREFIX="claude"
 
-    # Suggest appropriate branch name
-    if [ "$AGENT_TYPE" == "web" ]; then
-        # Web uses session ID (from user context)
-        echo "For Claude Code Web, create branch like:"
-        echo "  git checkout -b claude/description-sessionid"
-        echo ""
-        echo "Example:"
-        echo "  git checkout -b claude/spec-kit-integration-011CV35RoubgSRMHNVuYa7Si"
-    elif [ "$AGENT_TYPE" == "cli" ]; then
-        # CLI uses timestamp
+    if [ -f ".claude/identity-cli-director.json" ]; then
+        AGENT_ID="cli-claude-director-001"
+        AGENT_NAME="CDIR"
+        BRANCH_PREFIX="claude/design"
         TIMESTAMP=$(date +%s)
-        SUGGESTED_BRANCH="claude/cli-spec-kit-work-$TIMESTAMP"
-        echo "For Claude Code CLI, I can create a branch for you:"
+        SUGGESTED_BRANCH="claude/design-work-$TIMESTAMP"
+
+        echo "Agent: CLI-Director (CDIR)"
+        echo "CDIR should use claude/design-* branches"
         echo ""
         echo "Suggested branch: $SUGGESTED_BRANCH"
         echo ""
@@ -43,18 +36,46 @@ if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
         if [[ "$CREATE_BRANCH" == "y" || "$CREATE_BRANCH" == "Y" ]]; then
             git checkout -b "$SUGGESTED_BRANCH"
             echo "✅ Created and switched to: $SUGGESTED_BRANCH"
-            echo ""
-            echo "When ready to push:"
-            echo "  git push -u origin $SUGGESTED_BRANCH"
-            echo ""
-            echo "GitHub automation will handle the rest (PR creation, validation, merge)."
             exit 0
         else
-            echo ""
-            echo "Please create a claude/* branch manually:"
-            echo "  git checkout -b claude/cli-description-\$(date +%s)"
+            echo "Please create a claude/design-* branch manually"
             exit 1
         fi
+
+    elif [ -f ".claude/identity-cli-executor.json" ]; then
+        AGENT_ID="cli-claude-executor-001"
+        AGENT_NAME="CEXE"
+        BRANCH_PREFIX="claude/impl"
+        TIMESTAMP=$(date +%s)
+        SUGGESTED_BRANCH="claude/impl-work-$TIMESTAMP"
+
+        echo "Agent: CLI-Executor (CEXE)"
+        echo "CEXE should use claude/impl-* branches"
+        echo ""
+        echo "Suggested branch: $SUGGESTED_BRANCH"
+        echo ""
+        read -p "Create this branch? (y/n): " CREATE_BRANCH
+
+        if [[ "$CREATE_BRANCH" == "y" || "$CREATE_BRANCH" == "Y" ]]; then
+            git checkout -b "$SUGGESTED_BRANCH"
+            echo "✅ Created and switched to: $SUGGESTED_BRANCH"
+            exit 0
+        else
+            echo "Please create a claude/impl-* branch manually"
+            exit 1
+        fi
+
+    elif [ -f ".claude/identity-web.json" ]; then
+        AGENT_ID="web-claude-designer-001"
+        AGENT_NAME="Web"
+        BRANCH_PREFIX="claude/web-emergency"
+
+        echo "Agent: Claude Code Web (standby)"
+        echo "Web should use claude/web-emergency-* branches (emergency only)"
+        echo ""
+        echo "Example:"
+        echo "  git checkout -b claude/web-emergency-reason-sessionid"
+
     else
         echo "Create a claude/* branch:"
         echo "  git checkout -b claude/description-$(date +%s)"

@@ -16,6 +16,24 @@ echo ""
 # PART 1: Branch Enforcement (BLOCKING)
 #================================
 
+# Detect which agent is pushing (three-agent architecture)
+AGENT_ID="unknown"
+AGENT_NAME="Unknown"
+
+if [ -f ".claude/identity-cli-director.json" ]; then
+    AGENT_ID="cli-claude-director-001"
+    AGENT_NAME="CDIR"
+elif [ -f ".claude/identity-cli-executor.json" ]; then
+    AGENT_ID="cli-claude-executor-001"
+    AGENT_NAME="CEXE"
+elif [ -f ".claude/identity-web.json" ]; then
+    AGENT_ID="web-claude-designer-001"
+    AGENT_NAME="Web"
+fi
+
+echo "Pre-push: Agent $AGENT_NAME ($AGENT_ID)"
+echo ""
+
 echo "Part 1: Branch Convention Enforcement"
 echo "--------------------------------------"
 echo ""
@@ -32,11 +50,14 @@ while read local_ref local_sha remote_ref remote_sha; do
             echo ""
             echo "AI agents must use claude/* branch convention:"
             echo ""
-            echo "  For Claude Code Web:"
-            echo "    git checkout -b claude/description-sessionid"
+            echo "  For CDIR (Designer-Researcher):"
+            echo "    git checkout -b claude/design-description-\$(date +%s)"
             echo ""
-            echo "  For Claude Code CLI:"
-            echo "    git checkout -b claude/cli-description-\$(date +%s)"
+            echo "  For CEXE (Executor-Validator):"
+            echo "    git checkout -b claude/impl-description-\$(date +%s)"
+            echo ""
+            echo "  For Web (Standby-Emergency):"
+            echo "    git checkout -b claude/web-emergency-reason-sessionid"
             echo ""
             echo "Then push to your branch:"
             echo "  git push -u origin <your-claude-branch>"
@@ -58,8 +79,38 @@ while read local_ref local_sha remote_ref remote_sha; do
             exit 1
         fi
 
-        # Validate claude/* branch naming for AI agents
+        # Validate claude/* branch naming for three-agent architecture
         if [[ "$branch" == claude/* ]]; then
+            # Check if branch pattern matches agent role
+            if [ "$AGENT_ID" = "cli-claude-director-001" ]; then
+                if [[ ! "$branch" =~ ^claude/design- ]]; then
+                    echo "⚠️  WARNING: CDIR should use claude/design-* branches"
+                    echo "   Current branch: $branch"
+                    echo "   Expected: claude/design-*"
+                    echo ""
+                    echo "   Continuing anyway, but consider switching to correct pattern"
+                    echo ""
+                fi
+            elif [ "$AGENT_ID" = "cli-claude-executor-001" ]; then
+                if [[ ! "$branch" =~ ^claude/impl- ]]; then
+                    echo "⚠️  WARNING: CEXE should use claude/impl-* branches"
+                    echo "   Current branch: $branch"
+                    echo "   Expected: claude/impl-*"
+                    echo ""
+                    echo "   Continuing anyway, but consider switching to correct pattern"
+                    echo ""
+                fi
+            elif [ "$AGENT_ID" = "web-claude-designer-001" ]; then
+                if [[ ! "$branch" =~ ^claude/web-emergency- ]]; then
+                    echo "⚠️  WARNING: Web should use claude/web-emergency-* branches"
+                    echo "   Current branch: $branch"
+                    echo "   Expected: claude/web-emergency-*"
+                    echo ""
+                    echo "   Continuing anyway, but consider switching to correct pattern"
+                    echo ""
+                fi
+            fi
+
             echo "✅ Valid claude branch: $branch"
         else
             echo "✅ Pushing to branch: $branch"
