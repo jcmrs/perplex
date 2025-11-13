@@ -45,7 +45,33 @@ foundation:
     - "Integration"
     - "Automation"
 
-  methodology: "Discovery-Driven with Lean Principles"
+  methodologies:
+    architecture: "Two-layer complementary scopes"
+
+    project_level:
+      name: "Discovery-Driven Development with Lean Principles"
+      scope: "Exploration, validation, strategic decisions"
+      active: "Throughout project lifecycle"
+      principles:
+        - "Small experiments, fast learning cycles"
+        - "Decision logs as first-class artifacts"
+        - "Autonomous work within clear boundaries"
+        - "Regular vision alignment checks"
+      reference: "decisions/2025-11-10-foundation-methodology.md"
+
+    implementation_level:
+      name: "Spec-Driven Development with GitHub Spec Kit"
+      scope: "Formalized specifications, structured execution"
+      active: "During implementation phases"
+      principles:
+        - "Living specifications as continuous reference"
+        - "Atomic tasks prevent scope creep"
+        - "Test-driven validation"
+        - "Incremental execution with checkpoints"
+      reference: "decisions/2025-11-12-methodology-architecture.md"
+
+    relationship: "Discovery produces what Spec-Driven consumes; Spec learnings feed Discovery refinement"
+    integration_analysis: "docs/METHODOLOGY_INTEGRATION_ANALYSIS.md"
 
   success_criteria:
     - "AI agent can start any session and understand project state"
