@@ -36,9 +36,23 @@
 
 4. **Follow the checkpoint's reading list** - It tells you what's critical vs optional
 
+5. **Check for active specifications (CLI agents only):**
+   ```bash
+   ls -la specs/*/spec.md 2>/dev/null || echo "No active specs"
+   ls -la .specify/memory/constitution.md 2>/dev/null || echo "Constitution not yet established"
+   ```
+
+   **If specifications exist:**
+   - Review constitution first (`.specify/memory/constitution.md`) to understand project principles
+   - Check active specifications in `specs/NNN-feature-name/spec.md`
+   - Review plans if planning started: `specs/NNN-feature-name/plan.md`
+   - Check tasks if decomposition done: `specs/NNN-feature-name/tasks.md`
+
+   **Why this matters:** Specifications are living documents that guide implementation. If they exist, they're THE authoritative reference for what you're building and why. Ignoring specs means losing strategic alignment.
+
 **Why this matters:** Checkpoints provide just-in-time context loading. Reading them FIRST is orders of magnitude more token-efficient than exploring the codebase blindly. The memory graph maps relationships so you know what to read and what to skip.
 
-**If no checkpoint exists:** This is unusual. Start with @FOUNDATION.md, then @docs/PRODUCT_VISION.md, then @sessions/CURRENT_STATUS.md.
+**If no checkpoint exists:** This is unusual. Start with @FOUNDATION.md, then @docs/PRODUCT_VISION.md, then @sessions/CURRENT_STATUS.md, then check for specs.
 
 ---
 
@@ -210,6 +224,42 @@ Creates checkpoint + memory graph. Use at phase transitions or major milestones.
 ./tools/session-end.sh
 ```
 Runs validation, completeness review, shows summary. Use before ending session.
+
+**Spec-Driven Development (CLI agents only):**
+```bash
+# Establish project principles (one-time)
+/speckit.constitution
+
+# Create feature specification
+/speckit.specify "Feature description"
+
+# Optional: Clarify ambiguities (max 3 questions)
+/speckit.clarify
+
+# Generate technical plan
+/speckit.plan
+
+# Break down into atomic tasks
+/speckit.tasks
+
+# Optional: Validate cross-artifact consistency
+/speckit.analyze
+
+# Execute implementation
+/speckit.implement
+```
+
+**When to use Spec-Driven Development:**
+- Phase 1 implementations (perplex-transformer, perplex-reader)
+- New feature development requiring formal specifications
+- Complex work needing structured decomposition
+- When building something that Web has designed/specified
+
+**When NOT to use Spec-Driven Development:**
+- Discovery phase exploration (ADR-010: Discovery-Driven is project level)
+- Bug fixes or minor changes
+- Infrastructure setup
+- Documentation work
 
 ---
 
