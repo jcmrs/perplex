@@ -1,9 +1,22 @@
 # Phase 8: Production Activation
 
-**Agent:** CDIR
+**Agent:** CLI-Director (CDIR)
 **Prerequisites:** Phase 7 complete (validation passed)
+**Execution Environment:** PowerShell Terminal Window 1
+**OS:** Windows
+**Project Path:** `C:\Development\perplex`
 **Branch:** Merge `claude/design-three-agent-config` to main
-**Duration:** 30-45 min
+**Duration Estimate:** 30-45 minutes
+
+---
+
+## IMPORTANT: Environment Setup
+
+**You are running on Windows with PowerShell.**
+
+**Terminal:** PowerShell Terminal Window 1 (same window used throughout Phases 1-7)
+
+**PowerShell Commands:** All commands are PowerShell unless noted otherwise.
 
 ---
 
@@ -16,22 +29,31 @@ Activate three-agent architecture in production.
 ## Step-by-Step
 
 ### 1. Verify Phase 7 Complete
-```bash
-cat .claude/migration-phase-7-complete.txt
+
+```powershell
+cat .claude\migration-phase-7-complete.txt
 ```
 
-Ensure all validation tests passed.
+Ensure all validation tests passed. Should show timestamp and confirmation.
+
+---
 
 ### 2. Merge Configuration PR
 
-```bash
-# Switch to config branch
+**Switch to config branch:**
+```powershell
 git checkout claude/design-three-agent-config
+```
 
-# Ensure all changes committed
+**Ensure all changes committed:**
+```powershell
 git status
+```
 
-# Push final changes
+Should show clean working tree.
+
+**Push final changes (if any uncommitted):**
+```powershell
 git push
 ```
 
@@ -41,37 +63,65 @@ git push
 - Once passing, PR will auto-merge (auto-merge workflow)
 
 **Or merge manually:**
-```bash
+```powershell
 git checkout main
 git merge claude/design-three-agent-config
 git push origin main
 ```
 
+---
+
 ### 3. Clean Up Test Spec
 
-```bash
+**Switch to main and pull:**
+```powershell
 git checkout main
 git pull origin main
+```
 
-# Remove test spec (was for validation only)
-rm -rf specs/000-migration-test
-rm -f src/hello.py tests/test_hello.py
+**Remove test spec (was for validation only):**
+```powershell
+# Remove test spec directory
+Remove-Item -Path specs\000-migration-test -Recurse -Force -ErrorAction SilentlyContinue
 
+# Remove test implementation files
+Remove-Item -Path src\hello.py -Force -ErrorAction SilentlyContinue
+Remove-Item -Path tests\test_hello.py -Force -ErrorAction SilentlyContinue
+```
+
+**Check what was removed:**
+```powershell
+git status
+```
+
+**Commit cleanup:**
+```powershell
 git add -A
 git commit --no-gpg-sign -m "[CDIR] Clean up migration test artifacts
 
 Removed 000-migration-test spec (validation complete).
+Removed test implementation (src/hello.py, tests/test_hello.py).
 
 Migration Phase: 8A of 9
-Agent: CDIR
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: main
+Environment: Windows PowerShell at C:\Development\perplex
 "
+```
 
+**Push to remote:**
+```powershell
 git push
 ```
 
+---
+
 ### 4. Create ADR-012
 
-Create `decisions/2025-11-13-three-agent-architecture-migration.md` (if not already created):
+Create `decisions\2025-11-13-three-agent-architecture-migration.md` (if not already created).
+
+**Open your text editor and create the file with this content:**
 
 ```markdown
 # ADR-012: Three-Agent Architecture Migration
@@ -172,32 +222,49 @@ All 7 Foundation Imperatives validated: [✓]
 **Validation:** Passed (test spec 000-migration-test)
 ```
 
-Commit ADR:
-```bash
-git add decisions/2025-11-13-three-agent-architecture-migration.md
+**Save the file.**
+
+**Commit ADR:**
+```powershell
+git add decisions\2025-11-13-three-agent-architecture-migration.md
 git commit --no-gpg-sign -m "[CDIR] ADR-012: Three-agent architecture migration
 
 Documents decision rationale, implementation, and consequences.
 
 Migration Phase: 8B of 9
-Agent: CDIR
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: main
+Environment: Windows PowerShell at C:\Development\perplex
 "
+```
 
+**Push to remote:**
+```powershell
 git push
 ```
 
+---
+
 ### 5. Create Production Checkpoint
 
-```bash
-./tools/create-checkpoint.sh "Three-agent architecture migration complete"
+**Option A: Use Automation Script (Recommended)**
+```powershell
+.\tools\create-checkpoint.sh "Three-agent architecture migration complete"
 ```
 
-Or manually:
-```bash
-cat > checkpoints/checkpoint-$(date +%Y%m%d-%H%M%S)-three-agent-migration-complete.md <<EOF
+**Note:** The script is bash, so Git Bash will handle it automatically when you run it.
+
+**Option B: Manual PowerShell Creation**
+
+```powershell
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$checkpointFile = "checkpoints\checkpoint-$timestamp-three-agent-migration-complete.md"
+
+@"
 # Checkpoint: Three-Agent Migration Complete
 
-**Date:** 2025-11-13
+**Date:** $(Get-Date -Format "yyyy-MM-dd")
 **Phase:** Foundation → Production (Three-Agent)
 
 ## Summary
@@ -224,13 +291,13 @@ Project Perplex successfully migrated from two-agent to three-agent architecture
 
 ## Critical Files
 
-1. .claude/identity-cli-director.json
-2. .claude/identity-cli-executor.json
-3. .claude/identity-web.json (standby)
-4. .claude/agent-registry.json (v3.0)
-5. .claude/workspace-coordination.yml (v2.0)
+1. .claude\identity-cli-director.json
+2. .claude\identity-cli-executor.json
+3. .claude\identity-web.json (standby)
+4. .claude\agent-registry.json (v3.0)
+5. .claude\workspace-coordination.yml (v2.0)
 6. CLAUDE.md (three-agent protocols)
-7. docs/THREE_AGENT_MIGRATION_ARCHITECTURE.md
+7. docs\THREE_AGENT_MIGRATION_ARCHITECTURE.md
 
 ## Active Agents
 
@@ -245,51 +312,144 @@ Project Perplex successfully migrated from two-agent to three-agent architecture
 3. Create first real specification with CDIR
 4. Implement with CEXE
 5. Validate coordination in practice
+"@ | Set-Content -Path $checkpointFile -Encoding UTF8
 
-EOF
+Write-Host "Checkpoint created: $checkpointFile"
 ```
+
+**Commit checkpoint:**
+```powershell
+git add checkpoints\*
+git commit --no-gpg-sign -m "[CDIR] Checkpoint: Three-agent migration complete
+
+Production checkpoint documenting successful migration.
+
+Migration Phase: 8C of 9
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: main
+Environment: Windows PowerShell at C:\Development\perplex
+"
+git push
+```
+
+---
 
 ### 6. Update CURRENT_STATUS.md
 
-```bash
-./tools/generate-status.sh
+**Run status generation script:**
+```powershell
+.\tools\generate-status.sh
 ```
 
-Verify CURRENT_STATUS reflects three-agent architecture.
+**Note:** Git Bash will handle the script automatically.
+
+**Verify CURRENT_STATUS reflects three-agent architecture:**
+```powershell
+cat sessions\CURRENT_STATUS.md
+```
+
+Should mention three-agent architecture and updated status.
+
+---
 
 ### 7. Create Session Log
 
-Create `sessions/session-20251113-three-agent-migration.md`:
+**Open your text editor and create `sessions\session-20251113-three-agent-migration.md`:**
 
-Document entire migration:
+Document the entire migration:
 - All 9 phases
 - What changed
 - Validation results
 - ADR reference
 - Lessons learned
 
-```bash
-git add sessions/session-20251113-three-agent-migration.md
-git add sessions/CURRENT_STATUS.md
+**Example structure:**
+
+```markdown
+# Session Log: Three-Agent Architecture Migration
+
+**Date:** 2025-11-13
+**Agent:** CDIR (cli-claude-director-001) + CEXE (cli-claude-executor-001)
+**Environment:** Windows PowerShell (two terminals)
+**Duration:** [calculated from phase start to Phase 8 completion]
+
+## Overview
+
+Successfully migrated Project Perplex from two-agent to three-agent architecture.
+
+## Migration Phases Completed
+
+### Phase 1: CDIR Identity Setup
+- Created identity-cli-director.json
+- Configured Terminal-1 environment
+- [details...]
+
+### Phase 2: Configuration Migration
+- Updated all configuration files
+- Migrated identity files
+- [details...]
+
+[Continue for all 9 phases...]
+
+## Changes Summary
+
+- **Files Modified:** 40+
+- **Subsystems Updated:** 10
+- **ADRs Created:** 1 (ADR-012)
+- **Validation:** Test spec 000-migration-test passed
+
+## Validation Results
+
+[Include Part F validation results from Phase 7...]
+
+## Lessons Learned
+
+[Document any insights, challenges, solutions...]
+
+## Next Steps
+
+- Phase 9: Web handoff
+- Begin production work with three-agent coordination
+- Create first real specification with CDIR
+```
+
+**Save the file.**
+
+**Commit session log and status:**
+```powershell
+git add sessions\session-20251113-three-agent-migration.md
+git add sessions\CURRENT_STATUS.md
 
 git commit --no-gpg-sign -m "[CDIR] Document three-agent migration session
 
 Complete migration log: 9 phases, 40+ files, validation passed.
 
-Migration Phase: 8C of 9
-Agent: CDIR
+Migration Phase: 8D of 9
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: main
+Environment: Windows PowerShell at C:\Development\perplex
 "
+```
 
+**Push to remote:**
+```powershell
 git push
 ```
 
+---
+
 ### 8. Update Agent Registry - Production Status
 
-Edit `.claude/agent-registry.json`:
+**Open `.claude\agent-registry.json` in your text editor.**
 
-**CDIR:**
+**Update CDIR entry:**
 ```json
 {
+  "agent_id": "cli-claude-director-001",
+  "display_name": "Claude Code CLI Director",
+  "short_name": "CDIR",
   "status": "active",
   "workspace": {
     "workspace_state": "operational",
@@ -298,9 +458,12 @@ Edit `.claude/agent-registry.json`:
 }
 ```
 
-**CEXE:**
+**Update CEXE entry:**
 ```json
 {
+  "agent_id": "cli-claude-executor-001",
+  "display_name": "Claude Code CLI Executor",
+  "short_name": "CEXE",
   "status": "active",
   "workspace": {
     "workspace_state": "idle",
@@ -309,9 +472,12 @@ Edit `.claude/agent-registry.json`:
 }
 ```
 
-**Web:**
+**Update Web entry:**
 ```json
 {
+  "agent_id": "web-claude-designer-001",
+  "display_name": "Claude Code Web",
+  "short_name": "Web",
   "status": "standby",
   "workspace": {
     "workspace_state": "standby",
@@ -320,8 +486,11 @@ Edit `.claude/agent-registry.json`:
 }
 ```
 
-```bash
-git add .claude/agent-registry.json
+**Save the file.**
+
+**Commit agent registry:**
+```powershell
+git add .claude\agent-registry.json
 git commit --no-gpg-sign -m "[CDIR] Agent registry: Production status
 
 All agents operational:
@@ -329,17 +498,31 @@ All agents operational:
 - CEXE: Active (awaiting specs)
 - Web: Standby
 
-Migration Phase: 8D of 9
-Agent: CDIR
+Migration Phase: 8E of 9
+Agent: CDIR (cli-claude-director-001)
+Terminal: PowerShell-Terminal-1
+Branch: main
+Environment: Windows PowerShell at C:\Development\perplex
 "
+```
 
+**Push to remote:**
+```powershell
 git push
 ```
 
+---
+
 ### 9. Create Phase Marker
-```bash
-echo "Phase 8 complete: $(date)" > .claude/migration-phase-8-complete.txt
+
+```powershell
+"Phase 8 complete: $(Get-Date)" | Set-Content -Path .claude\migration-phase-8-complete.txt
+cat .claude\migration-phase-8-complete.txt
 ```
+
+Should show timestamp confirmation.
+
+---
 
 ### 10. Announce Production
 
@@ -362,6 +545,11 @@ Architecture:
 Next: Phase 9 - Web handoff (final ceremonial transition)
 
 🎉 Three-agent architecture is LIVE 🎉
+
+Environment: Windows PowerShell at C:\Development\perplex
+Terminal: PowerShell-Terminal-1
+Agent: CDIR (cli-claude-director-001)
+Ready for production work.
 ```
 
 ---
@@ -369,16 +557,65 @@ Next: Phase 9 - Web handoff (final ceremonial transition)
 ## Validation Checklist
 
 - [ ] Configuration PR merged to main
-- [ ] Test artifacts cleaned up
-- [ ] ADR-012 created and committed
-- [ ] Production checkpoint created
-- [ ] CURRENT_STATUS.md updated
-- [ ] Session log documented
-- [ ] Agent registry shows production status
+- [ ] Test artifacts cleaned up (specs\000-migration-test, src\hello.py, tests\test_hello.py)
+- [ ] ADR-012 created and committed (decisions\2025-11-13-three-agent-architecture-migration.md)
+- [ ] Production checkpoint created (checkpoints\checkpoint-YYYYMMDD-HHMMSS-three-agent-migration-complete.md)
+- [ ] CURRENT_STATUS.md updated (sessions\CURRENT_STATUS.md)
+- [ ] Session log documented (sessions\session-20251113-three-agent-migration.md)
+- [ ] Agent registry shows production status (.claude\agent-registry.json)
 - [ ] All changes pushed to main
-- [ ] Phase 8 marker created
+- [ ] Phase 8 marker created (.claude\migration-phase-8-complete.txt)
 
 ---
 
+## If Validation Fails
+
+**Problem: Merge conflicts**
+- Use git to resolve conflicts manually
+- Prioritize three-agent configuration over old two-agent config
+- Ask for help if uncertain
+
+**Problem: Checkpoint script fails**
+- Use manual PowerShell creation (Option B in Step 5)
+- Ensure UTF8 encoding
+- Verify file paths with `\`
+
+**Problem: Status generation script fails**
+- Manually edit sessions\CURRENT_STATUS.md
+- Update date, phase, recent commits
+- Commit manually
+
+**Problem: Missing test artifacts (can't delete)**
+- Check if they exist: `Test-Path specs\000-migration-test`
+- If missing, skip deletion (already clean)
+- Continue to next step
+
+---
+
+## Notes
+
+**About PowerShell:**
+- All commands use `\` for paths
+- Use `Set-Content` instead of `>` for UTF8 encoding
+- `cat` is an alias that works in PowerShell
+- Git commands are identical to bash
+
+**About Git Bash Scripts:**
+- When you run `.\tools\create-checkpoint.sh`, Git Bash handles it
+- Don't convert .sh files to PowerShell
+- Just run them and they work
+
+**About Automation:**
+- GitHub workflows handle PR creation and merge
+- Checkpoint script automates most of checkpoint creation
+- Status script regenerates CURRENT_STATUS.md
+- All tools designed for automation
+
+---
+
+**Prepared by:** web-claude-designer-001
+**For:** cli-claude-director-001
+**Environment:** Windows PowerShell (Terminal Window 1)
+**Project Path:** C:\Development\perplex
 **Phase:** 8 of 9
-**Next:** Phase 9 - Web Handoff & Standby (final transition)
+**Next:** Phase 9 - Web Handoff & Standby
