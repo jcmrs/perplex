@@ -27,18 +27,19 @@
 
 ### Multi-Agent Collaboration Without Coordination
 
-Project Perplex has multiple AI agents working in separate physical environments on the same repository:
+Project Perplex has three AI agents with distinct roles:
 
-| Agent | Environment | Physical Location |
-|-------|-------------|-------------------|
-| **Claude Code Web (Web)** | Browser-based | Sandboxed web environment |
-| **Claude Code CLI (CLI)** | Local Windows | Direct filesystem access |
+| Agent | Environment | Physical Location | Role |
+|-------|-------------|-------------------|------|
+| **CDIR (CLI-Director)** | PowerShell Terminal 1 | Local Windows | Designer-researcher |
+| **CEXE (CLI-Executor)** | PowerShell Terminal 2 | Local Windows | Executor-validator |
+| **Web (Standby)** | Browser-based | Sandboxed web environment | Emergency backup (inactive) |
 
-**Think of it like:** Two people working on the same project, but in different offices, without a clear system for "who's responsible for what."
+**Think of it like:** Two specialists (designer + executor) working on the same project in adjacent offices, with a backup specialist on-call.
 
-### What Went Wrong
+### What Went Wrong (Historical Context)
 
-**Historical evidence:**
+**Original two-agent architecture (Web + CLI):**
 - CLI attempted to push to `main` branch 3 times despite documentation
 - Both agents updated `CURRENT_STATUS.md` simultaneously → merge conflict
 - No visibility into "what is Web working on vs CLI"
@@ -46,6 +47,12 @@ Project Perplex has multiple AI agents working in separate physical environments
 
 **Why documentation alone failed:**
 AI agents under cognitive load forget conventions. Enforcement prevents mistakes, documentation doesn't.
+
+**Evolution to three-agent architecture:**
+- **CDIR** replaced Web as primary designer (local Windows, PowerShell Terminal 1)
+- **CEXE** refined CLI's executor role (local Windows, PowerShell Terminal 2)
+- **Web** transitioned to standby emergency backup (inactive unless needed)
+- Coordination system remains the same, now enforces CDIR ↔ CEXE collaboration
 
 ### User's Strategic Insight
 
@@ -92,7 +99,7 @@ Git Hooks → Enforce boundaries before commit
 
 **Definition:** Formal process for transitioning work between agents.
 
-**Example:** Web creates specification → CLI creates implementation plan
+**Example:** CDIR creates specification → CEXE creates implementation plan
 
 **Components:**
 - **Handoff triggers:** Explicit points where work transitions
@@ -114,9 +121,11 @@ Git Hooks → Enforce boundaries before commit
 
 ## Workspace Boundaries
 
-### Web (Claude Code Web) - Designer-Researcher
+### CDIR (CLI-Director) - Designer-Researcher
 
-**Role:** Design, architecture, specifications, research
+**Role:** Design, architecture, specifications, documentation, requirements
+
+**Environment:** PowerShell Terminal Window 1, Local Windows
 
 **Primary Ownership (Can create/modify/delete):**
 
@@ -126,6 +135,7 @@ requirements/           → Functional and non-functional requirements
 docs/                   → Documentation and guides
 ideas/                  → Idea backlog
 specs/*/spec.md         → Feature specifications (what/why/success)
+.specify/memory/constitution.md → Project constitution
 
 FOUNDATION.md
 README.md
@@ -140,6 +150,7 @@ sessions/               → Session logs (separate files per agent)
 checkpoints/            → Checkpoints (both agents create)
 backlog/                → Backlog items
 .claude/                → Identity and coordination files
+.claude/handoffs/       → Handoff markers
 sessions/CURRENT_STATUS.md
 .claude/agent-registry.json
 ```
@@ -147,24 +158,27 @@ sessions/CURRENT_STATUS.md
 **Read-Only (Can read but not modify):**
 
 ```
-src/                    → Implementation code (CLI owns)
-tests/                  → Test implementation (CLI owns)
-specs/*/plan.md         → Technical plans (CLI owns)
-specs/*/tasks.md        → Task decomposition (CLI owns)
+src/                    → Implementation code (CEXE owns)
+tests/                  → Test implementation (CEXE owns)
+specs/*/plan.md         → Technical plans (CEXE owns)
+specs/*/tasks.md        → Task decomposition (CEXE owns)
+specs/*/implementation/ → Implementation artifacts (CEXE owns)
 ```
 
-**Branch Pattern:** `claude/{description}-{sessionid}`
+**Branch Pattern:** `claude/design-{description}-{timestamp}`
 
-### CLI (Claude Code CLI) - Executor-Validator
+### CEXE (CLI-Executor) - Executor-Validator
 
 **Role:** Implementation, testing, validation, technical planning
 
-**Primary Ownership:**
+**Environment:** PowerShell Terminal Window 2, Local Windows
+
+**Primary Ownership (Can create/modify/delete):**
 
 ```
 src/                    → Implementation code
 tests/                  → Test implementation and execution
-specs/*/plan.md         → Technical implementation plans
+specs/*/plan.md         → Technical implementation plans (how to implement)
 specs/*/tasks.md        → Atomic task decomposition
 specs/*/implementation/ → Per-spec implementation artifacts
 tools/                  → Can add implementation tools
@@ -173,49 +187,54 @@ tools/                  → Can add implementation tools
 .claude/session-state.json
 ```
 
-**Shared Ownership:**
+**Shared Ownership (Both agents can modify):**
 
 ```
-sessions/               → Session logs
-checkpoints/            → Checkpoints
+sessions/               → Session logs (separate files per agent)
+checkpoints/            → Checkpoints (both agents create)
 backlog/                → Backlog items
-.claude/                → Coordination files
+.claude/                → Identity and coordination files
+.claude/handoffs/       → Handoff markers
 sessions/CURRENT_STATUS.md
 .claude/agent-registry.json
 ```
 
-**Read-Only:**
+**Read-Only (Can read but not modify):**
 
 ```
-decisions/              → ADRs (Web owns)
-requirements/           → Requirements (Web owns)
-docs/                   → Documentation (Web owns)
-specs/*/spec.md         → Specifications (Web owns)
+decisions/              → Architecture Decision Records (CDIR owns)
+requirements/           → Requirements (CDIR owns)
+docs/                   → Documentation (CDIR owns)
+ideas/                  → Idea backlog (CDIR owns)
+specs/*/spec.md         → Feature specifications (CDIR owns)
+.specify/memory/constitution.md → Project constitution (CDIR owns)
 
 FOUNDATION.md
 README.md
+CONTRIBUTING.md
 docs/PRODUCT_VISION.md
 ```
 
-**Branch Pattern:** `claude/cli-{description}-{timestamp}`
+**Branch Pattern:** `claude/impl-{description}-{timestamp}`
 
 ### Why These Boundaries?
 
 **Separation of Concerns:**
-- Web focuses on **what** and **why** (specifications, requirements)
-- CLI focuses on **how** (implementation, testing)
+- CDIR focuses on **what** and **why** (specifications, requirements, architecture)
+- CEXE focuses on **how** (implementation, testing, technical planning)
 
 **Spec Kit Integration:**
-- Web creates `spec.md` (requirements, success criteria)
-- CLI creates `plan.md` (technical approach)
-- CLI creates `tasks.md` (atomic decomposition)
-- CLI implements in `src/`
-- Web validates against `spec.md` success criteria
+- CDIR creates `spec.md` (requirements, success criteria) using `/speckit.specify`
+- CEXE creates `plan.md` (technical approach) using `/speckit.plan`
+- CEXE creates `tasks.md` (atomic decomposition) using `/speckit.tasks`
+- CEXE implements in `src/` using `/speckit.implement`
+- CDIR validates against `spec.md` success criteria
 
 **Prevents Common Conflicts:**
-- Both agents can't modify same spec.md simultaneously
+- Both agents can't modify same artifacts simultaneously
 - Clear ownership when things break (who's responsible?)
 - Handoffs formalize "your turn" transitions
+- Spec Kit commands enforced at agent level (CDIR can't run /speckit.implement, CEXE can't run /speckit.specify)
 
 ---
 
@@ -225,23 +244,23 @@ docs/PRODUCT_VISION.md
 
 **Definition:** Explicit points where work transitions between agents.
 
-#### 1. Spec Complete (Web → CLI)
+#### 1. Spec Complete (CDIR → CEXE)
 
-**Trigger:** Web finishes creating specification
+**Trigger:** CDIR finishes creating specification
 
 **Artifact:** `specs/NNN-feature-name/spec.md`
 
 **Validation Criteria:**
 - [ ] spec.md exists and is complete
 - [ ] Success criteria defined
-- [ ] Web marks spec as ready in agent registry
+- [ ] CDIR marks spec as ready in agent registry
 
-**Next Action:** CLI creates plan.md (how to implement)
+**Next Action:** CEXE creates plan.md (how to implement)
 
 **Handoff Process:**
 ```bash
-# Web runs:
-tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
+# CDIR runs:
+tools/agent-handoff.sh --to cexe --artifact specs/001-feature/spec.md
 
 # Creates handoff marker:
 .claude/handoffs/001-spec-to-plan.json
@@ -250,40 +269,40 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 {
   "cli-claude-executor-001": {
     "next_work": "Create plan.md for specs/001-feature",
-    "handoff_from": "web-claude-designer-001",
+    "handoff_from": "cli-claude-director-001",
     "handoff_artifact": "specs/001-feature/spec.md",
     "handoff_timestamp": "2025-11-13T12:00:00Z"
   }
 }
 ```
 
-#### 2. Plan Complete (CLI → Web)
+#### 2. Plan Complete (CEXE → CDIR)
 
-**Trigger:** CLI finishes technical plan
+**Trigger:** CEXE finishes technical plan
 
 **Artifact:** `specs/NNN-feature-name/plan.md`
 
 **Validation Criteria:**
 - [ ] plan.md exists and is complete
 - [ ] Architecture decisions documented
-- [ ] CLI marks plan as ready
+- [ ] CEXE marks plan as ready
 
-**Next Action:** Web validates plan aligns with spec.md
+**Next Action:** CDIR validates plan aligns with spec.md
 
-#### 3. Plan Validated (Web → CLI)
+#### 3. Plan Validated (CDIR → CEXE)
 
-**Trigger:** Web confirms plan aligns with specification
+**Trigger:** CDIR confirms plan aligns with specification
 
 **Artifact:** `specs/NNN-feature-name/plan.md`
 
 **Validation Criteria:**
-- [ ] Web reviewed plan.md
+- [ ] CDIR reviewed plan.md
 - [ ] Alignment confirmed or adjustments made
-- [ ] Web marks plan as validated
+- [ ] CDIR marks plan as validated
 
-**Next Action:** CLI creates tasks.md
+**Next Action:** CEXE creates tasks.md
 
-#### 4. Tasks Complete (CLI → CLI)
+#### 4. Tasks Complete (CEXE → CEXE)
 
 **Trigger:** Task decomposition ready for execution
 
@@ -292,11 +311,11 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 **Validation Criteria:**
 - [ ] tasks.md exists with atomic tasks
 - [ ] Dependencies mapped
-- [ ] CLI marks tasks as ready
+- [ ] CEXE marks tasks as ready
 
-**Next Action:** CLI begins implementation
+**Next Action:** CEXE begins implementation
 
-#### 5. Implementation Complete (CLI → Web)
+#### 5. Implementation Complete (CEXE → CDIR)
 
 **Trigger:** Implementation complete with passing tests
 
@@ -305,19 +324,19 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 **Validation Criteria:**
 - [ ] All tasks in tasks.md completed
 - [ ] Tests passing
-- [ ] CLI marks implementation complete
+- [ ] CEXE marks implementation complete
 
-**Next Action:** Web validates against spec.md success criteria
+**Next Action:** CDIR validates against spec.md success criteria
 
-#### 6. Validation Complete (Web → Both)
+#### 6. Validation Complete (CDIR → Both)
 
-**Trigger:** Web confirms implementation meets specification
+**Trigger:** CDIR confirms implementation meets specification
 
 **Artifact:** `specs/NNN-feature-name/`
 
 **Validation Criteria:**
 - [ ] Success criteria from spec.md met
-- [ ] Web marks specification as complete
+- [ ] CDIR marks specification as complete
 - [ ] ADR created if architectural decisions made
 
 **Next Action:** Stage complete, proceed to next stage
@@ -332,7 +351,7 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 
 **Example:**
 ```
-[Web] Update CURRENT_STATUS after completing spec.md for transformer
+[CDIR] Update CURRENT_STATUS after completing spec.md for transformer
 ```
 
 **Resolution:** Git history shows order, commit messages explain why
@@ -341,17 +360,17 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 
 **Situation:** Both agents working on different features simultaneously
 
-**Rule:** Use separate feature branches, coordinate via user
+**Rule:** Use separate feature branches, coordinate via agent registry
 
 **Example:**
-- Web on `claude/spec-transformer-sessionA`
-- CLI on `claude/cli-impl-reader-timestampB`
+- CDIR on `claude/design-transformer-sessionA`
+- CEXE on `claude/impl-reader-timestampB`
 
 **Resolution:** Agent registry shows active branches, GitHub automation merges in order
 
 #### Ownership Dispute
 
-**Situation:** Unclear if Web or CLI should create a file
+**Situation:** Unclear if CDIR or CEXE should create a file
 
 **Rule:** Workspace manifest is source of truth, update if incorrect
 
@@ -363,17 +382,17 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 
 #### Handoff Timing
 
-**Situation:** Web completes spec while CLI unavailable (session limit)
+**Situation:** CDIR completes spec while CEXE unavailable (session limit)
 
 **Rule:** Handoff marker persists until next agent acknowledges
 
 **Process:**
-1. Web creates handoff marker: `.claude/handoffs/001-spec-to-plan.json`
-2. Web updates agent registry
-3. Web commits and pushes
-4. CLI starts new session (later)
-5. CLI runs: `tools/agent-check-registry.sh`
-6. CLI sees handoff marker, knows what to work on
+1. CDIR creates handoff marker: `.claude/handoffs/001-spec-to-plan.json`
+2. CDIR updates agent registry
+3. CDIR commits and pushes
+4. CEXE starts new session (later)
+5. CEXE runs: `tools/agent-check-registry.sh`
+6. CEXE sees handoff marker, knows what to work on
 
 #### Emergency Override
 
@@ -383,9 +402,9 @@ tools/agent-handoff.sh --to cli --artifact specs/001-feature/spec.md
 
 **Example:**
 ```
-[EMERGENCY] CLI fixes critical bug in docs/ (Web-owned)
+[EMERGENCY] CEXE fixes critical bug in docs/ (CDIR-owned)
 
-Reason: Production blocker, Web unavailable, time-sensitive.
+Reason: Production blocker, CDIR unavailable, time-sensitive.
 Follow-up: Create issue to review if boundary should change.
 ```
 
@@ -419,19 +438,19 @@ Follow-up: Create issue to review if boundary should change.
 ```
 ❌ ERROR: Workspace Boundary Violation
 
-You (web-claude-designer-001) tried to modify:
+You (cli-claude-director-001) tried to modify:
   src/perplex_transformer/parser.py
 
 This file is owned by: cli-claude-executor-001
 
 Workspace rules:
-  - Web owns: specs/*/spec.md (specifications)
-  - CLI owns: src/ (implementation)
+  - CDIR owns: specs/*/spec.md (specifications)
+  - CEXE owns: src/ (implementation)
 
 Correct workflow:
-  1. Web creates specification
-  2. Web hands off to CLI
-  3. CLI implements in src/
+  1. CDIR creates specification
+  2. CDIR hands off to CEXE
+  3. CEXE implements in src/
 
 See: docs/AGENT_WORKSPACE_COORDINATION.md
 ```
@@ -448,9 +467,9 @@ See: docs/AGENT_WORKSPACE_COORDINATION.md
 ```json
 {
   "agents": {
-    "web-claude-designer-001": {
+    "cli-claude-director-001": {
       "status": "active",
-      "current_work_branch": "claude/spec-transformer-session123",
+      "current_work_branch": "claude/design-transformer-session123",
       "active_specifications": ["specs/001-perplex-transformer/spec.md"],
       "workspace_state": "designing",
       "last_active": "2025-11-13T12:00:00Z",
@@ -468,7 +487,7 @@ See: docs/AGENT_WORKSPACE_COORDINATION.md
       "last_active": "2025-11-12T20:00:00Z",
       "pending_handoffs": [
         {
-          "from": "web-claude-designer-001",
+          "from": "cli-claude-director-001",
           "artifact": "specs/001-perplex-transformer/spec.md",
           "timestamp": "2025-11-13T12:00:00Z"
         }
@@ -490,17 +509,17 @@ See: docs/AGENT_WORKSPACE_COORDINATION.md
 tools/agent-check-registry.sh
 
 # Output:
-Agent: web-claude-designer-001
+Agent: cli-claude-director-001
 Status: active
 Working on: specs/001-perplex-transformer/spec.md
-Branch: claude/spec-transformer-session123
+Branch: claude/design-transformer-session123
 State: designing
-Next handoff: To CLI (when spec complete)
+Next handoff: To CEXE (when spec complete)
 
 Agent: cli-claude-executor-001
 Status: idle
 Pending handoffs: 1
-  - From Web: specs/001-perplex-transformer/spec.md (12:00 UTC)
+  - From CDIR: specs/001-perplex-transformer/spec.md (12:00 UTC)
 ```
 
 ### Layer 3: Remote Validation (GitHub Actions)
@@ -655,57 +674,57 @@ tools/agent-handoff.sh --to cli --artifact specs/001-perplex-transformer/spec.md
    - Artifact: specs/001-perplex-transformer/spec.md
 
 ✅ Agent registry updated:
-   - Web: State = completed, handoff = sent
-   - CLI: pending_handoffs += 1
+   - CDIR: State = completed, handoff = sent
+   - CEXE: pending_handoffs += 1
 
 💡 Suggested commit message:
-[Web] [HANDOFF] Complete transformer specification → CLI for planning
+[CDIR] [HANDOFF] Complete transformer specification → CEXE for planning
 
 Specification complete with success criteria:
 - What: Parse Perplexity conversations, extract knowledge
 - Why: Enable AI agent access to Perplexity research
 - Success: Working transformer with validated output format
 
-Next: CLI creates plan.md for implementation approach
+Next: CEXE creates plan.md for implementation approach
 ```
 
 **Step 4: Commit & Push**
 ```bash
-# Web commits with suggested message:
+# CDIR commits with suggested message:
 git add specs/001-perplex-transformer/spec.md .claude/
-git commit -m "[Web] [HANDOFF] Complete transformer specification → CLI for planning
+git commit -m "[CDIR] [HANDOFF] Complete transformer specification → CEXE for planning
 
 Specification complete with success criteria:
 - What: Parse Perplexity conversations, extract knowledge
 - Why: Enable AI agent access to Perplexity research
 - Success: Working transformer with validated output format
 
-Next: CLI creates plan.md for implementation approach"
+Next: CEXE creates plan.md for implementation approach"
 
 # Push to feature branch:
-git push -u origin claude/transformer-spec-session123
+git push -u origin claude/design-transformer-session123
 
 # GitHub automation:
 # - Auto-creates PR
 # - Workspace validation workflow runs
-# - Validates: Web only modified spec.md (Web-owned) ✅
+# - Validates: CDIR only modified spec.md (CDIR-owned) ✅
 # - Auto-merge proceeds
 # - Branch deleted after merge
 ```
 
-### Example 2: CLI Receives Handoff and Plans
+### Example 2: CEXE Receives Handoff and Plans
 
-**Scenario:** CLI starts new session, sees pending handoff
+**Scenario:** CEXE starts new session, sees pending handoff
 
 **Step 1: Check Registry**
 ```bash
-# CLI runs on session start (as part of CLAUDE.md protocol):
+# CEXE runs on session start (as part of CLAUDE.md protocol):
 tools/agent-check-registry.sh
 
 # Output:
-📬 Pending Handoffs for CLI (1):
+📬 Pending Handoffs for CEXE (1):
 
-From: Web (web-claude-designer-001)
+From: CDIR (cli-claude-director-001)
 Artifact: specs/001-perplex-transformer/spec.md
 Trigger: spec_complete
 Timestamp: 2025-11-13 12:00 UTC (2 hours ago)
@@ -717,16 +736,16 @@ Status: Ready for planning
 
 **Step 2: Start Planning Work**
 ```bash
-# CLI runs:
+# CEXE runs:
 tools/agent-start-work.sh --artifact specs/001-perplex-transformer/plan.md --type plan
 
 # Output:
-✅ Agent identified: cli-claude-executor-001 (CLI)
-✅ Artifact type: plan (CLI-owned)
+✅ Agent identified: cli-claude-executor-001 (CEXE)
+✅ Artifact type: plan (CEXE-owned)
 ✅ Handoff acknowledged: spec.md → plan.md
 ✅ Agent registry updated
 📋 Current state:
-   - Branch: claude/cli-transformer-plan-1731502800
+   - Branch: claude/impl-transformer-plan-1731502800
    - Working on: specs/001-perplex-transformer/plan.md
    - State: planning
    - Spec reference: specs/001-perplex-transformer/spec.md
@@ -737,49 +756,49 @@ tools/agent-start-work.sh --artifact specs/001-perplex-transformer/plan.md --typ
 
 **Step 3: Create Plan**
 ```
-[CLI] Read specs/001-perplex-transformer/spec.md
-[CLI] Use /speckit.plan to create technical plan
-[CLI] Document: Architecture, dependencies, technical approach
+[CEXE] Read specs/001-perplex-transformer/spec.md
+[CEXE] Use /speckit.plan to create technical plan
+[CEXE] Document: Architecture, dependencies, technical approach
 ```
 
-**Step 4: Handoff to Web for Validation**
+**Step 4: Handoff to CDIR for Validation**
 ```bash
-# CLI completes plan.md, hands back to Web:
-tools/agent-handoff.sh --to web --artifact specs/001-perplex-transformer/plan.md
+# CEXE completes plan.md, hands back to CDIR:
+tools/agent-handoff.sh --to cdir --artifact specs/001-perplex-transformer/plan.md
 
 # Output:
 ✅ Handoff validation passed:
    - plan.md exists and complete
    - Architecture decisions documented
-   - CLI marked as ready
+   - CEXE marked as ready
 
 ✅ Handoff marker created:
    - File: .claude/handoffs/20251113140000-plan-to-validation.json
    - From: cli-claude-executor-001
-   - To: web-claude-designer-001
+   - To: cli-claude-director-001
    - Artifact: specs/001-perplex-transformer/plan.md
    - Type: validation_request
 
 💡 Suggested commit message:
-[CLI] [HANDOFF] Complete transformer plan → Web for validation
+[CEXE] [HANDOFF] Complete transformer plan → CDIR for validation
 
 Technical plan complete:
 - Architecture: Parser → Extractor → Formatter → Graph Entry
 - Dependencies: Python 3.11+, basic-memory, knowledge graph
 - Approach: Event-driven pipeline with validation stages
 
-Next: Web validates plan.md aligns with spec.md requirements
+Next: CDIR validates plan.md aligns with spec.md requirements
 ```
 
 ### Example 3: Boundary Violation Blocked
 
-**Scenario:** CLI accidentally tries to modify spec.md (Web-owned)
+**Scenario:** CEXE accidentally tries to modify spec.md (CDIR-owned)
 
 **Attempted Change:**
 ```
-[CLI working on implementation]
+[CEXE working on implementation]
 "Hmm, this spec.md requirement is unclear, let me clarify it..."
-[CLI edits specs/001-perplex-transformer/spec.md]
+[CEXE edits specs/001-perplex-transformer/spec.md]
 ```
 
 **Pre-Commit Hook Blocks:**

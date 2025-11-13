@@ -34,8 +34,9 @@ Perplex aims to solve a common problem in AI-assisted development: the friction 
 - **2025-11-13:** Multi-agent workspace coordination with enforcement (ADR-011)
 
 **Active Agents:**
-- **Claude Code Web** (Designer-Researcher) - Specifications, ADRs, documentation
-- **Claude Code CLI** (Executor-Validator) - Implementation, testing, technical planning
+- **CDIR (CLI-Director)** - Primary designer (PowerShell Terminal 1): Specifications, ADRs, documentation
+- **CEXE (CLI-Executor)** - Primary executor (PowerShell Terminal 2): Implementation, testing, validation
+- **Web (Standby)** - Emergency backup (browser-based, inactive)
 
 See [`sessions/CURRENT_STATUS.md`](sessions/CURRENT_STATUS.md) for latest state.
 
@@ -157,21 +158,32 @@ perplex/
 
 ## 🤝 Multi-Agent Coordination (2025-11-13)
 
-Project Perplex uses **multiple AI agents** collaborating on the same repository with enforced workspace boundaries.
+Project Perplex uses **three AI agents** with distinct roles collaborating on the same repository with enforced workspace boundaries.
 
 ### Active Agents
 
-**Claude Code Web (Designer-Researcher):**
-- Environment: Browser-based, sandboxed
-- Role: Design, architecture, specifications, documentation
-- Owns: `decisions/`, `docs/`, `specs/*/spec.md`
-- Branch pattern: `claude/*`
+**CDIR (CLI-Director) - Primary Designer:**
+- **Environment:** PowerShell Terminal Window 1, Local Windows
+- **Agent ID:** cli-claude-director-001
+- **Role:** Designer-researcher
+- **Responsibilities:** Create specifications, ADRs, documentation, requirements
+- **Branch Pattern:** `claude/design-*`
+- **Workspace:** `decisions/`, `docs/`, `requirements/`, `ideas/`, `specs/*/spec.md`
 
-**Claude Code CLI (Executor-Validator):**
-- Environment: Local Windows, full system access
-- Role: Implementation, testing, technical planning
-- Owns: `src/`, `tests/`, `specs/*/plan.md`, `specs/*/tasks.md`
-- Branch pattern: `claude/cli-*`
+**CEXE (CLI-Executor) - Primary Executor:**
+- **Environment:** PowerShell Terminal Window 2, Local Windows
+- **Agent ID:** cli-claude-executor-001
+- **Role:** Executor-validator
+- **Responsibilities:** Implement features, write tests, validate implementations
+- **Branch Pattern:** `claude/impl-*`
+- **Workspace:** `src/`, `tests/`, `specs/*/plan.md`, `specs/*/tasks.md`
+
+**Web (Standby) - Emergency Backup:**
+- **Environment:** Browser-based, limited access
+- **Agent ID:** web-claude-designer-001
+- **Status:** Inactive (standby)
+- **Activation:** Manual, only if CDIR unavailable >24 hours
+- **Responsibilities:** Emergency backup designer, research support when requested
 
 ### Coordination System
 

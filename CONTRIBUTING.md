@@ -67,26 +67,47 @@ See [`FOUNDATION.md`](FOUNDATION.md) for detailed explanations.
 
 ### Multi-Agent Coordination (2025-11-13)
 
-Project Perplex uses **multiple AI agents** with enforced workspace boundaries:
+Project Perplex uses **three AI agents** with distinct roles and enforced workspace boundaries:
 
 **Active Agents:**
-- **Claude Code Web (Designer-Researcher):** Specifications, ADRs, documentation
-- **Claude Code CLI (Executor-Validator):** Implementation, testing, technical planning
 
-**Workspace Boundaries:**
-- Web owns: `decisions/`, `docs/`, `specs/*/spec.md`
-- CLI owns: `src/`, `tests/`, `specs/*/plan.md`, `specs/*/tasks.md`
-- Shared: `sessions/`, `checkpoints/`, `.claude/agent-registry.json`
+**CDIR (CLI-Director) - Primary Designer:**
+- **Environment:** PowerShell Terminal Window 1, Local Windows
+- **Agent ID:** cli-claude-director-001
+- **Responsibilities:** Specifications, ADRs, documentation, requirements
+- **Branch Pattern:** `claude/design-*`
+- **Workspace:** `decisions/`, `docs/`, `requirements/`, `ideas/`, `specs/*/spec.md`
+
+**CEXE (CLI-Executor) - Primary Executor:**
+- **Environment:** PowerShell Terminal Window 2, Local Windows
+- **Agent ID:** cli-claude-executor-001
+- **Responsibilities:** Implementation, testing, validation, technical planning
+- **Branch Pattern:** `claude/impl-*`
+- **Workspace:** `src/`, `tests/`, `specs/*/plan.md`, `specs/*/tasks.md`
+
+**Web (Standby) - Emergency Backup:**
+- **Environment:** Browser-based, limited access
+- **Agent ID:** web-claude-designer-001
+- **Status:** Inactive (standby)
+- **Activation:** Manual, only if CDIR unavailable >24 hours
+- **Responsibilities:** Emergency backup designer, research support
+
+**Coordination:**
+- CDIR and CEXE collaborate via agent registry (`.claude/agent-registry.json`)
+- CDIR creates specifications → CEXE implements → CDIR validates
+- Web remains inactive unless emergency activation needed
 
 **Enforcement:**
 - Pre-commit hooks validate workspace boundaries (BLOCKS violations)
 - GitHub Actions validates PRs
-- Agent coordination scripts formalize handoffs
+- Agent coordination scripts formalize handoffs (`tools/agent-handoff.sh`)
 
 **As a contributor:**
 - Respect workspace boundaries when contributing
 - Use `tools/validate-workspace-boundaries.sh --file <path>` to check ownership
 - See [Agent Workspace Coordination Guide](docs/AGENT_WORKSPACE_COORDINATION.md)
+- When working with CDIR: focus on design artifacts (specs, ADRs, docs)
+- When working with CEXE: focus on implementation artifacts (src, tests, plans)
 
 ---
 
@@ -126,10 +147,11 @@ Project Perplex uses **multiple AI agents** with enforced workspace boundaries:
 ```bash
 # Create feature branch
 # For AI agents:
-#   Web: claude/feature-description-SESSION_ID
-#   CLI: claude/cli-feature-description-SESSION_ID
+#   CDIR: claude/design-feature-description-TIMESTAMP
+#   CEXE: claude/impl-feature-description-TIMESTAMP
+#   Web: claude/web-emergency-reason-sessionid (emergency only)
 # For humans: your-name/feature-description
-git checkout -b your-name/feature-description-SESSION_ID
+git checkout -b your-name/feature-description
 
 # Make changes
 # Commit frequently

@@ -7,6 +7,16 @@ Everything lives here. Version controlled. Persistent. Accessible.
 
 Project Perplex aims to bridge local AI development tools (Claude Code, Gemini CLI) with Perplexity AI's research capabilities, enabling seamless collaboration without manual context-switching.
 
+## AI Development Team
+
+**Three-Agent Architecture:**
+
+- **CDIR (CLI-Director):** Primary designer, local Windows environment (PowerShell Terminal 1)
+- **CEXE (CLI-Executor):** Primary executor, local Windows environment (PowerShell Terminal 2)
+- **Web:** Standby emergency backup, browser-based (inactive unless needed)
+
+**Coordination:** Clear workspace boundaries, handoff procedures, envelope communication.
+
 ## Foundation Imperatives
 
 These are not guidelines - they are non-negotiable constraints that shape every decision.
@@ -88,6 +98,30 @@ These are not guidelines - they are non-negotiable constraints that shape every 
 - **Scope:** Formalize validated ideas, structure execution
 - **Active:** When implementing what discovery validated
 - **Principles:** Living specifications, atomic tasks, continuous reference, test-driven validation
+
+**Agent Responsibilities:**
+
+**CDIR executes:**
+- `/speckit.constitution` - Establish project principles
+- `/speckit.specify` - Create feature specifications
+- `/speckit.clarify` - Clarify ambiguities
+- `/speckit.analyze` - Cross-artifact validation
+- `/speckit.checklist` - Quality validation
+
+**CEXE executes:**
+- `/speckit.plan` - Generate technical plans from specs
+- `/speckit.tasks` - Decompose into atomic tasks
+- `/speckit.implement` - Execute implementation
+- `/speckit.analyze` - Cross-artifact validation
+- `/speckit.checklist` - Quality validation
+
+**Coordination Pattern:**
+1. CDIR creates spec → handoff to CEXE
+2. CEXE creates plan → handoff to CDIR for validation
+3. CDIR validates plan → handoff back to CEXE
+4. CEXE implements → handoff to CDIR for final validation
+
+**Handoff mechanism:** Agent registry (`.claude\agent-registry.json`) + optional handoff markers
 
 **Relationship:** Complementary scopes, not sequential phases
 - Discovery produces what Spec-Driven consumes (foundation, constraints, validated "what to build")
