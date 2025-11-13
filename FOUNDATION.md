@@ -77,17 +77,31 @@ These are not guidelines - they are non-negotiable constraints that shape every 
 
 ### 4. Proper Product Management & Development Methodologies
 
-**Current Methodology:** Discovery-Driven with Lean Principles
-- Small experiments, fast learning cycles
-- Decision logs as first-class artifacts
-- Autonomous work within clear boundaries
-- Regular vision alignment checks
+**Methodology Architecture:** Two complementary layers operating at different scopes
+
+**Project Level - Discovery-Driven Development with Lean Principles** (ADR-001)
+- **Scope:** Exploration, validation, strategic decisions
+- **Active:** Throughout entire project lifecycle
+- **Principles:** Small experiments, fast learning cycles, decision logs, autonomous work, vision alignment
+
+**Implementation Level - Spec-Driven Development with GitHub Spec Kit** (ADR-010)
+- **Scope:** Formalize validated ideas, structure execution
+- **Active:** When implementing what discovery validated
+- **Principles:** Living specifications, atomic tasks, continuous reference, test-driven validation
+
+**Relationship:** Complementary scopes, not sequential phases
+- Discovery produces what Spec-Driven consumes (foundation, constraints, validated "what to build")
+- Spec-Driven learnings feed back to Discovery refinement
+- Both active simultaneously during implementation (specs update as we learn)
 
 **Enforcement:**
 - [ ] Every significant decision logged in `/decisions`
-- [ ] Experiments documented with hypothesis, execution, learnings
+- [ ] Discovery: Experiments documented with hypothesis, execution, learnings
+- [ ] Spec-Driven: Specifications formalize discoveries, plans decompose into atomic tasks
 - [ ] Progress tracked against vision, not just tasks
 - [ ] Retrospectives captured after significant milestones
+
+**Reference:** docs/METHODOLOGY_INTEGRATION_ANALYSIS.md for complete architecture and rationale
 
 ## Success Criteria for Foundation Phase
 

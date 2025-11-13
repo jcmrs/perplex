@@ -10,41 +10,80 @@
 
 ## Executive Context: Why This Matters
 
-**[From: Web]** This is a critical foundation piece we skipped. We got sidetracked by multi-agent coordination (which was important), but now we must return to complete Stage 1 properly.
+**[From: Web]** This is critical foundation work that completes our methodology architecture.
+
+### Methodology Architecture (CRITICAL UNDERSTANDING)
+
+**Project Perplex uses TWO complementary methodologies at different levels** (ADR-010):
+
+**Project Level - Discovery-Driven Development** (ADR-001)
+- **Scope:** Exploration, validation, strategic decisions
+- **Active:** Throughout entire project lifecycle
+- **What it does:** Validates feasibility, makes strategic decisions, adapts to learnings
+- **What it produces:** Foundation, product vision, validated architecture, constraints
+
+**Implementation Level - Spec-Driven Development (Spec Kit)** (ADR-010)
+- **Scope:** Formalize validated ideas, structure execution
+- **Active:** When implementing what discovery validated
+- **What it does:** Prevents "losing sight" during coding via living specifications
+- **What it consumes:** Everything Discovery-Driven produced
+
+**Relationship:** NOT sequential phases - complementary scopes
+- Discovery produces what Spec-Driven needs (constitution, constraints, validated "what to build")
+- Spec-Driven learnings feed back to Discovery refinement
+- Both active simultaneously during implementation
+
+**Reference:**
+- ADR-010: decisions/2025-11-12-methodology-architecture.md
+- Analysis: docs/METHODOLOGY_INTEGRATION_ANALYSIS.md
+- Config: config/project.yml (methodologies section)
 
 ### What We're Really Doing
 
-**NOT just installing a tool.** We're integrating Spec-Driven Development (SDD) methodology into Project Perplex's foundation.
+**NOT replacing our methodology.** We're adding the **implementation level** to our **Discovery-Driven project**.
 
-**Spec Kit is HOW we prevent the "losing sight" pattern:**
-- Living specifications = continuous reference for AI agents
-- Atomic tasks = prevent scope creep
-- Checkpoints = force course-correction before drift
+**Spec Kit is the "How to Execute" layer WITHIN our Discovery-Driven exploration:**
+- Living specifications = continuous reference (prevent losing sight)
+- Atomic tasks = prevent scope creep during implementation
+- Formal plans = structure execution of validated ideas
 - Test-driven validation = AI self-trust
+
+**Discovery-Driven built Spec Kit's foundation:**
+- Constitution = FOUNDATION.md ✓
+- Project memory = /docs, /sessions, /checkpoints ✓
+- User context = PRODUCT_VISION.md ✓
+- Technical preferences = ADRs (tech stack, architecture) ✓
+- Constraints = PROCESS_MEMORY.md ✓
+- Discovery findings = Validation analyses ✓
+
+**User's strategic insight:** "What we have been doing is preparing the context Spec Kit needs."
+
+**Validated:** Complete alignment. We've built exactly what Spec Kit requires to generate effective specifications.
 
 ### The Bigger Picture
 
 **Project Perplex Mission:**
 Bridge local AI tools (Claude Code, Gemini CLI) with Perplexity AI research capabilities.
 
-**Stage 1 (Current):**
-Establish stable foundation before any coding:
-1. ✅ Methodology chosen: Spec-Driven Development with GitHub Spec Kit
-2. ✅ Technology stack: Python 3.11 + uv
-3. ✅ Memory layer: basic-memory MCP server (project isolation working)
-4. ✅ Multi-agent coordination: Identity management operational
-5. ❌ **Spec Kit integration: SKIPPED (we're fixing this now)**
-6. ⏳ Phase 1 specifications: BLOCKED (needs Spec Kit)
+**Where We Are (Foundation/Discovery):**
+1. ✅ Discovery-Driven methodology established (ADR-001)
+2. ✅ Technology stack validated (Python 3.11 + uv, MCP, basic-memory)
+3. ✅ Memory layer operational (basic-memory with project isolation)
+4. ✅ Multi-agent coordination working (identity management)
+5. ✅ Methodology architecture formalized (ADR-010 - two-layer complementary)
+6. ❌ **Spec Kit tool integration: PENDING (we're doing this now)**
+7. ⏳ Phase 1 specifications: BLOCKED (needs Spec Kit to formalize discoveries)
 
-**Why we skipped this:**
-- Multi-agent identity confusion took priority
-- Process discipline lapse during coordination work
-- Lost focus on Stage 1 deliverables checklist
+**Why now:**
+- Discovery validated Stage 1 architecture (we know WHAT to build)
+- Foundation complete (constitution, constraints, context ready)
+- Ready to formalize discoveries into specifications
+- Spec Kit inherits our foundation (not starting from scratch)
 
-**Why we're doing this now:**
-- Can't write Phase 1 specifications without Spec Kit methodology
-- Foundation incomplete without development framework
-- Discovery phase work premature without stable foundation
+**What changes:**
+- Discovery-Driven continues (still exploring, still validating)
+- Spec-Driven added (structure for implementation execution)
+- Both work together (Discovery → Spec → Implementation learnings → Discovery)
 
 ---
 
@@ -89,6 +128,13 @@ Before proceeding, understand how Spec Kit aligns with our non-negotiable princi
 ## Spec-Driven Development (SDD) Methodology
 
 **You must understand this methodology, not just install the tool.**
+
+**Official Documentation:**
+- **GitHub Repository:** https://github.com/github/spec-kit
+- **DeepWiki Documentation:** https://deepwiki.com/github/spec-kit
+- **Blog Post:** https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/
+
+**Recommendation:** Download/clone Spec Kit documentation locally for offline reference and add to repository at `docs/external/spec-kit/` for consistency between Web and CLI agents.
 
 ### Four Phases
 
