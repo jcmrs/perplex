@@ -125,6 +125,34 @@ jobs:
             echo "create_release=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Detect agent from PR branch (if applicable)
+        id: detect-agent
+        if: github.event_name == 'pull_request'
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          echo "Branch: $BRANCH_NAME"
+
+          if [[ "$BRANCH_NAME" =~ ^claude/design- ]]; then
+            AGENT_ID="cli-claude-director-001"
+            AGENT_NAME="CDIR"
+            echo "Agent: CDIR (Designer-Researcher)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/impl- ]]; then
+            AGENT_ID="cli-claude-executor-001"
+            AGENT_NAME="CEXE"
+            echo "Agent: CEXE (Executor-Validator)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/web-emergency- ]]; then
+            AGENT_ID="web-claude-designer-001"
+            AGENT_NAME="Web"
+            echo "Agent: Web (Emergency Standby)"
+          else
+            AGENT_ID="github-actions[bot]"
+            AGENT_NAME="GitHub Actions"
+            echo "Agent: Unknown pattern (default to GitHub Actions)"
+          fi
+
+          echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+
       - name: Create checkpoint
         env:
           CHECKPOINT_NON_INTERACTIVE: 'true'
@@ -136,7 +164,7 @@ jobs:
           CHECKPOINT_CRITICAL_FILES: ${{ steps.params.outputs.critical_files }}
           CHECKPOINT_SKIP_PATTERNS: ${{ steps.params.outputs.skip_patterns }}
           CHECKPOINT_TRIGGER: ${{ steps.params.outputs.trigger }}
-          CHECKPOINT_CREATED_BY: 'github-actions[bot]'
+          CHECKPOINT_CREATED_BY: ${{ steps.detect-agent.outputs.agent_id || 'github-actions[bot]' }}
         run: |
           chmod +x tools/create-checkpoint.sh
           ./tools/create-checkpoint.sh

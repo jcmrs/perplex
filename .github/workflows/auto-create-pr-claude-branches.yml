@@ -1,10 +1,12 @@
 name: Auto-Create PR for Claude Branches
 
-# Trigger when AI agent pushes to claude/* branches
+# Trigger when AI agent pushes to claude/* branches (three-agent architecture)
 on:
   push:
     branches:
-      - 'claude/*'
+      - 'claude/design-**'     # CDIR (CLI-Director) branches
+      - 'claude/impl-**'       # CEXE (CLI-Executor) branches
+      - 'claude/web-emergency-**'  # Web (Emergency) branches
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,6 +48,33 @@ jobs:
             echo "No existing PR found for branch: $BRANCH_NAME"
           fi
 
+      - name: Detect agent from branch name
+        id: detect-agent
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Branch: $BRANCH_NAME"
+
+          if [[ "$BRANCH_NAME" =~ ^claude/design- ]]; then
+            AGENT_NAME="CDIR"
+            AGENT_FULL_NAME="CLI-Director"
+            echo "Agent: CDIR (Designer-Researcher)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/impl- ]]; then
+            AGENT_NAME="CEXE"
+            AGENT_FULL_NAME="CLI-Executor"
+            echo "Agent: CEXE (Executor-Validator)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/web-emergency- ]]; then
+            AGENT_NAME="Web"
+            AGENT_FULL_NAME="Web Emergency"
+            echo "Agent: Web (Emergency Standby)"
+          else
+            AGENT_NAME="Claude"
+            AGENT_FULL_NAME="Claude Agent"
+            echo "Agent: Unknown pattern"
+          fi
+
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+          echo "agent_full_name=$AGENT_FULL_NAME" >> $GITHUB_OUTPUT
+
       - name: Create Pull Request via GitHub API
         if: steps.check_pr.outputs.pr_exists == 'false'
         env:
@@ -53,9 +82,11 @@ jobs:
         run: |
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           COMMIT_MESSAGE=$(git log -1 --pretty=%B "$GITHUB_SHA" || echo "Automated changes")
+          AGENT_NAME="${{ steps.detect-agent.outputs.agent_name }}"
 
-          # Extract title from first line of commit message
-          PR_TITLE=$(echo "$COMMIT_MESSAGE" | head -n1)
+          # Extract title from first line of commit message and add agent prefix
+          COMMIT_TITLE=$(echo "$COMMIT_MESSAGE" | head -n1)
+          PR_TITLE="[$AGENT_NAME] $COMMIT_TITLE"
 
           # Use remaining lines as body, or default message
           PR_BODY=$(echo "$COMMIT_MESSAGE" | tail -n +3)
