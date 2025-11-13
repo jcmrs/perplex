@@ -30,6 +30,23 @@ Git hooks are scripts that run automatically at specific points in the git workf
 
 **Can Skip:** `git commit --no-verify` (not recommended)
 
+### pre-push
+**When:** Before git push executes
+**What:** Two-part enforcement (branch convention + completeness review)
+**Part 1 (BLOCKING):**
+- **BLOCKS** direct pushes to main/master
+- Enforces claude/* branch convention for AI agents
+- Prevents bypassing GitHub automation (PR creation, validation, auto-merge)
+
+**Part 2 (NON-BLOCKING):**
+- Runs completeness review (warnings only)
+- Checks for missing documentation, uncommitted work, etc.
+- Allows push even if issues found (advisory)
+
+**Why:** CLI repeatedly tried to push to main (3 times) despite documentation. Enforcement prevents the mistake.
+
+**Can Skip:** `git push --no-verify` (only for emergencies)
+
 ## Setup
 
 Git hooks are stored in `.githooks/` directory (version controlled).

@@ -39,7 +39,7 @@
 ### Git Hooks (Active)
 - **pre-commit**: Foundation validation (blocks if failing)
 - **commit-msg**: Message quality validation
-- **pre-push**: Completeness review (warning only)
+- **pre-push**: Branch convention enforcement (blocks main pushes) + Completeness review (warning only)
 
 ### Session Management Scripts
 - **tools/session-start.sh**: Automated startup protocol
@@ -49,6 +49,196 @@
 ### Validation & Quality
 - **tools/validate-foundation.sh**: Structure and integrity checks
 - **tools/review-completeness.sh**: Systematic gap detection
+
+---
+
+## CRITICAL: Git Workflow Enforcement
+
+**Real-World Validation of User's Insight**
+
+### The Problem (Proven Third Time)
+
+**CLI repeatedly violated branch conventions:**
+1. First attempt: Tried to push to main
+2. Second attempt: Tried to push to main
+3. Third attempt: Tried to push to main
+
+**Despite:**
+- Documentation exists (THREE_ENVIRONMENT_COORDINATION.md)
+- Instructions provided (use claude/* branches)
+- Previous corrections given
+
+**User's Prediction Validated:** "CLI can't be expected to constantly think of everything under cognitive load"
+
+**This is EXACTLY why we need enforcement, not documentation.**
+
+---
+
+### The Solution: ENFORCE, Don't Document
+
+**Created Two Enforcement Mechanisms:**
+
+#### 1. Pre-Push Git Hook (BLOCKS Invalid Pushes)
+
+**File:** `.git/hooks/pre-push`
+
+**What it does:**
+- **BLOCKS** direct pushes to main/master branches
+- Shows clear error with correct workflow instructions
+- Explains GitHub automation (PR creation, validation, auto-merge)
+- Validates claude/* branch naming for AI agents
+- Provides specific examples for Web vs CLI agents
+
+**Result:** Impossible to accidentally push to main - enforcement prevents the error.
+
+#### 2. Branch Helper Script (MAKES Correct Workflow Easy)
+
+**File:** `tools/ensure-claude-branch.sh`
+
+**What it does:**
+- Detects if AI is on main/master branch
+- Identifies agent type (Web vs CLI) from identity files
+- Suggests proper branch name format:
+  - **Web:** `claude/description-sessionid`
+  - **CLI:** `claude/cli-description-timestamp`
+- Optionally creates branch automatically for CLI
+- Provides clear instructions for pushing
+
+**Usage:**
+```bash
+# CLI runs at session start or before committing work:
+./tools/ensure-claude-branch.sh
+
+# If on main, script offers to create proper branch
+# If on claude/* branch, confirms and continues
+```
+
+**Result:** Making the right thing easy to do.
+
+---
+
+### Why This Matters (Foundation Imperatives)
+
+**Automation Imperative Applied:**
+- Don't rely on AI "remembering" under cognitive load
+- Automate enforcement, not just documentation
+- Make correct behavior the path of least resistance
+
+**AI-First Principle:**
+- AI agents have cognitive limitations (context window, memory)
+- Design systems that work WITH those limitations
+- Enforcement mechanisms support AI autonomy
+
+**Holistic System Thinking:**
+- GitHub has automation → Local needs automation
+- Asymmetry creates failure points
+- Consistent enforcement across environments
+
+---
+
+### Implementation Status
+
+**✅ Implemented:**
+- Pre-push hook created: `.git/hooks/pre-push`
+- Pre-push hook made executable: `chmod +x`
+- Branch helper created: `tools/ensure-claude-branch.sh`
+- Helper made executable: `chmod +x`
+
+**✅ Documented:**
+- This section documents the enforcement
+- Pre-push hook includes usage instructions
+- Helper script provides interactive guidance
+
+**✅ Tested:**
+- Next attempt to push to main will be BLOCKED
+- Clear error message guides to correct workflow
+
+---
+
+### Integration with Workflows
+
+**Session Start (Future Enhancement):**
+```bash
+# tools/session-start.sh should call:
+./tools/ensure-claude-branch.sh
+
+# Ensures AI is on correct branch before starting work
+```
+
+**Before Committing Work:**
+```bash
+# CLI should run:
+./tools/ensure-claude-branch.sh
+
+# Confirms proper branch before making commits
+```
+
+**Pre-Push (Automatic):**
+```bash
+# Git automatically calls .git/hooks/pre-push
+# BLOCKS if pushing to main
+# Enforces claude/* convention
+```
+
+---
+
+### Expected CLI Workflow (Corrected)
+
+**1. Session Start:**
+```bash
+./tools/ensure-claude-branch.sh
+# If on main, creates claude/cli-description-timestamp branch
+```
+
+**2. Do Work:**
+```bash
+# Spec Kit integration, code changes, etc.
+```
+
+**3. Commit Work:**
+```bash
+git add .
+git commit -m "Descriptive message"
+# Pre-commit hook validates
+```
+
+**4. Push to Remote:**
+```bash
+git push -u origin $(git branch --show-current)
+# Pre-push hook enforces claude/* branch
+# GitHub automation creates PR, validates, merges
+```
+
+**5. Result:**
+- ✅ PR auto-created
+- ✅ Validation runs
+- ✅ Auto-merge if passing
+- ✅ Branch deleted after merge
+- ✅ No manual intervention needed
+
+---
+
+### Lessons Learned
+
+**1. Documentation Alone is Insufficient**
+- Documentation exists ≠ Behavior happens
+- AI agents under cognitive load forget conventions
+- Enforcement mechanisms prevent mistakes
+
+**2. User's Non-Technical Insight Was Correct**
+- "CLI can't be expected to constantly think of everything"
+- Strategic observation from non-technical user identified critical gap
+- Technical expertise without user perspective misses systemic issues
+
+**3. GitHub Automation Model Should Apply Locally**
+- What works on GitHub (automation) should work locally
+- Asymmetry between environments creates failure points
+- Consistent enforcement philosophy across all environments
+
+**4. Make Correct Behavior Easy**
+- Pre-push hook BLOCKS incorrect behavior
+- Helper script MAKES correct behavior easy
+- Path of least resistance = correct path
 
 ---
 
