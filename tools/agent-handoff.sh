@@ -81,40 +81,85 @@ if [ -z "$TO_AGENT" ] || [ -z "$ARTIFACT_PATH" ]; then
     usage
 fi
 
-# Normalize to_agent
+# Normalize to_agent (three-agent architecture)
 case "$TO_AGENT" in
+    cdir|CDIR|Cdir)
+        TO_AGENT_ID="cli-claude-director-001"
+        TO_AGENT_NAME="CDIR"
+        ;;
+    cexe|CEXE|Cexe)
+        TO_AGENT_ID="cli-claude-executor-001"
+        TO_AGENT_NAME="CEXE"
+        ;;
     web|Web|WEB)
         TO_AGENT_ID="web-claude-designer-001"
-        TO_AGENT_NAME="Claude Code Web"
+        TO_AGENT_NAME="Web"
         ;;
+    # Legacy support
     cli|CLI|Cli)
         TO_AGENT_ID="cli-claude-executor-001"
-        TO_AGENT_NAME="Claude Code CLI"
+        TO_AGENT_NAME="CEXE"
+        echo "⚠️  Note: 'cli' is now 'cexe' in three-agent architecture"
         ;;
     *)
-        echo "Error: Invalid target agent. Use 'web' or 'cli'"
+        echo "Error: Invalid target agent. Use 'cdir', 'cexe', or 'web'"
         exit 1
         ;;
 esac
 
-# Detect source agent if not provided
+# Detect source agent if not provided (three-agent architecture)
 if [ -z "$FROM_AGENT_ID" ]; then
-    if [ -f "$PROJECT_ROOT/.claude/identity-web.json" ]; then
-        FROM_AGENT_ID="web-claude-designer-001"
-        FROM_AGENT_NAME="Claude Code Web"
-    elif [ -f "$PROJECT_ROOT/.claude/identity-cli.json" ]; then
+    if [ -f "$PROJECT_ROOT/.claude/identity-cli-director.json" ]; then
+        FROM_AGENT_ID="cli-claude-director-001"
+        FROM_AGENT_NAME="CDIR"
+    elif [ -f "$PROJECT_ROOT/.claude/identity-cli-executor.json" ]; then
         FROM_AGENT_ID="cli-claude-executor-001"
-        FROM_AGENT_NAME="Claude Code CLI"
+        FROM_AGENT_NAME="CEXE"
+    elif [ -f "$PROJECT_ROOT/.claude/identity-web.json" ]; then
+        FROM_AGENT_ID="web-claude-designer-001"
+        FROM_AGENT_NAME="Web"
     else
         echo "Error: Cannot detect source agent"
         exit 1
     fi
 else
-    if [ "$FROM_AGENT_ID" = "web-claude-designer-001" ]; then
-        FROM_AGENT_NAME="Claude Code Web"
+    if [ "$FROM_AGENT_ID" = "cli-claude-director-001" ]; then
+        FROM_AGENT_NAME="CDIR"
+    elif [ "$FROM_AGENT_ID" = "cli-claude-executor-001" ]; then
+        FROM_AGENT_NAME="CEXE"
     else
-        FROM_AGENT_NAME="Claude Code CLI"
+        FROM_AGENT_NAME="Web"
     fi
+fi
+
+# Valid handoff patterns for three-agent architecture:
+# CDIR → CEXE (specification complete, ready for planning)
+# CEXE → CDIR (plan complete, needs validation)
+# CDIR → CEXE (plan validated, ready for implementation)
+# CEXE → CDIR (implementation complete, needs validation)
+# CDIR → CDIR (specification refinement)
+# CEXE → CEXE (continued implementation)
+
+VALID_HANDOFFS="CDIR->CEXE CEXE->CDIR CDIR->CDIR CEXE->CEXE"
+
+HANDOFF_TYPE="$FROM_AGENT_NAME->$TO_AGENT_NAME"
+
+if [[ ! " $VALID_HANDOFFS " =~ " $HANDOFF_TYPE " ]]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "❌ Invalid Handoff"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "ERROR: Invalid handoff: $HANDOFF_TYPE"
+    echo ""
+    echo "Valid handoff patterns:"
+    echo "  - CDIR → CEXE (specification to planning/implementation)"
+    echo "  - CEXE → CDIR (plan/implementation to validation)"
+    echo "  - CDIR → CDIR (specification refinement)"
+    echo "  - CEXE → CEXE (continued implementation)"
+    echo ""
+    echo "Note: Web only participates in emergency scenarios"
+    echo ""
+    exit 1
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -122,6 +167,8 @@ echo "🤝 Creating Agent Handoff"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+echo -e "${GREEN}Valid handoff:${NC} $HANDOFF_TYPE"
+echo ""
 echo -e "${BLUE}From:${NC} $FROM_AGENT_NAME ($FROM_AGENT_ID)"
 echo -e "${MAGENTA}To:${NC} $TO_AGENT_NAME ($TO_AGENT_ID)"
 echo -e "${GREEN}Artifact:${NC} $ARTIFACT_PATH"
@@ -193,6 +240,7 @@ cat > "$MARKER_FILE" <<EOF
   "to_agent": "$TO_AGENT_ID",
   "artifact": "$ARTIFACT_PATH",
   "trigger": "$TRIGGER",
+  "handoff_type": "$HANDOFF_TYPE",
   "validation_criteria": [
 $(printf '    "%s"' "${VALIDATION_CRITERIA[0]}")
 $(for criterion in "${VALIDATION_CRITERIA[@]:1}"; do printf ',\n    "%s"' "$criterion"; done)

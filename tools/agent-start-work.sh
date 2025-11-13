@@ -73,14 +73,25 @@ if [ -z "$ARTIFACT_PATH" ] || [ -z "$ARTIFACT_TYPE" ]; then
     usage
 fi
 
-# Detect agent if not provided
+# Detect agent if not provided (three-agent architecture)
 if [ -z "$AGENT_ID" ]; then
-    if [ -f "$PROJECT_ROOT/.claude/identity-web.json" ]; then
-        AGENT_ID="web-claude-designer-001"
-    elif [ -f "$PROJECT_ROOT/.claude/identity-cli.json" ]; then
+    if [ -f "$PROJECT_ROOT/.claude/identity-cli-director.json" ]; then
+        AGENT_ID="cli-claude-director-001"
+        AGENT_NAME="CDIR"
+        BRANCH_PREFIX="claude/design"
+        echo "Agent: CLI-Director (CDIR)"
+    elif [ -f "$PROJECT_ROOT/.claude/identity-cli-executor.json" ]; then
         AGENT_ID="cli-claude-executor-001"
+        AGENT_NAME="CEXE"
+        BRANCH_PREFIX="claude/impl"
+        echo "Agent: CLI-Executor (CEXE)"
+    elif [ -f "$PROJECT_ROOT/.claude/identity-web.json" ]; then
+        AGENT_ID="web-claude-designer-001"
+        AGENT_NAME="Web"
+        BRANCH_PREFIX="claude/web-emergency"
+        echo "Agent: Claude Code Web (standby)"
     else
-        echo "Error: Cannot detect agent. No identity files found."
+        echo "ERROR: No agent identity file found"
         exit 1
     fi
 fi
@@ -90,25 +101,28 @@ echo "🚀 Starting Work on Artifact"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Identify agent
+# Identify agent (three-agent architecture)
 AGENT_NAME=""
 AGENT_ROLE=""
-if [ "$AGENT_ID" = "web-claude-designer-001" ]; then
-    AGENT_NAME="Claude Code Web"
+if [ "$AGENT_ID" = "cli-claude-director-001" ]; then
+    AGENT_NAME="Claude Code CLI-Director (CDIR)"
     AGENT_ROLE="designer-researcher"
 elif [ "$AGENT_ID" = "cli-claude-executor-001" ]; then
-    AGENT_NAME="Claude Code CLI"
+    AGENT_NAME="Claude Code CLI-Executor (CEXE)"
     AGENT_ROLE="executor-validator"
+elif [ "$AGENT_ID" = "web-claude-designer-001" ]; then
+    AGENT_NAME="Claude Code Web"
+    AGENT_ROLE="standby-emergency"
 fi
 
 echo -e "${GREEN}✅ Agent identified:${NC} $AGENT_NAME ($AGENT_ID)"
 echo ""
 
-# Validate artifact type matches agent role
+# Validate artifact type matches agent role (three-agent architecture)
 VALID_TYPE=false
 case "$ARTIFACT_TYPE" in
     specification)
-        if [ "$AGENT_ID" = "web-claude-designer-001" ]; then
+        if [ "$AGENT_ID" = "cli-claude-director-001" ] || [ "$AGENT_ID" = "web-claude-designer-001" ]; then
             VALID_TYPE=true
         fi
         ;;
@@ -125,11 +139,14 @@ if [ "$VALID_TYPE" = false ]; then
     echo "Agent: $AGENT_NAME ($AGENT_ROLE)"
     echo "Artifact type: $ARTIFACT_TYPE"
     echo ""
-    if [ "$AGENT_ID" = "web-claude-designer-001" ]; then
-        echo "Web can work on:"
+    if [ "$AGENT_ID" = "cli-claude-director-001" ]; then
+        echo "CDIR can work on:"
+        echo "  - specification (specs/*/spec.md)"
+    elif [ "$AGENT_ID" = "web-claude-designer-001" ]; then
+        echo "Web can work on (emergency only):"
         echo "  - specification (specs/*/spec.md)"
     else
-        echo "CLI can work on:"
+        echo "CEXE can work on:"
         echo "  - plan (specs/*/plan.md)"
         echo "  - tasks (specs/*/tasks.md)"
         echo "  - implementation (src/)"
@@ -155,14 +172,14 @@ if [ -d "$HANDOFFS_DIR" ]; then
     fi
 fi
 
-# Suggest branch name if not on correct pattern
+# Suggest branch name if not on correct pattern (three-agent architecture)
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 SUGGESTED_BRANCH=""
 
-if [ "$AGENT_ID" = "web-claude-designer-001" ]; then
-    if [[ ! "$CURRENT_BRANCH" =~ ^claude/ ]]; then
-        SUGGESTED_BRANCH="claude/$(basename "$(dirname "$ARTIFACT_PATH")")-$(date +%s)"
-        echo -e "${YELLOW}⚠️  Not on claude/* branch${NC}"
+if [ "$AGENT_ID" = "cli-claude-director-001" ]; then
+    if [[ ! "$CURRENT_BRANCH" =~ ^claude/design- ]]; then
+        SUGGESTED_BRANCH="claude/design-$(basename "$(dirname "$ARTIFACT_PATH")")-$(date +%s)"
+        echo -e "${YELLOW}⚠️  Not on claude/design-* branch${NC}"
         echo "Current branch: $CURRENT_BRANCH"
         echo "Suggested: $SUGGESTED_BRANCH"
         echo ""
@@ -171,9 +188,20 @@ if [ "$AGENT_ID" = "web-claude-designer-001" ]; then
         echo ""
     fi
 elif [ "$AGENT_ID" = "cli-claude-executor-001" ]; then
-    if [[ ! "$CURRENT_BRANCH" =~ ^claude/cli- ]]; then
-        SUGGESTED_BRANCH="claude/cli-$(basename "$(dirname "$ARTIFACT_PATH")")-$(date +%s)"
-        echo -e "${YELLOW}⚠️  Not on claude/cli-* branch${NC}"
+    if [[ ! "$CURRENT_BRANCH" =~ ^claude/impl- ]]; then
+        SUGGESTED_BRANCH="claude/impl-$(basename "$(dirname "$ARTIFACT_PATH")")-$(date +%s)"
+        echo -e "${YELLOW}⚠️  Not on claude/impl-* branch${NC}"
+        echo "Current branch: $CURRENT_BRANCH"
+        echo "Suggested: $SUGGESTED_BRANCH"
+        echo ""
+        echo "Create branch:"
+        echo "  git checkout -b $SUGGESTED_BRANCH"
+        echo ""
+    fi
+elif [ "$AGENT_ID" = "web-claude-designer-001" ]; then
+    if [[ ! "$CURRENT_BRANCH" =~ ^claude/web-emergency- ]]; then
+        SUGGESTED_BRANCH="claude/web-emergency-$(basename "$(dirname "$ARTIFACT_PATH")")-$(date +%s)"
+        echo -e "${YELLOW}⚠️  Not on claude/web-emergency-* branch${NC}"
         echo "Current branch: $CURRENT_BRANCH"
         echo "Suggested: $SUGGESTED_BRANCH"
         echo ""
