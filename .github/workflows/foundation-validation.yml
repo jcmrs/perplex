@@ -6,6 +6,10 @@ on:
   push:
     branches: [ main ]
 
+concurrency:
+  group: perplex-validation
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
