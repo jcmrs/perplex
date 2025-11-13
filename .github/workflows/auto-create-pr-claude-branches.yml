@@ -6,6 +6,10 @@ on:
     branches:
       - 'claude/*'
 
+concurrency:
+  group: perplex-create-pr
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
