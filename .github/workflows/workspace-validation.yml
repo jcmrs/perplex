@@ -1,0 +1,227 @@
+name: Workspace Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-workspace-boundaries:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect agent from branch name
+        id: detect-agent
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Branch: $BRANCH_NAME"
+
+          if [[ "$BRANCH_NAME" =~ ^claude/cli- ]]; then
+            AGENT_ID="cli-claude-executor-001"
+            AGENT_NAME="Claude Code CLI"
+          elif [[ "$BRANCH_NAME" =~ ^claude/ ]]; then
+            AGENT_ID="web-claude-designer-001"
+            AGENT_NAME="Claude Code Web"
+          else
+            AGENT_ID="unknown"
+            AGENT_NAME="Unknown Agent"
+          fi
+
+          echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+
+          echo "Detected agent: $AGENT_NAME ($AGENT_ID)"
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          echo "Getting changed files..."
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "$CHANGED_FILES"
+
+          # Save to file for later processing
+          echo "$CHANGED_FILES" > changed_files.txt
+
+          FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l)
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Validate workspace boundaries
+        id: validate
+        run: |
+          AGENT_ID="${{ steps.detect-agent.outputs.agent_id }}"
+
+          if [ "$AGENT_ID" = "unknown" ]; then
+            echo "⚠️  Cannot validate: Unknown agent (branch doesn't match claude/* or claude/cli-* pattern)"
+            echo "status=warning" >> $GITHUB_OUTPUT
+            echo "message=Branch name doesn't match agent patterns. Manual review required." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Validating workspace boundaries for $AGENT_ID..."
+
+          VIOLATIONS=()
+          VIOLATION_COUNT=0
+
+          while IFS= read -r file; do
+            if [ -z "$file" ]; then
+              continue
+            fi
+
+            echo "Checking: $file"
+
+            # Run validation
+            if ! bash tools/validate-workspace-boundaries.sh --file "$file" --agent "$AGENT_ID" --quiet; then
+              EXIT_CODE=$?
+              if [ $EXIT_CODE -eq 1 ]; then
+                VIOLATIONS+=("$file")
+                VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+                echo "  ❌ Violation: $file"
+              elif [ $EXIT_CODE -eq 2 ]; then
+                echo "  ⚠️  Emergency override: $file"
+              fi
+            else
+              echo "  ✅ OK: $file"
+            fi
+          done < changed_files.txt
+
+          if [ $VIOLATION_COUNT -gt 0 ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "violation_count=$VIOLATION_COUNT" >> $GITHUB_OUTPUT
+
+            # Format violations for comment
+            VIOLATIONS_TEXT=""
+            for file in "${VIOLATIONS[@]}"; do
+              VIOLATIONS_TEXT="$VIOLATIONS_TEXT- \`$file\`\n"
+            done
+            echo "violations<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$VIOLATIONS_TEXT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+            exit 1
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=All files respect workspace boundaries" >> $GITHUB_OUTPUT
+            echo "✅ All files validated successfully"
+          fi
+
+      - name: Comment on PR (violation)
+        if: failure() && steps.validate.outputs.status == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const agentName = '${{ steps.detect-agent.outputs.agent_name }}';
+            const agentId = '${{ steps.detect-agent.outputs.agent_id }}';
+            const violationCount = '${{ steps.validate.outputs.violation_count }}';
+            const violations = `${{ steps.validate.outputs.violations }}`;
+
+            const comment = `## ⚠️ Workspace Boundary Violations
+
+**Agent:** ${agentName} (\`${agentId}\`)
+**Branch:** \`${{ github.head_ref }}\`
+**Violations:** ${violationCount}
+
+### Files Violating Workspace Boundaries
+
+${violations}
+
+### Workspace Rules
+
+**Web (Claude Code Web) owns:**
+- \`decisions/\` - Architecture Decision Records
+- \`docs/\` - Documentation
+- \`specs/*/spec.md\` - Feature specifications
+
+**CLI (Claude Code CLI) owns:**
+- \`src/\` - Implementation code
+- \`tests/\` - Test code
+- \`specs/*/plan.md\`, \`specs/*/tasks.md\` - Technical plans and tasks
+
+**Shared (both can modify):**
+- \`sessions/\` - Session logs
+- \`checkpoints/\` - Checkpoints
+- \`.claude/agent-registry.json\` - Agent coordination
+
+### Resolution
+
+**Option 1: Remove violating files from PR**
+\`\`\`bash
+git restore --staged <file>
+git commit --amend
+git push --force
+\`\`\`
+
+**Option 2: Emergency override (document reason)**
+\`\`\`bash
+git commit --amend -m "[EMERGENCY] Reason for override..."
+git push --force
+\`\`\`
+
+**Option 3: Update workspace manifest if boundaries incorrect**
+Edit \`.claude/workspace-coordination.yml\` in separate PR first.
+
+### More Information
+
+- [Workspace Coordination Docs](../blob/main/docs/AGENT_WORKSPACE_COORDINATION.md)
+- [ADR-011: Agent Workspace Boundaries](../blob/main/decisions/2025-11-13-agent-workspace-coordination.md)
+
+---
+
+*This check ensures agents work within their designated boundaries. See workspace manifest for complete ownership rules.*
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Comment on PR (success)
+        if: success() && steps.validate.outputs.status == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const agentName = '${{ steps.detect-agent.outputs.agent_name }}';
+            const agentId = '${{ steps.detect-agent.outputs.agent_id }}';
+            const fileCount = '${{ steps.changed-files.outputs.file_count }}';
+
+            const comment = `## ✅ Workspace Validation Passed
+
+**Agent:** ${agentName} (\`${agentId}\`)
+**Files checked:** ${fileCount}
+**Status:** All files respect workspace boundaries
+
+---
+
+*Workspace coordination enforces proper agent boundaries. Great work!*
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Set check status
+        if: always()
+        run: |
+          STATUS="${{ steps.validate.outputs.status }}"
+          if [ "$STATUS" = "failure" ]; then
+            echo "::error::Workspace boundary violations detected"
+            exit 1
+          elif [ "$STATUS" = "warning" ]; then
+            echo "::warning::Unable to validate workspace boundaries (unknown agent pattern)"
+            exit 0
+          else
+            echo "::notice::Workspace validation passed"
+            exit 0
+          fi
