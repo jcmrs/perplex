@@ -1,0 +1,44 @@
+{
+  "checkpoint_id": "checkpoint-20251113-003309-methodology-architecture-formalized",
+  "timestamp": "2025-11-13T00:33:09Z",
+  "phase": "foundation",
+  "next_phase": "discovery",
+
+  "critical_files": [
+    {"path": "FOUNDATION.md", "reason": "Updated with methodology architecture", "priority": "critical"},
+    {"path": "config/project.yml", "reason": "Two-layer methodology config", "priority": "critical"},
+    {"path": "decisions/2025-11-12-methodology-architecture.md", "reason": "ADR-010 formal decision", "priority": "critical"},
+    {"path": "docs/METHODOLOGY_INTEGRATION_ANALYSIS.md", "reason": "Complete validation analysis", "priority": "critical"},
+    {"path": "docs/SPEC_KIT_INTEGRATION_PROMPT_CLI.md", "reason": "Ready for CLI handoff", "priority": "critical"}
+  ],
+
+  "active_work": {
+    "focus": "CLI Spec Kit integration, then Phase 1 specifications (perplex-transformer, perplex-reader)",
+    "blockers": [],
+    "next_steps": []
+  },
+
+  "relationships": {
+    "2025-11-10-foundation-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-10-foundation-methodology": {"type": "decision", "status": "active"},
+    "2025-11-11-checkpoint-automation-strategy": {"type": "decision", "status": "active"},
+    "2025-11-11-claude-md-architecture": {"type": "decision", "status": "active"},
+    "2025-11-11-completeness-review-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-11-testing-infrastructure": {"type": "decision", "status": "active"},
+    "2025-11-12-basic-memory-as-stage1-foundation": {"type": "decision", "status": "active"},
+    "2025-11-12-methodology-architecture": {"type": "decision", "status": "active"},
+    "2025-11-12-perplexity-integration-architecture": {"type": "decision", "status": "active"}
+  },
+
+  "skip_for_now": [
+    "*/TEMPLATE.md",
+    "sessions/session-*.md",
+    "examples/*"
+  ],
+
+  "git_state": {
+    "branch": "claude/spec-kit-integration-011CV35RoubgSRMHNVuYa7Si",
+    "last_commit": "4027c88",
+    "last_commit_message": "Revise Spec Kit integration prompt: methodology architecture context"
+  }
+}
