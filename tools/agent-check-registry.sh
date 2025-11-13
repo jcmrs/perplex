@@ -79,8 +79,9 @@ if [ "$WEB_WORK" != "null" ] && [ -n "$WEB_WORK" ]; then
 fi
 
 # Check for pending handoffs for Web
-WEB_PENDING=$(grep -A 20 '"agent_id": "web-claude-designer-001"' "$AGENT_REGISTRY" | grep -A 5 '"pending_handoffs"' | grep -c '"from"' || echo "0")
-if [ "$WEB_PENDING" -gt 0 ]; then
+WEB_PENDING=$(grep -A 20 '"agent_id": "web-claude-designer-001"' "$AGENT_REGISTRY" | grep -A 5 '"pending_handoffs"' | grep -c '"from"' 2>/dev/null || echo "0")
+WEB_PENDING=${WEB_PENDING:-0}  # Ensure it's set to 0 if empty
+if [ "${WEB_PENDING}" -gt 0 ] 2>/dev/null; then
     echo -e "  ${YELLOW}📬 Pending handoffs: $WEB_PENDING${NC}"
 fi
 
@@ -115,8 +116,9 @@ if [ "$CLI_WORK" != "null" ] && [ -n "$CLI_WORK" ]; then
 fi
 
 # Check for pending handoffs for CLI
-CLI_PENDING=$(grep -A 20 '"agent_id": "cli-claude-executor-001"' "$AGENT_REGISTRY" | grep -A 5 '"pending_handoffs"' | grep -c '"from"' || echo "0")
-if [ "$CLI_PENDING" -gt 0 ]; then
+CLI_PENDING=$(grep -A 20 '"agent_id": "cli-claude-executor-001"' "$AGENT_REGISTRY" | grep -A 5 '"pending_handoffs"' | grep -c '"from"' 2>/dev/null || echo "0")
+CLI_PENDING=${CLI_PENDING:-0}  # Ensure it's set to 0 if empty
+if [ "${CLI_PENDING}" -gt 0 ] 2>/dev/null; then
     echo -e "  ${YELLOW}📬 Pending handoffs: $CLI_PENDING${NC}"
 fi
 
@@ -125,7 +127,8 @@ echo ""
 # Check for handoff markers in directory
 if [ -d "$HANDOFFS_DIR" ]; then
     HANDOFF_COUNT=$(find "$HANDOFFS_DIR" -name "*.json" 2>/dev/null | wc -l)
-    if [ "$HANDOFF_COUNT" -gt 0 ]; then
+    HANDOFF_COUNT=${HANDOFF_COUNT:-0}  # Ensure it's set to 0 if empty
+    if [ "${HANDOFF_COUNT}" -gt 0 ] 2>/dev/null; then
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "📨 Active Handoff Markers"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -144,11 +147,11 @@ if [ -n "$CURRENT_AGENT" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
-    if [ "$CURRENT_AGENT" = "web-claude-designer-001" ] && [ "$WEB_PENDING" -gt 0 ]; then
+    if [ "$CURRENT_AGENT" = "web-claude-designer-001" ] && [ "${WEB_PENDING:-0}" -gt 0 ] 2>/dev/null; then
         echo "  You have $WEB_PENDING pending handoff(s)"
         echo "  Run: tools/agent-start-work.sh to acknowledge and begin work"
         echo ""
-    elif [ "$CURRENT_AGENT" = "cli-claude-executor-001" ] && [ "$CLI_PENDING" -gt 0 ]; then
+    elif [ "$CURRENT_AGENT" = "cli-claude-executor-001" ] && [ "${CLI_PENDING:-0}" -gt 0 ] 2>/dev/null; then
         echo "  You have $CLI_PENDING pending handoff(s)"
         echo "  Run: tools/agent-start-work.sh to acknowledge and begin work"
         echo ""
