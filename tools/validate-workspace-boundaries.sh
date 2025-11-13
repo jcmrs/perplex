@@ -170,6 +170,7 @@ check_ownership() {
        [[ "$file" =~ ^checkpoints/ ]] || \
        [[ "$file" =~ ^backlog/ ]] || \
        [[ "$file" =~ ^\.claude/ ]] || \
+       [[ "$file" =~ ^\.github/workflows/ ]] || \
        [[ "$file" == "sessions/CURRENT_STATUS.md" ]] || \
        [[ "$file" == ".claude/agent-registry.json" ]] || \
        [[ "$file" == ".claude/workspace-coordination.yml" ]]; then
