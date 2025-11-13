@@ -356,13 +356,58 @@ else
     issue "README.md not found!"
 fi
 
-# Check CONTRIBUTING.md if it exists
-if [ -f "CONTRIBUTING.md" ]; then
-    ok "CONTRIBUTING.md exists"
-    # Could add staleness check here too if CONTRIBUTING has Last Updated
-else
-    info "CONTRIBUTING.md not found (acceptable if not created yet)"
-fi
+# Function to check master document currency
+check_master_doc() {
+    local doc_path="$1"
+    local doc_name="$2"
+
+    if [ ! -f "$doc_path" ]; then
+        return  # Skip if doesn't exist
+    fi
+
+    # Extract last updated date
+    DOC_DATE=$(grep -E "^\*\*Last Updated:\*\*" "$doc_path" | sed 's/\*\*Last Updated:\*\* //' || echo "")
+
+    if [ -z "$DOC_DATE" ]; then
+        warning "$doc_name missing 'Last Updated' date"
+        info "Add at bottom: **Last Updated:** YYYY-MM-DD"
+        return
+    fi
+
+    # Calculate age in days
+    if [ "$(uname)" = "Darwin" ]; then
+        DOC_TIMESTAMP=$(date -j -f "%Y-%m-%d" "$DOC_DATE" +%s 2>/dev/null || echo "0")
+    else
+        DOC_TIMESTAMP=$(date -d "$DOC_DATE" +%s 2>/dev/null || echo "0")
+    fi
+    CURRENT_TIMESTAMP=$(date +%s)
+
+    if [ "$DOC_TIMESTAMP" -eq 0 ]; then
+        warning "Could not parse $doc_name 'Last Updated' date"
+        return
+    fi
+
+    DOC_AGE_DAYS=$(( (CURRENT_TIMESTAMP - DOC_TIMESTAMP) / 86400 ))
+
+    if [ "$DOC_AGE_DAYS" -gt 7 ]; then
+        warning "$doc_name last updated $DOC_AGE_DAYS days ago"
+
+        # Check commits since last update
+        RECENT_COMMITS=$(git log --since="$DOC_DATE" --oneline 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$RECENT_COMMITS" -gt 5 ]; then
+            warning "$RECENT_COMMITS commits since $doc_name update"
+            info "Likely needs updating - consider reviewing for currency"
+        fi
+    else
+        ok "$doc_name updated recently ($DOC_AGE_DAYS days ago)"
+    fi
+}
+
+# Check all master documents
+check_master_doc "CONTRIBUTING.md" "CONTRIBUTING.md"
+check_master_doc "CHANGELOG.md" "CHANGELOG.md"
+check_master_doc "docs/MILESTONES.md" "docs/MILESTONES.md"
+check_master_doc "docs/BRANCHING_STRATEGY.md" "docs/BRANCHING_STRATEGY.md"
 
 # ============================================
 # SUMMARY

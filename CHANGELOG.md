@@ -37,6 +37,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Testing setup script**: tools/setup-testing.sh for dependency installation
 - **Completeness review enhancements (ITEM-012)**: config/completeness.yml for configuration, scheduled-completeness.yml for weekly health checks, reporting framework, hybrid mode
 - **Checkpoint automation improvements (ITEM-013)**: cleanup-checkpoint-branches.yml for automatic branch cleanup, enhanced documentation with Copilot insights
+- **Multi-agent identity management**: Agent identity files (.claude/identity-web.json, .claude/identity-cli.json) with role definitions
+- **Workspace coordination system**: Four-layer enforcement architecture (local hooks, work tracking, remote validation, handoff automation)
+- **Workspace manifest**: .claude/workspace-coordination.yml defining file ownership boundaries
+- **Agent registry v2.0**: Enhanced agent-registry.json with workspace tracking fields
+- **Agent coordination scripts**: agent-start-work.sh, agent-handoff.sh, agent-check-registry.sh for formalized coordination
+- **Workspace boundary validation**: Pre-commit hook enhancement blocking workspace violations
+- **GitHub Actions workspace validation**: workspace-validation.yml workflow for PR boundary checks
+- **Handoff markers infrastructure**: .claude/handoffs/ directory with handoff protocol
+- **Spec Kit integration**: GitHub Spec Kit for structured development workflow
+- **Methodology architecture**: Two-layer complementary approach (Discovery-Driven + Spec-Driven)
 
 #### Foundation Systems
 - Directory structure with purpose documentation
@@ -50,6 +60,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ADR-003: CLAUDE.md Architecture - Table of Contents Pattern
 - ADR-004: Testing Infrastructure (shellcheck, bats, yamllint)
 - ADR-005: Completeness Review Configuration & Enhanced Automation
+- ADR-006: Checkpoint System Evolution (Design & Implementation)
+- ADR-007: GitHub Actions PR Automation (Auto-Create PR + Auto-Merge workflows)
+- ADR-008: Second Opinion Pattern (External validation for critical architectural decisions)
+- ADR-009: Basic-Memory as Stage 1 Foundation (MCP integration, project isolation)
+- ADR-010: Methodology Architecture (Sequential strategy, Discovery-Driven + Spec-Driven integration)
+- ADR-011: Agent Workspace Coordination (Multi-agent boundaries, four-layer enforcement)
+- ADR-012: Spec Kit Integration & Methodology Architecture (Formalization of two-layer approach)
 
 ### Phase: Discovery (Not Started)
 
@@ -139,5 +156,5 @@ This changelog provides high-level view of project evolution. For detailed techn
 
 ---
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-11-13
 **Current Version:** 0.1.0 (Foundation)

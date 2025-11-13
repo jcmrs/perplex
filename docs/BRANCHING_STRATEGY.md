@@ -1,7 +1,7 @@
 # Git Branching Strategy
 
-**Last Updated:** 2025-11-10
-**Status:** Active
+**Last Updated:** 2025-11-13
+**Status:** Active (Multi-Agent Coordination Operational)
 
 ---
 
@@ -23,13 +23,25 @@ Like a trusted employee filing status reports - work continues, but the trail ex
 **Who commits:** No one directly - only via PR merge
 **Represents:** Production-ready state
 
-### Feature Branches: `claude/feature-name-SESSION_ID`
-**Purpose:** Active development work
-**Naming:** `claude/[description]-[SESSION_ID]`
-**Who commits:** AI agent (Claude)
-**Lifecycle:** Created → Worked → PR → Merged → Deleted
+### Feature Branches: Multi-Agent Patterns
 
-**Example:** `claude/perplex-initial-setup-011CUzxDPZiWB31A6DM5T2Mc`
+**Web Agent (Claude Code Web):**
+- **Pattern:** `claude/[description]-[SESSION_ID]`
+- **Purpose:** Specifications, ADRs, documentation work
+- **Who commits:** Claude Code Web (Designer-Researcher)
+- **Example:** `claude/workspace-coordination-011CV35RoubgSRMHNVuYa7Si`
+
+**CLI Agent (Claude Code CLI):**
+- **Pattern:** `claude/cli-[description]-[SESSION_ID]`
+- **Purpose:** Implementation, testing, technical planning
+- **Who commits:** Claude Code CLI (Executor-Validator)
+- **Example:** `claude/cli-perplex-transformer-011CV35RoubgSRMHNVuYa7Si`
+
+**Lifecycle:** Created → Worked → PR (auto-created) → Validated → Merged (auto) → Deleted
+
+**Branch detection:**
+- `claude/*` → Web agent (GitHub Actions)
+- `claude/cli-*` → CLI agent (GitHub Actions)
 
 ### Other Branch Patterns (Future)
 - `gemini/[description]-[SESSION_ID]` - For Gemini CLI work
@@ -63,15 +75,27 @@ git push -u origin claude/feature-description-SESSION_ID
 ```
 
 ### 4. Pull Request Creation
+
+**Autonomous (2025-11-11 onwards):**
+- PR automatically created by GitHub Actions when pushing to `claude/*` or `claude/cli-*` branch
+- Uses commit message for PR title and body
+- No manual "Compare & pull request" clicks required
+- True AI-First autonomy achieved
+
+**Workflow:** `.github/workflows/auto-create-pr-claude-branches.yml`
+
+**Commit message format matters:**
 ```bash
-# AI creates PR with comprehensive description
-gh pr create --title "Clear, descriptive title" \
-  --body "Detailed summary with:
-  - What was done
-  - Why it was done
-  - Links to ADRs
-  - Testing/validation performed
-  - Traceability to requirements (if applicable)"
+# First line = PR title
+# Body = PR description
+git commit -m "Brief PR title
+
+Detailed description:
+- What was done
+- Why it was done
+- Links to ADRs
+- Testing/validation performed
+"
 ```
 
 ### 5. Review & Merge
