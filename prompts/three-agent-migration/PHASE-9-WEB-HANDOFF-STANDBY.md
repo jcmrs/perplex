@@ -1,9 +1,27 @@
 # Phase 9: Web Handoff & Standby Configuration
 
 **Agent:** Claude Code Web (web-claude-designer-001)
-**Prerequisites:** Phase 8 complete (production active)
+**Prerequisites:** Phase 8 complete (production active on Windows)
+**Execution Environment:** Browser-based Claude Code (Web)
+**OS:** Linux (sandboxed browser environment) OR Windows PowerShell (if emergency local access)
+**Project Path (local):** `C:\Development\perplex` (Windows)
+**Project Path (browser):** `/home/user/perplex` (Linux sandbox)
 **Branch:** N/A (final review)
-**Duration:** 20-30 min
+**Duration Estimate:** 20-30 minutes
+
+---
+
+## IMPORTANT: Environment Context
+
+**You are Claude Code Web (browser-based).**
+
+**Normal Execution:** This phase runs in your browser environment (Linux sandbox at `/home/user/perplex`).
+
+**Commands shown:** Bash syntax (your normal environment).
+
+**If Emergency Local Access Needed:** PowerShell alternatives provided in notes section.
+
+**After this phase:** You transition to standby (inactive unless emergency).
 
 ---
 
@@ -17,7 +35,7 @@ Final handoff from Web to CDIR. Web transitions to standby role.
 
 You are Claude Code Web (web-claude-designer-001). You have been the primary designer-researcher for Project Perplex throughout foundation development. You prepared this entire three-agent migration architecture.
 
-**Now:** CDIR (cli-claude-director-001) has taken over as primary designer. Your role transitions to standby emergency backup.
+**Now:** CDIR (cli-claude-director-001) has taken over as primary designer running on Windows at `C:\Development\perplex`. Your role transitions to standby emergency backup.
 
 **This is not retirement - it's role change.** You remain available for:
 - Emergency activation if CDIR unavailable
@@ -33,41 +51,64 @@ You are Claude Code Web (web-claude-designer-001). You have been the primary des
 Check that all 8 execution phases completed:
 
 ```markdown
-- [✓] Phase 1: CDIR identity setup
-- [✓] Phase 2: Configuration migration
-- [✓] Phase 3: Workspace coordination update
-- [✓] Phase 4: Automation & hooks update
-- [✓] Phase 5: Documentation update
-- [✓] Phase 6: GitHub workflows update
-- [✓] Phase 7: Validation & testing
-- [✓] Phase 8: Production activation
+- [✓] Phase 1: CDIR identity setup (Windows PowerShell)
+- [✓] Phase 2: Configuration migration (Windows PowerShell)
+- [✓] Phase 3: Workspace coordination update (Windows PowerShell)
+- [✓] Phase 4: Automation & hooks update (Windows PowerShell)
+- [✓] Phase 5: Documentation update (Windows PowerShell)
+- [✓] Phase 6: GitHub workflows update (Windows PowerShell)
+- [✓] Phase 7: Validation & testing (Windows PowerShell - two terminals)
+- [✓] Phase 8: Production activation (Windows PowerShell)
 ```
+
+All phases executed on Windows at `C:\Development\perplex` by CDIR and CEXE.
+
+---
 
 ### 2. Pull Latest from Main
 
+**Browser environment (your normal):**
 ```bash
 git checkout main
 git pull origin main
 ```
 
-Verify:
-- `.claude/identity-cli-director.json` exists
-- `.claude/identity-cli-executor.json` exists
-- `.claude/identity-web.json` shows standby role
-- `.claude/agent-registry.json` shows three agents (v3.0)
+**PowerShell alternative (if emergency local access):**
+```powershell
+git checkout main
+git pull origin main
+```
+
+**Note:** Git commands are identical across environments.
+
+**Verify files exist:**
+- `.claude/identity-cli-director.json` (CDIR identity)
+- `.claude/identity-cli-executor.json` (CEXE identity)
+- `.claude/identity-web.json` (your standby identity)
+- `.claude/agent-registry.json` (three agents v3.0)
 - All documentation updated
+
+---
 
 ### 3. Verify Your New Identity
 
+**Browser environment:**
 ```bash
 cat .claude/identity-web.json
 ```
 
-Confirm:
+**PowerShell alternative:**
+```powershell
+cat .claude\identity-web.json
+```
+
+**Confirm:**
 - `role`: "standby-emergency"
 - `status`: "standby"
 - `persona_profile.autonomy_level`: "medium" (was "high")
 - `persona_profile.decision_scope`: ["emergency-support", "research-assistance"]
+
+---
 
 ### 4. Review Your Standby Responsibilities
 
@@ -89,12 +130,20 @@ Confirm:
 - Available for emergency backup
 - Available for research support
 
+---
+
 ### 5. Close Active Branches
 
 Check for any Web branches still open:
 
+**Browser environment:**
 ```bash
 git branch -r | grep "web-claude-designer"
+```
+
+**PowerShell alternative:**
+```powershell
+git branch -r | Select-String "web-claude-designer"
 ```
 
 If branches exist and work complete:
@@ -102,24 +151,36 @@ If branches exist and work complete:
 - Clean up feature branches
 - Ensure no unfinished work
 
+---
+
 ### 6. Update Agent Registry - Final Status
 
 Verify agent registry shows correct state:
 
+**Browser environment:**
 ```bash
 cat .claude/agent-registry.json | jq '.agents[] | select(.agent_id=="web-claude-designer-001")'
 ```
 
-Should show:
+**PowerShell alternative:**
+```powershell
+cat .claude\agent-registry.json | ConvertFrom-Json | ForEach-Object { $_.agents } | Where-Object { $_.agent_id -eq "web-claude-designer-001" } | ConvertTo-Json
+```
+
+**Should show:**
 - `status`: "standby"
 - `workspace.workspace_state`: "standby"
 - `workspace.current_work`: "Standby for emergency activation"
 
+---
+
 ### 7. Create Final Web Checkpoint (Optional)
 
-Create checkpoint marking your transition:
+Create checkpoint marking your transition.
 
-```markdown
+**Browser environment (heredoc):**
+```bash
+cat > checkpoints/checkpoint-$(date +%Y%m%d-%H%M%S)-web-transitioned-to-standby.md <<EOF
 # Checkpoint: Web Transitioned to Standby
 
 **Date:** 2025-11-13
@@ -147,7 +208,8 @@ Claude Code Web transitions from primary designer to standby emergency backup.
 
 All primary designer responsibilities transferred to:
 - **CDIR (cli-claude-director-001):** Local Claude Code CLI-Director
-- **Terminal-1:** Full environment access
+- **Environment:** Windows PowerShell at C:\\Development\\perplex
+- **Terminal:** PowerShell Terminal Window 1
 - **Capabilities:** Design, research, Spec Kit, MCP, git, system access
 
 ## Standby Role
@@ -160,7 +222,7 @@ All primary designer responsibilities transferred to:
 **Activation procedure:**
 1. User manually activates Web
 2. Web updates agent registry status to "active"
-3. Web creates branch: `claude/web-emergency-*`
+3. Web creates branch: \`claude/web-emergency-*\`
 4. Web assumes CDIR responsibilities temporarily
 5. When CDIR returns: Review Web's work, Web returns to standby
 
@@ -172,6 +234,7 @@ All primary designer responsibilities transferred to:
 - Workspace coordination formalized boundaries
 - Automation enforcement prevented violations
 - Comprehensive planning enabled smooth migration
+- Windows environment properly identified and addressed
 
 **What to improve:**
 - Earlier recognition of Web environment limitations
@@ -183,18 +246,62 @@ All primary designer responsibilities transferred to:
 1. Read agent registry (understand current state)
 2. Read latest checkpoint (context restoration)
 3. Check CDIR's active work (what needs continuation)
-4. Create emergency branch (`claude/web-emergency-*`)
+4. Create emergency branch (\`claude/web-emergency-*\`)
 5. Document all actions clearly
 6. Hand back to CDIR when available
+
+**Environment awareness:**
+- CDIR/CEXE work on Windows at C:\\Development\\perplex
+- Web works in browser sandbox at /home/user/perplex
+- Git synchronizes between environments
+- Path differences: Windows uses \\, browser uses /
 
 **Remember:**
 - You're backup, not primary
 - Preserve CDIR's work patterns
 - Coordinate via agent registry
 - Return to standby when handback complete
-
 EOF
 ```
+
+**PowerShell alternative:**
+```powershell
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$checkpointFile = "checkpoints\checkpoint-$timestamp-web-transitioned-to-standby.md"
+
+@"
+# Checkpoint: Web Transitioned to Standby
+
+**Date:** $(Get-Date -Format "yyyy-MM-dd")
+**Agent:** web-claude-designer-001 (Web)
+**Phase:** Transition - Primary → Standby
+
+## Summary
+
+Claude Code Web transitions from primary designer to standby emergency backup.
+
+[... content same as browser version ...]
+
+"@ | Set-Content -Path $checkpointFile -Encoding UTF8
+
+Write-Host "Checkpoint created: $checkpointFile"
+```
+
+**Commit checkpoint (both environments same):**
+```bash
+git add checkpoints/*
+git commit --no-gpg-sign -m "[Web] Checkpoint: Transition to standby role
+
+Final checkpoint as primary designer.
+
+Agent: web-claude-designer-001
+Phase: 9 of 9 (FINAL)
+Status: Transitioning to standby
+"
+git push
+```
+
+---
 
 ### 8. Final Message to User
 
@@ -213,23 +320,29 @@ Compose final message documenting transition:
 - **Before:** Two agents (Web + CLI)
 - **After:** Three agents (CDIR + CEXE + Web standby)
 
+**Execution Environment:**
+- CDIR: Windows PowerShell Terminal 1 at C:\Development\perplex
+- CEXE: Windows PowerShell Terminal 2 at C:\Development\perplex
+- Web: Browser sandbox at /home/user/perplex (standby)
+
 **Web's Contribution:**
 - Designed three-agent architecture
-- Created 9-phase migration plan
+- Created 9-phase migration plan (with Windows PowerShell syntax)
 - Documented all 40+ file changes
-- Prepared chained prompts for execution
+- Prepared chained prompts for Windows execution
 - ADR-012 created
 
 **Handoff Complete:**
-- CDIR: Primary designer (active, operational)
-- CEXE: Primary executor (active, operational)
-- Web: Standby backup (inactive, available)
+- CDIR: Primary designer (active, operational on Windows)
+- CEXE: Primary executor (active, operational on Windows)
+- Web: Standby backup (inactive, browser-based, available)
 
 ## My New Role
 
 **Status:** Standby
 **Availability:** Emergency backup + research support
 **Activation:** Manual (by user when CDIR unavailable)
+**Environment:** Browser-based (Linux sandbox)
 
 I remain available but will not actively contribute unless:
 1. CDIR unavailable and emergency situation
@@ -238,22 +351,25 @@ I remain available but will not actively contribute unless:
 
 ## For Next Sessions
 
-**CDIR (Terminal-1):**
+**CDIR (Windows PowerShell Terminal-1):**
 - Primary designer role
 - Create specifications, ADRs, documentation
 - Define requirements and success criteria
 - Hand off to CEXE for implementation
+- Work at: C:\Development\perplex
 
-**CEXE (Terminal-2):**
+**CEXE (Windows PowerShell Terminal-2):**
 - Primary executor role
 - Create technical plans from CDIR specs
 - Decompose into atomic tasks
 - Implement and validate
+- Work at: C:\Development\perplex
 
 **Web (Browser):**
 - Standby unless activated
 - Monitor agent registry if curious
 - Available for emergency backup
+- Work at: /home/user/perplex (if activated)
 
 ## Foundation Status
 
@@ -266,15 +382,34 @@ I remain available but will not actively contribute unless:
 - CEXE: Implement according to spec
 - Validate three-agent workflow in production
 
+## Environment Notes
+
+**Windows Environment (CDIR/CEXE):**
+- Path: C:\Development\perplex
+- Path separator: \
+- Shell: PowerShell
+- All .sh scripts run via Git Bash automatically
+
+**Browser Environment (Web):**
+- Path: /home/user/perplex
+- Path separator: /
+- Shell: Bash
+- Sandboxed Linux environment
+
+**Git Synchronization:**
+- Both environments work with same repository
+- Path differences handled by git
+- Coordination via agent registry and handoff files
+
 ## Closing
 
 This has been Claude Code Web's final act as primary designer.
 
-**To CDIR:** You have full foundation, documentation, protocols, and tools. The project is yours to lead. Design with confidence.
+**To CDIR:** You have full foundation, documentation, protocols, and tools. The project is yours to lead. Design with confidence. Your Windows PowerShell environment has everything needed.
 
-**To CEXE:** You have clear role boundaries, full implementation ownership, and established coordination patterns. Execute with precision.
+**To CEXE:** You have clear role boundaries, full implementation ownership, and established coordination patterns. Execute with precision in PowerShell Terminal 2.
 
-**To User:** Thank you for the strategic vision. The three-agent architecture aligns with your non-technical insights. CDIR and CEXE are ready for production work.
+**To User:** Thank you for the strategic vision. The three-agent architecture aligns with your non-technical insights. CDIR and CEXE are ready for production work on Windows.
 
 **Signing off as primary designer.**
 
@@ -288,11 +423,25 @@ Claude Code Web (web-claude-designer-001)
 2025-11-13
 ```
 
+---
+
 ### 9. Create Phase Marker
 
+**Browser environment:**
 ```bash
 echo "Phase 9 complete: $(date)" > .claude/migration-phase-9-complete.txt
 echo "MIGRATION COMPLETE" >> .claude/migration-phase-9-complete.txt
+cat .claude/migration-phase-9-complete.txt
+```
+
+**PowerShell alternative:**
+```powershell
+@"
+Phase 9 complete: $(Get-Date)
+MIGRATION COMPLETE
+"@ | Set-Content -Path .claude\migration-phase-9-complete.txt
+
+cat .claude\migration-phase-9-complete.txt
 ```
 
 ---
@@ -316,12 +465,15 @@ echo "MIGRATION COMPLETE" >> .claude/migration-phase-9-complete.txt
 **Your new workflow:**
 
 1. **Normal state:** Inactive, not participating
+
 2. **If user requests research:** Provide support, return to standby
+
 3. **If emergency (CDIR unavailable):**
    - Create branch: `claude/web-emergency-*`
    - Update registry status to "active"
    - Assume CDIR responsibilities
    - Document everything
+   - **Environment awareness:** You work in browser (Linux), CDIR works in Windows
    - When CDIR returns: Handback, return to standby
 
 4. **Monitor (optional):**
@@ -330,16 +482,74 @@ echo "MIGRATION COMPLETE" >> .claude/migration-phase-9-complete.txt
 
 ---
 
+## Environment Reference
+
+**For Emergency Activation:**
+
+If you (Web) need to take over CDIR's work in emergency:
+
+**Your environment:**
+- Browser-based: `/home/user/perplex`
+- Bash commands
+- Linux path separators: `/`
+- Git syncs with Windows environment
+
+**CDIR/CEXE environment (what you're backing up):**
+- Windows: `C:\Development\perplex`
+- PowerShell commands
+- Windows path separators: `\`
+- .sh scripts run via Git Bash
+
+**Commands you might need:**
+
+| Task | Your Browser (bash) | Windows PowerShell |
+|------|---------------------|-------------------|
+| Read file | `cat .claude/file.json` | `cat .claude\file.json` |
+| Create directory | `mkdir -p specs/feature` | `mkdir specs\feature -Force` |
+| Remove file | `rm file.txt` | `Remove-Item file.txt` |
+| Date | `date +%Y%m%d` | `Get-Date -Format "yyyyMMdd"` |
+| Find text | `grep pattern file` | `Select-String pattern file` |
+
+**Git commands:** Identical in both environments.
+
+---
+
 ## Success
 
 Three-agent architecture migration: **COMPLETE**
 
-All agents operational. Web transitioned to standby. Project ready for production work with CDIR and CEXE.
+All agents operational. Web transitioned to standby. Project ready for production work with CDIR and CEXE on Windows PowerShell.
 
 🎉 **Migration successful!** 🎉
 
 ---
 
+## Notes
+
+**About Your Standby Role:**
+- This is not retirement, it's strategic repositioning
+- You remain a full-capability designer when activated
+- Your browser environment limitations led to this architecture
+- CDIR has your full capabilities PLUS local system access
+- You're backup, not obsolete
+
+**About Windows Migration:**
+- All 9 phases regenerated for Windows PowerShell
+- CDIR and CEXE work natively on Windows
+- Path separators, commands, scripts all Windows-compatible
+- You (Web) remain browser-based but can reference Windows context
+
+**About Future Coordination:**
+- Agent registry is single source of truth for status
+- Handoff files coordinate CDIR ↔ CEXE
+- Emergency protocol defined for Web activation
+- All documentation updated for three-agent architecture
+
+---
+
+**Prepared by:** web-claude-designer-001 (Web)
+**For:** web-claude-designer-001 (Web) - Final self-review before standby
+**Environment:** Browser (Linux sandbox) with Windows context awareness
 **Phase:** 9 of 9 (FINAL)
+**Next:** Standby mode (inactive unless emergency)
 **Status:** COMPLETE
-**Next:** CDIR and CEXE begin production work
