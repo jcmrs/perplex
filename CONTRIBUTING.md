@@ -65,6 +65,29 @@ All contributions must align with:
 
 See [`FOUNDATION.md`](FOUNDATION.md) for detailed explanations.
 
+### Multi-Agent Coordination (2025-11-13)
+
+Project Perplex uses **multiple AI agents** with enforced workspace boundaries:
+
+**Active Agents:**
+- **Claude Code Web (Designer-Researcher):** Specifications, ADRs, documentation
+- **Claude Code CLI (Executor-Validator):** Implementation, testing, technical planning
+
+**Workspace Boundaries:**
+- Web owns: `decisions/`, `docs/`, `specs/*/spec.md`
+- CLI owns: `src/`, `tests/`, `specs/*/plan.md`, `specs/*/tasks.md`
+- Shared: `sessions/`, `checkpoints/`, `.claude/agent-registry.json`
+
+**Enforcement:**
+- Pre-commit hooks validate workspace boundaries (BLOCKS violations)
+- GitHub Actions validates PRs
+- Agent coordination scripts formalize handoffs
+
+**As a contributor:**
+- Respect workspace boundaries when contributing
+- Use `tools/validate-workspace-boundaries.sh --file <path>` to check ownership
+- See [Agent Workspace Coordination Guide](docs/AGENT_WORKSPACE_COORDINATION.md)
+
 ---
 
 ## How to Contribute
@@ -102,6 +125,10 @@ See [`FOUNDATION.md`](FOUNDATION.md) for detailed explanations.
 
 ```bash
 # Create feature branch
+# For AI agents:
+#   Web: claude/feature-description-SESSION_ID
+#   CLI: claude/cli-feature-description-SESSION_ID
+# For humans: your-name/feature-description
 git checkout -b your-name/feature-description-SESSION_ID
 
 # Make changes
@@ -407,5 +434,5 @@ Contributors are recognized through:
 
 ---
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-11-13
 **Status:** Active
