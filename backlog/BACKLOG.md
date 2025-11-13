@@ -1,7 +1,7 @@
 # Backlog - Master List
 
-**Last Updated:** 2025-11-11
-**Total Items:** 14
+**Last Updated:** 2025-11-13
+**Total Items:** 15
 
 ---
 
@@ -134,11 +134,19 @@
 **Test First:** Run workflow in practice to identify actual vs. theoretical issues before implementation
 **Outcome:** HIGH priority items completed: (1) ✅ Branch cleanup automation implemented (.github/workflows/cleanup-checkpoint-branches.yml) with automatic and manual modes, dry-run support, graceful failure handling. (2) ⚠️ Error handling deferred following test-first philosophy - will add when real errors encountered in practice. (3) ✅ Documentation updated in checkpoints/GITHUB_AUTOMATION.md with Copilot insights, branch cleanup section, and implementation status. MEDIUM/LOW priority items remain in backlog for future implementation after testing reveals actual need.
 
+### ITEM-015: Simplify GitHub Actions Workflow Template Literals
+**Status:** Backlog
+**Effort:** Small
+**Target:** Maintenance Phase
+**Description:** Simplify nested JavaScript template literals in workspace-validation.yml to improve robustness against GitHub Actions YAML parser intermittent failures. Line 127 has nested backticks causing occasional parsing errors.
+**Rationale:** Intermittent workflow failures create noise but don't block functionality. PRs merge successfully. Low priority robustness enhancement.
+**Priority:** Low - Workflow functional, user explicitly requested low priority
+
 ---
 
 ## 📊 Summary by Status
 
-- **Backlog:** 4 items
+- **Backlog:** 5 items
 - **Active:** 0 items
 - **Complete:** 6 items
 - **Discarded:** 1 item (ITEM-011)
@@ -148,13 +156,13 @@
 
 - **High:** 1 item (complete)
 - **Medium:** 5 items (4 complete, 1 backlog)
-- **Low/Deferred:** 8 items (3 deferred, 3 backlog, 1 complete, 1 discarded)
+- **Low/Deferred:** 9 items (3 deferred, 4 backlog, 1 complete, 1 discarded)
 
 ---
 
 ## Backlog Health
 
-**Last Review:** 2025-11-11 (post-PR automation breakthrough)
+**Last Review:** 2025-11-13 (post-workspace coordination enforcement)
 **Next Review:** After Discovery Phase Complete
 
 **Notes:**
@@ -165,6 +173,7 @@
 - 1 item completed during foundation phase (ITEM-009)
 - **1 item discarded (ITEM-011):** Superseded by autonomous PR workflow (2025-11-11)
 - **1 item updated (ITEM-014):** Approach revised to use GitHub REST API instead of gh CLI (2025-11-11)
+- **1 item added (ITEM-015):** GitHub Actions workflow template literal simplification (low priority, 2025-11-13)
 - **Key learning:** gh CLI blocked in Claude Code environment - use GitHub REST API + curl + jq pattern instead
 
 ---
