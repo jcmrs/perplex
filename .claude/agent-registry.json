@@ -1,9 +1,9 @@
 {
   "$schema": "./registry-schema.json",
-  "registry_version": "1.0",
+  "registry_version": "2.0",
   "project": "perplex",
   "created": "2025-11-12T19:47:00Z",
-  "last_updated": "2025-11-12T19:47:00Z",
+  "last_updated": "2025-11-13T02:30:00Z",
   "agents": [
     {
       "agent_id": "web-claude-designer-001",
@@ -13,19 +13,27 @@
       "environment": "web-browser",
       "role": "designer-researcher",
       "identity_file": ".claude/identity-web.json",
-      "git_branch": "claude/perplexity-ai-integration-011CV35RoubgSRMHNVuYa7Si",
+      "git_branch": "claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si",
       "first_active": "2025-11-12T00:00:00Z",
-      "last_active": "2025-11-12T19:47:00Z",
+      "last_active": "2025-11-13T02:30:00Z",
       "coordination": {
         "message_prefix": "[From: Web]",
         "handoff_method": "detailed-prompts-via-user"
+      },
+      "workspace": {
+        "current_work_branch": "claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si",
+        "active_specifications": [],
+        "workspace_state": "designing",
+        "current_work": "Stage 2: Workspace coordination enforcement implementation",
+        "next_handoff": null,
+        "pending_handoffs": []
       }
     },
     {
       "agent_id": "cli-claude-executor-001",
       "display_name": "Claude Code CLI",
       "short_name": "CLI",
-      "status": "active",
+      "status": "idle",
       "environment": "local-windows",
       "role": "executor-validator",
       "identity_file": ".claude/identity-cli.json",
@@ -36,7 +44,15 @@
         "message_prefix": "[From: CLI]",
         "handoff_method": "direct-execution"
       },
-      "notes": "Identity configuration complete. Stage 1 operational. Git hooks configured. Three-environment coordination understood."
+      "workspace": {
+        "current_work_branch": null,
+        "active_specifications": [],
+        "workspace_state": "idle",
+        "current_work": null,
+        "next_handoff": null,
+        "pending_handoffs": []
+      },
+      "notes": "Identity configuration complete. Stage 1 operational. Git hooks configured. Three-environment coordination understood. Workspace coordination ready."
     }
   ],
   "coordination_protocols": {
@@ -53,8 +69,24 @@
   },
   "metadata": {
     "purpose": "Track and coordinate multiple AI agents on Project Perplex",
-    "version": "1.0",
+    "version": "2.0",
     "maintained_by": "All active agents",
-    "update_protocol": "Agent updates own entry when significant change"
+    "update_protocol": "Agent updates own entry when significant change",
+    "changelog": {
+      "2.0": {
+        "date": "2025-11-13",
+        "changes": [
+          "Added workspace coordination fields per agent",
+          "Added current_work_branch, active_specifications, workspace_state",
+          "Added next_handoff and pending_handoffs tracking",
+          "Enhanced with Stage 2 enforcement implementation support"
+        ],
+        "related": "ADR-011 (Agent Workspace Coordination)"
+      },
+      "1.0": {
+        "date": "2025-11-12",
+        "changes": ["Initial agent registry with multi-agent identity system"]
+      }
+    }
   }
 }
