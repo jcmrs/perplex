@@ -1,0 +1,587 @@
+# Agent Workspace Coordination Manifest
+# Defines workspace boundaries, ownership, and coordination rules for multi-agent collaboration
+
+schema_version: "1.0"
+last_updated: "2025-11-13"
+updated_by: "web-claude-designer-001"
+
+# ============================================================================
+# AGENT WORKSPACE DEFINITIONS
+# ============================================================================
+
+agents:
+  # --------------------------------------------------------------------------
+  # Claude Code Web - Designer-Researcher
+  # --------------------------------------------------------------------------
+  web-claude-designer-001:
+    display_name: "Claude Code Web"
+    short_name: "Web"
+    role: "designer-researcher"
+    identity_file: ".claude/identity-web.json"
+
+    workspace_focus:
+      - "Architecture and design specifications"
+      - "Research and analysis documentation"
+      - "Decision records and requirements"
+      - "High-level strategy and planning"
+
+    primary_ownership:
+      # Directories Web owns (can create, modify, delete)
+      directories:
+        - path: "decisions/"
+          reason: "Creates and maintains Architecture Decision Records"
+          pattern: "*.md"
+          exceptions: ["TEMPLATE.md", "README.md"]
+
+        - path: "requirements/"
+          reason: "Defines functional and non-functional requirements"
+          pattern: "**/*.md"
+          exceptions: ["TEMPLATE.md"]
+
+        - path: "docs/"
+          reason: "Creates and maintains documentation"
+          pattern: "**/*.md"
+          exceptions: []
+          notes: "High-level docs, architecture, processes, guides"
+
+        - path: "ideas/"
+          reason: "Captures and manages idea backlog"
+          pattern: "*.md"
+          exceptions: ["TEMPLATE.md"]
+
+        - path: "specs/*/spec.md"
+          reason: "Creates feature specifications (what/why/success)"
+          pattern: "spec.md"
+          notes: "Defines requirements, NOT implementation details"
+
+      # Individual files Web owns
+      files:
+        - "FOUNDATION.md"
+        - "README.md"
+        - "CONTRIBUTING.md"
+        - "docs/PRODUCT_VISION.md"
+        - "requirements/TRACEABILITY.md"
+
+    shared_ownership:
+      # Both agents can modify, coordination via git
+      directories:
+        - path: "sessions/"
+          reason: "Both agents create session logs"
+          coordination: "Separate files, naming convention includes agent"
+          pattern: "session-*.md"
+
+        - path: "checkpoints/"
+          reason: "Both agents can create checkpoints"
+          coordination: "Automated by scripts, includes agent metadata"
+          pattern: "checkpoint-*.md"
+
+        - path: "backlog/"
+          reason: "Both agents can add backlog items"
+          coordination: "Web typically prioritizes, CLI can add discovered items"
+          pattern: "*.md"
+
+        - path: ".claude/"
+          reason: "Agent identity and coordination files"
+          coordination: "Web owns coordination.yml, CLI owns mcp-config.json"
+          notes: "Each agent manages own identity file"
+
+      files:
+        - "sessions/CURRENT_STATUS.md"
+        - ".claude/agent-registry.json"
+
+    read_only:
+      # Web can read but not modify (CLI ownership)
+      directories:
+        - path: "src/"
+          reason: "CLI owns implementation code"
+
+        - path: "tests/"
+          reason: "CLI owns test implementation"
+
+        - path: "specs/*/plan.md"
+          reason: "CLI creates technical plans"
+          notes: "Web can validate but not modify"
+
+        - path: "specs/*/tasks.md"
+          reason: "CLI decomposes into atomic tasks"
+          notes: "Web can review but not modify"
+
+        - path: "specs/*/implementation/"
+          reason: "CLI owns implementation artifacts per spec"
+
+      files:
+        - ".claude/mcp-config.json"
+        - ".claude/session-state.json"
+
+    branch_pattern: "claude/*"
+    branch_naming: "claude/{description}-{sessionid}"
+
+    decision_scope_validation:
+      # Validate ADRs match agent's role (from identity file)
+      allowed_scopes:
+        - "architecture"
+        - "research"
+        - "documentation"
+        - "design"
+        - "strategic-planning"
+
+      alert_if_outside_scope: true
+
+  # --------------------------------------------------------------------------
+  # Claude Code CLI - Executor-Validator
+  # --------------------------------------------------------------------------
+  cli-claude-executor-001:
+    display_name: "Claude Code CLI"
+    short_name: "CLI"
+    role: "executor-validator"
+    identity_file: ".claude/identity-cli.json"
+
+    workspace_focus:
+      - "Implementation and code development"
+      - "Testing and validation execution"
+      - "Technical planning and task decomposition"
+      - "Local tooling and MCP integration"
+
+    primary_ownership:
+      directories:
+        - path: "src/"
+          reason: "Implements features and functionality"
+          pattern: "**/*.py"
+          notes: "Python implementation code"
+
+        - path: "tests/"
+          reason: "Creates and executes tests"
+          pattern: "**/*.py"
+          notes: "Test implementation and execution"
+
+        - path: "specs/*/plan.md"
+          reason: "Creates technical implementation plans"
+          pattern: "plan.md"
+          notes: "How to implement spec.md requirements"
+
+        - path: "specs/*/tasks.md"
+          reason: "Decomposes plan into atomic tasks"
+          pattern: "tasks.md"
+          notes: "Granular implementation tasks with dependencies"
+
+        - path: "specs/*/implementation/"
+          reason: "Per-specification implementation artifacts"
+          pattern: "**/*"
+          notes: "Working files, drafts, notes during implementation"
+
+        - path: "tools/"
+          reason: "Can create implementation-specific tools"
+          pattern: "*.sh"
+          notes: "CLI can add tools, Web typically designs automation"
+          coordination: "Coordinate before modifying existing tools"
+
+      files:
+        - ".claude/mcp-config.json"
+        - ".claude/session-state.json"
+
+    shared_ownership:
+      # Same as Web (both agents can modify)
+      directories:
+        - path: "sessions/"
+          coordination: "Separate files, naming includes agent"
+
+        - path: "checkpoints/"
+          coordination: "Automated by scripts"
+
+        - path: "backlog/"
+          coordination: "CLI adds discovered work, Web prioritizes"
+
+        - path: ".claude/"
+          coordination: "CLI owns mcp-config/session-state, Web owns coordination"
+
+      files:
+        - "sessions/CURRENT_STATUS.md"
+        - ".claude/agent-registry.json"
+
+    read_only:
+      # CLI can read but not modify (Web ownership)
+      directories:
+        - path: "decisions/"
+          reason: "Web creates ADRs"
+          notes: "CLI can inform ADR content but Web authors"
+
+        - path: "requirements/"
+          reason: "Web defines requirements"
+          notes: "CLI validates feasibility, reports back to Web"
+
+        - path: "docs/"
+          reason: "Web maintains documentation"
+          notes: "CLI can suggest updates but Web authors"
+
+        - path: "specs/*/spec.md"
+          reason: "Web creates specifications"
+          notes: "CLI validates during planning, reports issues"
+
+      files:
+        - "FOUNDATION.md"
+        - "README.md"
+        - "docs/PRODUCT_VISION.md"
+
+    branch_pattern: "claude/cli-*"
+    branch_naming: "claude/cli-{description}-{timestamp}"
+
+    decision_scope_validation:
+      allowed_scopes:
+        - "implementation"
+        - "testing"
+        - "validation"
+        - "troubleshooting"
+        - "local-execution"
+
+      alert_if_outside_scope: true
+
+# ============================================================================
+# COORDINATION RULES
+# ============================================================================
+
+coordination:
+  # How agents coordinate work and transitions
+
+  handoff_triggers:
+    # Explicit points where work transitions between agents
+
+    - name: "spec_complete"
+      from: "web-claude-designer-001"
+      to: "cli-claude-executor-001"
+      artifact: "specs/*/spec.md"
+      trigger: "Specification defines what/why/success criteria"
+      validation:
+        - "spec.md exists and is complete"
+        - "Success criteria defined"
+        - "Web marks spec as ready in agent registry"
+      next_action: "CLI creates plan.md (how to implement)"
+
+    - name: "plan_complete"
+      from: "cli-claude-executor-001"
+      to: "web-claude-designer-001"
+      artifact: "specs/*/plan.md"
+      trigger: "Technical plan created with architecture"
+      validation:
+        - "plan.md exists and is complete"
+        - "Architecture decisions documented"
+        - "CLI marks plan as ready in agent registry"
+      next_action: "Web validates plan aligns with spec.md"
+
+    - name: "plan_validated"
+      from: "web-claude-designer-001"
+      to: "cli-claude-executor-001"
+      artifact: "specs/*/plan.md"
+      trigger: "Web confirms plan aligns with specification"
+      validation:
+        - "Web reviewed plan.md"
+        - "Alignment confirmed or adjustments made"
+        - "Web marks plan as validated in agent registry"
+      next_action: "CLI creates tasks.md (atomic decomposition)"
+
+    - name: "tasks_complete"
+      from: "cli-claude-executor-001"
+      to: "cli-claude-executor-001"
+      artifact: "specs/*/tasks.md"
+      trigger: "Task decomposition ready for execution"
+      validation:
+        - "tasks.md exists with atomic tasks"
+        - "Dependencies mapped"
+        - "CLI marks tasks as ready"
+      next_action: "CLI begins implementation"
+
+    - name: "implementation_complete"
+      from: "cli-claude-executor-001"
+      to: "web-claude-designer-001"
+      artifact: "src/**/*"
+      trigger: "Implementation complete with passing tests"
+      validation:
+        - "All tasks in tasks.md completed"
+        - "Tests passing"
+        - "CLI marks implementation complete"
+      next_action: "Web validates against spec.md success criteria"
+
+    - name: "validation_complete"
+      from: "web-claude-designer-001"
+      to: "both"
+      artifact: "specs/*/"
+      trigger: "Web confirms implementation meets specification"
+      validation:
+        - "Success criteria from spec.md met"
+        - "Web marks specification as complete"
+        - "ADR created if architectural decisions made"
+      next_action: "Stage complete, proceed to next stage"
+
+  conflict_resolution:
+    # Rules for handling workspace conflicts
+
+    - situation: "shared_file_modification"
+      rule: "Last agent to commit documents reason in commit message"
+      example: "Both agents update CURRENT_STATUS.md"
+      resolution: "Git history shows order, commit messages explain why"
+
+    - situation: "simultaneous_work"
+      rule: "Use separate feature branches, coordinate via user"
+      example: "Both agents working on different features"
+      resolution: "Agent registry shows active branches, GitHub automation merges"
+
+    - situation: "ownership_dispute"
+      rule: "Workspace manifest is source of truth, update if incorrect"
+      example: "Unclear if Web or CLI should create a file"
+      resolution: "Check manifest, update if reality diverges"
+
+    - situation: "handoff_timing"
+      rule: "Handoff marker persists until next agent acknowledges"
+      example: "Web completes spec while CLI unavailable (session limit)"
+      resolution: "Marker file created, CLI checks on startup"
+
+    - situation: "emergency_override"
+      rule: "Agent can work outside boundaries if documented in commit"
+      example: "Critical bug fix needed immediately"
+      resolution: "Commit message: '[EMERGENCY] Reason for override'"
+      follow_up: "Update manifest if boundary was wrong"
+
+  work_visibility:
+    # How agents see what others are doing
+
+    - mechanism: "agent_registry"
+      file: ".claude/agent-registry.json"
+      purpose: "Tracks current work, active branches, specifications"
+      update_frequency: "Every work start/handoff/completion"
+
+    - mechanism: "branch_naming"
+      pattern: "claude/* or claude/cli-*"
+      purpose: "Branch names indicate agent ownership"
+      enforcement: "Pre-push git hook validates pattern"
+
+    - mechanism: "commit_messages"
+      pattern: "[{agent_short_name}] Commit message"
+      purpose: "Commits include agent attribution"
+      example: "[Web] Create ADR-011 for workspace coordination"
+
+    - mechanism: "handoff_markers"
+      file: ".claude/handoffs/*.json"
+      purpose: "Persistent handoff state across sessions"
+      schema: "agent_from, agent_to, artifact, timestamp, validation_criteria"
+
+# ============================================================================
+# SPEC KIT INTEGRATION
+# ============================================================================
+
+spec_kit:
+  # Workspace rules for GitHub Spec Kit workflow
+
+  artifact_ownership:
+    constitution:
+      file: ".specify/memory/constitution.md"
+      owner: "web-claude-designer-001"
+      reason: "Integrates FOUNDATION.md imperatives"
+      creation_command: "/speckit.constitution"
+
+    specification:
+      file: "specs/NNN-feature-name/spec.md"
+      owner: "web-claude-designer-001"
+      reason: "Defines what/why/success (design responsibility)"
+      creation_command: "/speckit.specify"
+      validation_command: "/speckit.clarify (optional)"
+
+    plan:
+      file: "specs/NNN-feature-name/plan.md"
+      owner: "cli-claude-executor-001"
+      reason: "Technical how (execution responsibility)"
+      creation_command: "/speckit.plan"
+
+    tasks:
+      file: "specs/NNN-feature-name/tasks.md"
+      owner: "cli-claude-executor-001"
+      reason: "Atomic decomposition (execution responsibility)"
+      creation_command: "/speckit.tasks"
+
+    implementation:
+      directory: "src/"
+      owner: "cli-claude-executor-001"
+      reason: "Code implementation (execution responsibility)"
+      execution_command: "/speckit.implement"
+
+  command_access:
+    # Which agent can execute which Spec Kit commands
+
+    web-claude-designer-001:
+      allowed_commands:
+        - "/speckit.constitution"
+        - "/speckit.specify"
+        - "/speckit.clarify"
+        - "/speckit.analyze"
+        - "/speckit.checklist"
+
+      prohibited_commands:
+        - "/speckit.plan"
+        - "/speckit.tasks"
+        - "/speckit.implement"
+
+      reason: "Web designs specifications, CLI executes implementation"
+
+    cli-claude-executor-001:
+      allowed_commands:
+        - "/speckit.plan"
+        - "/speckit.tasks"
+        - "/speckit.implement"
+        - "/speckit.analyze"
+        - "/speckit.checklist"
+
+      prohibited_commands:
+        - "/speckit.constitution"
+        - "/speckit.specify"
+        - "/speckit.clarify"
+
+      reason: "CLI plans and implements, Web specifies requirements"
+
+  workflow_sequence:
+    # Proper Spec Kit workflow with agent coordination
+
+    - stage: "Phase -1: Constitution"
+      agent: "web-claude-designer-001"
+      command: "/speckit.constitution"
+      output: ".specify/memory/constitution.md"
+      handoff: "One-time setup, informs all future specs"
+
+    - stage: "Phase 0: Specification"
+      agent: "web-claude-designer-001"
+      command: "/speckit.specify"
+      output: "specs/NNN-feature-name/spec.md"
+      handoff: "spec_complete → CLI"
+
+    - stage: "Phase 1: Planning"
+      agent: "cli-claude-executor-001"
+      command: "/speckit.plan"
+      output: "specs/NNN-feature-name/plan.md"
+      handoff: "plan_complete → Web (for validation)"
+
+    - stage: "Phase 1.5: Validation"
+      agent: "web-claude-designer-001"
+      action: "Review plan.md against spec.md"
+      handoff: "plan_validated → CLI"
+
+    - stage: "Phase 2: Task Decomposition"
+      agent: "cli-claude-executor-001"
+      command: "/speckit.tasks"
+      output: "specs/NNN-feature-name/tasks.md"
+      handoff: "tasks_complete → CLI (self-handoff)"
+
+    - stage: "Phase 3: Implementation"
+      agent: "cli-claude-executor-001"
+      command: "/speckit.implement"
+      output: "src/**/*"
+      handoff: "implementation_complete → Web (for validation)"
+
+    - stage: "Phase 4: Validation"
+      agent: "web-claude-designer-001"
+      action: "Validate against spec.md success criteria"
+      handoff: "validation_complete → Stage complete"
+
+# ============================================================================
+# ENFORCEMENT CONFIGURATION
+# ============================================================================
+
+enforcement:
+  # How workspace boundaries are enforced
+
+  local:
+    mechanism: "git_hooks"
+    hook: ".githooks/pre-commit"
+    behavior: "BLOCKS commits violating boundaries"
+    validation_script: "tools/validate-workspace-boundaries.sh"
+    error_action: "Display ownership rules, suggest correct workflow"
+
+  remote:
+    mechanism: "github_actions"
+    workflow: ".github/workflows/workspace-validation.yml"
+    behavior: "Validates PRs, comments on violations"
+    validation: "Modified files vs branch owner vs manifest"
+    error_action: "Block merge, comment with violation details"
+
+  registry:
+    mechanism: "agent_registry_tracking"
+    file: ".claude/agent-registry.json"
+    behavior: "NON-BLOCKING visibility into agent activity"
+    update_triggers:
+      - "agent-start-work.sh execution"
+      - "agent-handoff.sh execution"
+      - "Checkpoint creation"
+      - "Session start/end"
+
+  override:
+    mechanism: "emergency_commit_message"
+    pattern: "[EMERGENCY] or [OVERRIDE]"
+    behavior: "Allows boundary violation if documented"
+    requirement: "Commit message must explain reason"
+    follow_up: "Create issue to update manifest if boundary wrong"
+
+# ============================================================================
+# EXTENSION POINTS
+# ============================================================================
+
+future_agents:
+  # Template for adding new agents
+
+  template:
+    agent_id: "new-agent-id"
+    display_name: "Agent Display Name"
+    role: "agent-role"
+    identity_file: ".claude/identity-{name}.json"
+    primary_ownership:
+      directories: []
+      files: []
+    shared_ownership:
+      directories: []
+      files: []
+    read_only:
+      directories: []
+      files: []
+    branch_pattern: "claude/{pattern}-*"
+    decision_scope_validation:
+      allowed_scopes: []
+
+  notes: |
+    When adding a new agent:
+    1. Create identity file (.claude/identity-{name}.json)
+    2. Add agent to this manifest
+    3. Update agent-registry.json
+    4. Update git hooks to recognize new agent
+    5. Update GitHub Actions workflows
+    6. Document in AGENT_WORKSPACE_COORDINATION.md
+
+# ============================================================================
+# METADATA
+# ============================================================================
+
+metadata:
+  created: "2025-11-13"
+  created_by: "web-claude-designer-001"
+  version: "1.0"
+  schema_version: "1.0"
+
+  related_documents:
+    - ".claude/identity-web.json"
+    - ".claude/identity-cli.json"
+    - ".claude/agent-registry.json"
+    - "decisions/2025-11-13-agent-workspace-coordination.md"
+    - "docs/AGENT_WORKSPACE_COORDINATION.md"
+    - "docs/THREE_ENVIRONMENT_COORDINATION.md"
+
+  validation:
+    last_validated: "2025-11-13"
+    validated_by: "web-claude-designer-001"
+    validation_method: "Foundation imperatives alignment check"
+    status: "active"
+
+  notes: |
+    This manifest is the source of truth for agent workspace boundaries.
+
+    If reality diverges from manifest:
+    1. Update manifest to match reality
+    2. Document reason for change
+    3. Update enforcement mechanisms
+    4. Commit with clear message
+
+    Manifest is configuration, not documentation.
+    Changes to manifest change agent behavior.
