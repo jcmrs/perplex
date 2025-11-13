@@ -7,7 +7,7 @@ on:
       - main
 
 concurrency:
-  group: perplex-merge
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
