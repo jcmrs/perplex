@@ -4,7 +4,8 @@
 
 # AI-First Strategy:
 # - No blanket ownership (enables auto-merge for routine work)
-# - Strategic files require human review (foundation, config, workflows, decisions)
+# - Strategic files require human review (foundation, config, decisions)
+# - Workflows can auto-merge (enable autonomous automation fixes)
 # - Balance between AI autonomy and strategic oversight
 
 # Foundation and core configuration
@@ -13,10 +14,6 @@
 /LICENSE @jcmrs
 /docs/PRODUCT_VISION.md @jcmrs
 /config/ @jcmrs
-
-# GitHub configuration
-# Changes to workflows, templates, and automation
-/.github/ @jcmrs
 
 # Documentation
 # AI can propose, human reviews for alignment
