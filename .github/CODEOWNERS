@@ -20,7 +20,16 @@
 
 # Documentation
 # AI can propose, human reviews for alignment
-/docs/ @jcmrs
+# EXCEPTION: Perplexity research prompts auto-merge (external consultation requests)
+/docs/PERPLEXITY_PROMPT_*.md
+
+# Strategic documentation requires review
+/docs/PRODUCT_VISION.md @jcmrs
+/docs/ARCHITECTURE.md @jcmrs
+/docs/DEVELOPMENT_GUIDE.md @jcmrs
+
+# Other documentation can be reviewed by AI agents
+/docs/
 
 # Decisions
 # All ADRs should be reviewed
