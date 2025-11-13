@@ -1,1 +1,1 @@
-checkpoint-20251112-194726-multi-agent-coordination-stage1-complete.md
+checkpoint-20251113-003309-methodology-architecture-formalized.md
