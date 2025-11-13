@@ -91,10 +91,40 @@ $ git show origin/main:README.md | grep -A 5 "Multi-Agent"
 
 **User observation:** "AGAIN I see those weird repeating github actions duplicates, one red, next white, then two green, all with the same name"
 
+**LIVE EXAMPLE (2025-11-13):**
+When PR #45 was manually merged, 4 workflows triggered simultaneously:
+
+1. ⚪ **Cleanup Checkpoint Branches** - https://github.com/jcmrs/perplex/actions/runs/19331050479
+   - Status: Success (white icon)
+   - Trigger: `pull_request` closed event
+   - Duration: 1s
+
+2. ✅ **Foundation Validation** - https://github.com/jcmrs/perplex/actions/runs/19331050467
+   - Status: Success (green icon)
+   - Trigger: `push` to main (commit 657ed22)
+   - Duration: 9s
+
+3. ✅ **Tests** - https://github.com/jcmrs/perplex/actions/runs/19331050458
+   - Status: Success (green icon)
+   - Trigger: `push` to main (commit 657ed22)
+   - Duration: 32s
+
+4. ❌ **Workspace Validation** - https://github.com/jcmrs/perplex/actions/runs/19331050144
+   - Status: Failed (red icon)
+   - Trigger: `push` to main (commit 657ed22)
+   - Duration: Unknown (failure)
+
+**All workflows:**
+- Triggered within same minute
+- All show same commit message: "Create comprehensive Perplexity research prompt: GitHub cache and workflow duplication"
+- Pattern: white, green, green, red
+- User sees duplicate workflow runs with different statuses
+
 **Workflow architecture:**
 - `.github/workflows/auto-create-pr-claude-branches.yml` - Creates PR on push to `claude/*`
 - `.github/workflows/auto-merge-claude-branches.yml` - Validates and merges PR
 - `.github/workflows/checkpoint-automation.yml` - Creates checkpoint after merge
+- `.github/workflows/cleanup-checkpoint-branches.yml` - Deletes merged branches
 - Multiple validation workflows (foundation, completeness, tests, workspace)
 
 **Trigger pattern:**
@@ -107,12 +137,15 @@ on:
     types: [opened, synchronize]
 ```
 
+**Single merge event triggered 4 workflows** - This is the duplication pattern.
+
 **Observed git history pattern:**
 ```
-ddc7653 Create revised Perplexity research prompt [...] (#44)  ← PR merge
-e589ce7 Merge Add repository sync step to CLI prompt          ← Merge commit
-db8a93e Create Perplexity research prompt [...]               ← Direct commit
-cdc6746 Add repository sync step to CLI prompt                ← Original commit
+657ed22 Create comprehensive Perplexity research prompt [...] (#45)  ← Just merged
+ddc7653 Create revised Perplexity research prompt [...] (#44)        ← Previous PR
+e589ce7 Merge Add repository sync step to CLI prompt                ← Merge commit
+db8a93e Create Perplexity research prompt [...]                     ← Direct commit
+cdc6746 Add repository sync step to CLI prompt                      ← Original commit
 ```
 
 ### Questions for Perplexity AI
