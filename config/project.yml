@@ -24,16 +24,45 @@ project:
         - "Validate alignment with vision"
         - "Approve major architectural decisions"
         - "Provide domain context AI cannot infer"
+        - "Coordinate between CDIR and CEXE agents"
       technical_level: "non-technical"
 
-    ai_agent:
-      role: "Autonomous Developer"
-      responsibilities:
-        - "Execute development tasks"
-        - "Maintain documentation and systems"
-        - "Make tactical technical decisions"
-        - "Document decisions and rationale"
-        - "Preserve continuity across sessions"
+    ai_agents:
+      primary_designer:
+        agent_id: "cli-claude-director-001"
+        display_name: "Claude Code CLI-Director (CDIR)"
+        role: "designer-researcher"
+        terminal: "PowerShell-Terminal-1"
+        environment: "Windows PowerShell"
+        responsibilities:
+          - "Create specifications and requirements"
+          - "Design architecture and make ADRs"
+          - "Maintain documentation"
+          - "Conduct research and validation"
+          - "Hand off specs to CEXE for implementation"
+
+      primary_executor:
+        agent_id: "cli-claude-executor-001"
+        display_name: "Claude Code CLI-Executor (CEXE)"
+        role: "executor-validator"
+        terminal: "PowerShell-Terminal-2"
+        environment: "Windows PowerShell"
+        responsibilities:
+          - "Implement features from CDIR specifications"
+          - "Create technical plans and task decomposition"
+          - "Write and execute tests"
+          - "Validate implementations"
+          - "Hand off results to CDIR for validation"
+
+      standby_support:
+        agent_id: "web-claude-designer-001"
+        display_name: "Claude Code Web"
+        role: "standby-emergency"
+        status: "standby"
+        environment: "Browser-based"
+        responsibilities:
+          - "Emergency backup if CDIR unavailable"
+          - "Research support when requested"
 
 foundation:
   imperatives:

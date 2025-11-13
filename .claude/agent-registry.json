@@ -1,57 +1,83 @@
 {
   "$schema": "./registry-schema.json",
-  "registry_version": "2.0",
+  "registry_version": "3.0",
   "project": "perplex",
   "created": "2025-11-12T19:47:00Z",
-  "last_updated": "2025-11-13T02:30:00Z",
+  "last_updated": "2025-11-13T00:00:00Z",
   "agents": [
     {
       "agent_id": "web-claude-designer-001",
       "display_name": "Claude Code Web",
       "short_name": "Web",
-      "status": "active",
+      "status": "standby",
       "environment": "web-browser",
-      "role": "designer-researcher",
+      "role": "standby-emergency",
       "identity_file": ".claude/identity-web.json",
-      "git_branch": "claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si",
+      "git_branch": null,
       "first_active": "2025-11-12T00:00:00Z",
-      "last_active": "2025-11-13T02:30:00Z",
+      "last_active": "2025-11-13T00:00:00Z",
       "coordination": {
         "message_prefix": "[From: Web]",
-        "handoff_method": "detailed-prompts-via-user"
+        "handoff_method": "emergency-only"
       },
       "workspace": {
-        "current_work_branch": "claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si",
+        "current_work_branch": null,
         "active_specifications": [],
-        "workspace_state": "designing",
-        "current_work": "Stage 2: Workspace coordination enforcement implementation",
+        "workspace_state": "standby",
+        "current_work": "Standby for emergency activation",
         "next_handoff": null,
         "pending_handoffs": []
       }
     },
     {
+      "agent_id": "cli-claude-director-001",
+      "display_name": "Claude Code CLI-Director",
+      "short_name": "CDIR",
+      "status": "active",
+      "environment": "local-windows",
+      "role": "designer-researcher",
+      "identity_file": ".claude/identity-cli-director.json",
+      "git_branch": "claude/design-three-agent-config",
+      "first_active": "2025-11-13T00:00:00Z",
+      "last_active": "2025-11-13T00:00:00Z",
+      "coordination": {
+        "message_prefix": "[From: CDIR]",
+        "handoff_method": "specification-to-implementation"
+      },
+      "workspace": {
+        "current_work_branch": "claude/design-three-agent-config",
+        "active_specifications": [],
+        "workspace_state": "designing",
+        "current_work": "Three-agent migration configuration",
+        "next_handoff": null,
+        "pending_handoffs": []
+      },
+      "terminal": "PowerShell-Terminal-1"
+    },
+    {
       "agent_id": "cli-claude-executor-001",
-      "display_name": "Claude Code CLI",
-      "short_name": "CLI",
-      "status": "idle",
+      "display_name": "Claude Code CLI-Executor",
+      "short_name": "CEXE",
+      "status": "active",
       "environment": "local-windows",
       "role": "executor-validator",
-      "identity_file": ".claude/identity-cli.json",
+      "identity_file": ".claude/identity-cli-executor.json",
       "git_branch": "main",
       "first_active": "2025-11-12T18:44:00Z",
       "last_active": "2025-11-12T21:45:00Z",
       "coordination": {
-        "message_prefix": "[From: CLI]",
-        "handoff_method": "direct-execution"
+        "message_prefix": "[From: CEXE]",
+        "handoff_method": "implementation-to-validation"
       },
       "workspace": {
         "current_work_branch": null,
         "active_specifications": [],
         "workspace_state": "idle",
-        "current_work": null,
+        "current_work": "Awaiting specification handoff from CDIR",
         "next_handoff": null,
         "pending_handoffs": []
       },
+      "terminal": "PowerShell-Terminal-2",
       "notes": "Identity configuration complete. Stage 1 operational. Git hooks configured. Three-environment coordination understood. Workspace coordination ready."
     }
   ],
@@ -69,10 +95,21 @@
   },
   "metadata": {
     "purpose": "Track and coordinate multiple AI agents on Project Perplex",
-    "version": "2.0",
+    "version": "3.0",
     "maintained_by": "All active agents",
     "update_protocol": "Agent updates own entry when significant change",
     "changelog": {
+      "3.0": {
+        "date": "2025-11-13",
+        "changes": [
+          "Added CDIR (cli-claude-director-001) as primary designer",
+          "Updated Web to standby-emergency role",
+          "Renamed CLI to CEXE (cli-claude-executor-001)",
+          "Added terminal tracking for local agents",
+          "Three-agent architecture operational"
+        ],
+        "related": "ADR-012 (Three-Agent Architecture Migration)"
+      },
       "2.0": {
         "date": "2025-11-13",
         "changes": [
