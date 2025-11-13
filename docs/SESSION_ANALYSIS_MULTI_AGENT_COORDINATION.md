@@ -4,6 +4,13 @@
 **Session:** Discovery Phase - Local Claude Code CLI Onboarding
 **Prepared by:** Claude Code Web
 
+**HISTORICAL NOTE (2025-11-13):** This document reflects the original two-agent architecture (Web + CLI). Project Perplex has since evolved to a three-agent architecture:
+- **CDIR (CLI-Director)**: Primary designer, PowerShell Terminal 1 (replaces Web as primary designer)
+- **CEXE (CLI-Executor)**: Primary executor, PowerShell Terminal 2 (replaces CLI)
+- **Web**: Standby emergency backup, inactive
+
+The insights in this document remain valuable for understanding multi-agent coordination patterns, but references to "Web as primary designer" and "CLI as executor" should be understood in the context of the original architecture.
+
 ---
 
 ## Executive Summary

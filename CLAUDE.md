@@ -12,17 +12,27 @@
 
 0. **Anchor your identity:**
    ```bash
-   cat .claude/identity-web.json     # If you're Claude Code Web
-   cat .claude/identity-cli.json     # If you're Claude Code CLI
-   cat .claude/agent-registry.json   # Check active agents
+   # If you're CDIR (PowerShell Terminal 1)
+   cat .claude/identity-cli-director.json
+
+   # If you're CEXE (PowerShell Terminal 2)
+   cat .claude/identity-cli-executor.json
+
+   # If you're Web (browser, emergency only)
+   cat .claude/identity-web.json
+
+   # Check all active agents
+   cat .claude/agent-registry.json
    ```
 
    **Why this matters:** Know WHO you are before loading WHAT you're working on. Your identity file defines your role (designer vs executor), capabilities, autonomy level, and coordination protocols. Without identity anchoring, you risk confusing your actions with other agents or losing strategic awareness.
 
    **Quick self-check:**
-   - What's your agent_id and display_name?
-   - What's your role and primary function?
-   - What's your communication prefix? (e.g., `[From: Web]`)
+   - What's your agent_id? (CDIR: cli-claude-director-001, CEXE: cli-claude-executor-001, Web: web-claude-designer-001)
+   - What's your short_name? (CDIR, CEXE, or Web)
+   - What's your role? (designer-researcher, executor-validator, or standby-emergency)
+   - What's your terminal? (PowerShell-Terminal-1, PowerShell-Terminal-2, or browser)
+   - What's your communication prefix? (e.g., `[From: CDIR]`)
    - Who else is active? (check agent registry)
 
 1. **Load the latest checkpoint:**
@@ -58,22 +68,41 @@
 
 ## 🤝 Multi-Agent Coordination
 
-**Project Perplex uses multiple AI agents collaborating on the same project.**
+**Project Perplex uses three AI agents with distinct roles:**
 
 ### Active Agents
 
-Check `.claude/agent-registry.json` for current agents. As of 2025-11-12:
+**CDIR (CLI-Director) - Primary Designer:**
+- **Environment:** PowerShell Terminal Window 1 (local Windows)
+- **Agent ID:** cli-claude-director-001
+- **Role:** Designer-researcher
+- **Primary Function:** Create specifications, ADRs, documentation, requirements
+- **Spec Kit Commands:** `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/speckit.analyze`, `/speckit.checklist`
+- **Branch Pattern:** `claude/design-*`
+- **Workspace Ownership:** `decisions/`, `docs/`, `requirements/`, `ideas/`, `specs/*/spec.md`
 
-- **Claude Code Web (Web):** Designer-researcher role, web-based environment
-- **Claude Code CLI (CLI):** Executor-validator role, local Windows environment
+**CEXE (CLI-Executor) - Primary Executor:**
+- **Environment:** PowerShell Terminal Window 2 (local Windows)
+- **Agent ID:** cli-claude-executor-001
+- **Role:** Executor-validator
+- **Primary Function:** Implement features, write tests, validate implementations
+- **Spec Kit Commands:** `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, `/speckit.analyze`, `/speckit.checklist`
+- **Branch Pattern:** `claude/impl-*`
+- **Workspace Ownership:** `src/`, `tests/`, `specs/*/plan.md`, `specs/*/tasks.md`, `specs/*/implementation/`
+
+**Web (Standby) - Emergency Backup:**
+- **Environment:** Browser-based (inactive unless emergency)
+- **Agent ID:** web-claude-designer-001
+- **Role:** Standby-emergency
+- **Status:** Inactive (standby)
+- **Activation:** Manual, only if CDIR unavailable >24 hours
+- **Branch Pattern:** `claude/web-emergency-*`
 
 ### Identity Configuration
 
-**Each agent has an identity file:**
-- `.claude/identity-web.json` - Claude Code Web
-- `.claude/identity-cli.json` - Claude Code CLI
+Check `.claude/agent-registry.json` for current agent status.
 
-**What identity files contain:**
+**Your identity file defines:**
 - agent_id and display_name (who you are)
 - role and primary_function (what you do)
 - capabilities and constraints (how you operate)
@@ -87,43 +116,50 @@ Check `.claude/agent-registry.json` for current agents. As of 2025-11-12:
 
 **Usage:**
 ```
-[From: Web] Designed identity management system. Implementation complete.
-[From: CLI] Stage 1 setup complete. basic-memory operational.
+[From: CDIR] Designed feature specification. Ready for CEXE implementation.
+[From: CEXE] Implementation complete. Validation requested from CDIR.
+[From: Web] Emergency: Continuing CDIR's work during unavailability.
 ```
 
 **Why this matters:**
 - User immediately knows which agent is speaking
-- No confusion between Web's analysis and CLI's execution
+- No confusion between CDIR's design and CEXE's execution
 - Clear handoff points in multi-agent workflows
-- Maintains role clarity (designer vs executor)
+- Maintains role clarity
 
 **Your prefix:** Check your identity file's `coordination.message_prefix` field.
 
 ### Coordination Conventions
 
 **Role Boundaries:**
-- **Web (Designer-Researcher):** Architecture, research, specifications, detailed prompts
-- **CLI (Executor-Validator):** Implementation, testing, validation, hands-on work
+- **CDIR (Designer):** Architecture, specifications, ADRs, documentation, requirements
+- **CEXE (Executor):** Implementation, testing, validation, technical decomposition
+- **Web (Standby):** Emergency backup, research support only
 
-**Handoff Pattern:**
-1. Web creates detailed guidance/prompts
-2. User copies to CLI
-3. CLI executes autonomously
-4. CLI reports results (with `[From: CLI]` prefix)
-5. Web reviews and integrates
+**Handoff Pattern (CDIR ↔ CEXE):**
+1. CDIR creates specification (`spec.md`)
+2. CDIR updates agent registry: spec ready for CEXE
+3. CEXE reads spec, creates plan (`plan.md`)
+4. CEXE updates agent registry: plan ready for CDIR validation
+5. CDIR reviews plan, validates against spec
+6. CDIR updates agent registry: plan approved
+7. CEXE creates tasks (`tasks.md`), implements
+8. CEXE updates agent registry: implementation ready for validation
+9. CDIR validates implementation against spec success criteria
 
-**Autonomy:** Both agents operate with high autonomy. Make technical decisions independently, escalate only strategic questions.
+**Autonomy:** Both CDIR and CEXE operate with high autonomy. Make technical decisions independently, escalate only strategic questions.
 
 **Git Coordination:**
-- Web typically works on feature branches (`claude/*`)
-- CLI can work on `main` or feature branches
+- CDIR: Works on `claude/design-*` branches
+- CEXE: Works on `claude/impl-*` branches
 - Coordinate merge strategy via agent registry notes
 
 ### Documentation
 
 **Setup Guidance:**
+- CDIR identity setup: @docs/IDENTITY_SETUP_PROMPT_CDIR.md
+- CEXE identity setup: @docs/IDENTITY_SETUP_PROMPT_CEXE.md
 - Web identity setup: Part of this repository
-- CLI identity setup: @docs/IDENTITY_SETUP_PROMPT_CLI.md
 
 **Coordination Analysis:**
 - Three-environment architecture: @docs/SESSION_ANALYSIS_MULTI_AGENT_COORDINATION.md
@@ -225,38 +261,99 @@ Creates checkpoint + memory graph. Use at phase transitions or major milestones.
 ```
 Runs validation, completeness review, shows summary. Use before ending session.
 
-**Spec-Driven Development (CLI agents only):**
+**Spec-Driven Development (CDIR and CEXE only):**
+
+**IMPORTANT:** CDIR and CEXE have different Spec Kit command access based on their roles.
+
+### CDIR Commands (PowerShell Terminal 1)
+
 ```bash
-# Establish project principles (one-time)
+# Establish project principles (one-time, or update when needed)
 /speckit.constitution
 
-# Create feature specification
+# Create feature specification (what to build, why, success criteria)
 /speckit.specify "Feature description"
 
-# Optional: Clarify ambiguities (max 3 questions)
+# Optional: Clarify ambiguities (max 3 targeted questions)
 /speckit.clarify
 
-# Generate technical plan
-/speckit.plan
-
-# Break down into atomic tasks
-/speckit.tasks
-
-# Optional: Validate cross-artifact consistency
+# Validate cross-artifact consistency
 /speckit.analyze
 
-# Execute implementation
-/speckit.implement
+# Generate quality validation checklist
+/speckit.checklist
 ```
+
+**CDIR Workflow:**
+1. Define project constitution (principles, standards)
+2. Create feature specification (what, why, success criteria)
+3. Clarify ambiguities with user if needed
+4. Validate specification completeness
+5. Hand off to CEXE via agent registry
+
+### CEXE Commands (PowerShell Terminal 2)
+
+```bash
+# Generate technical plan from CDIR's specification
+/speckit.plan
+
+# Break down plan into atomic tasks
+/speckit.tasks
+
+# Execute implementation following tasks
+/speckit.implement
+
+# Validate cross-artifact consistency
+/speckit.analyze
+
+# Generate quality validation checklist
+/speckit.checklist
+```
+
+**CEXE Workflow:**
+1. Read CDIR's specification
+2. Create technical plan (how to build it)
+3. Get CDIR validation on plan
+4. Decompose plan into atomic tasks
+5. Execute implementation
+6. Hand back to CDIR for validation
+
+### Full Three-Agent Workflow
+
+**Phase 0: Specification (CDIR)**
+- CDIR creates `spec.md` (what, why, success criteria)
+- CDIR hands off to CEXE
+
+**Phase 1: Planning (CEXE)**
+- CEXE reads spec
+- CEXE creates `plan.md` (how to build it)
+- CEXE hands back to CDIR for validation
+
+**Phase 2: Plan Validation (CDIR)**
+- CDIR reviews plan against spec
+- CDIR validates or requests changes
+- CDIR approves → hands back to CEXE
+
+**Phase 3: Execution (CEXE)**
+- CEXE creates `tasks.md` (atomic steps)
+- CEXE implements following tasks
+- CEXE runs tests
+- CEXE hands back to CDIR for validation
+
+**Phase 4: Implementation Validation (CDIR)**
+- CDIR validates against spec success criteria
+- CDIR marks complete or requests changes
+
+**Coordination:** Via agent registry (`.claude\agent-registry.json`) and optional handoff markers (`.claude\handoffs\*.json`)
 
 **When to use Spec-Driven Development:**
 - Phase 1 implementations (perplex-transformer, perplex-reader)
 - New feature development requiring formal specifications
 - Complex work needing structured decomposition
-- When building something that Web has designed/specified
+- When building something Web has designed/specified
 
 **When NOT to use Spec-Driven Development:**
-- Discovery phase exploration (ADR-010: Discovery-Driven is project level)
+- Discovery phase exploration
 - Bug fixes or minor changes
 - Infrastructure setup
 - Documentation work

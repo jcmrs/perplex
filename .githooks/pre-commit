@@ -10,6 +10,24 @@ echo ""
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 cd "$PROJECT_ROOT"
 
+# Detect which agent is committing (three-agent architecture)
+AGENT_ID="unknown"
+AGENT_NAME="Unknown"
+
+if [ -f ".claude/identity-cli-director.json" ]; then
+    AGENT_ID="cli-claude-director-001"
+    AGENT_NAME="CDIR"
+elif [ -f ".claude/identity-cli-executor.json" ]; then
+    AGENT_ID="cli-claude-executor-001"
+    AGENT_NAME="CEXE"
+elif [ -f ".claude/identity-web.json" ]; then
+    AGENT_ID="web-claude-designer-001"
+    AGENT_NAME="Web"
+fi
+
+echo "Pre-commit: Agent $AGENT_NAME ($AGENT_ID)"
+echo ""
+
 # Run foundation validation
 if [ -f "tools/validate-foundation.sh" ]; then
     echo "Running foundation validation..."
@@ -26,11 +44,65 @@ else
     echo "   Skipping validation..."
 fi
 
-# Run workspace boundary validation
+# Workspace boundary validation (three-agent architecture)
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Workspace Boundary Validation"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+MODIFIED_FILES=$(git diff --cached --name-only)
+VIOLATIONS=()
+
+for FILE in $MODIFIED_FILES; do
+    # CDIR primary ownership
+    if [ "$AGENT_ID" = "cli-claude-director-001" ]; then
+        # CDIR should NOT directly modify implementation artifacts
+        if [[ "$FILE" =~ ^src/ ]] || \
+           [[ "$FILE" =~ ^tests/ ]] || \
+           [[ "$FILE" =~ specs/.*/plan\.md$ ]] || \
+           [[ "$FILE" =~ specs/.*/tasks\.md$ ]]; then
+            VIOLATIONS+=("$FILE (CDIR should not modify implementation)")
+        fi
+    fi
+
+    # CEXE primary ownership
+    if [ "$AGENT_ID" = "cli-claude-executor-001" ]; then
+        # CEXE should NOT directly modify design artifacts
+        if [[ "$FILE" =~ ^decisions/ ]] || \
+           [[ "$FILE" =~ ^requirements/ ]] || \
+           [[ "$FILE" =~ specs/.*/spec\.md$ ]] || \
+           [[ "$FILE" =~ \.specify/memory/constitution\.md$ ]]; then
+            VIOLATIONS+=("$FILE (CEXE should not modify design)")
+        fi
+    fi
+
+    # Web should only modify in emergency
+    if [ "$AGENT_ID" = "web-claude-designer-001" ]; then
+        # Check if emergency branch
+        CURRENT_BRANCH=$(git branch --show-current)
+        if [[ ! "$CURRENT_BRANCH" =~ ^claude/web-emergency- ]]; then
+            VIOLATIONS+=("$FILE (Web not on emergency branch)")
+        fi
+    fi
+done
+
+if [ ${#VIOLATIONS[@]} -gt 0 ]; then
+    echo "❌ Workspace boundary violations detected:"
+    for VIOLATION in "${VIOLATIONS[@]}"; do
+        echo "  - $VIOLATION"
+    done
+    echo ""
+    echo "Check .claude/workspace-coordination.yml for agent boundaries"
+    echo "To override (NOT recommended): git commit --no-verify"
+    exit 1
+fi
+
+echo "✓ Workspace boundaries validated"
+echo ""
+
+# Run workspace boundary validation (legacy script if exists)
 if [ -f "tools/validate-workspace-boundaries.sh" ]; then
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "Workspace Boundary Validation"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Running legacy workspace validation..."
     echo ""
 
     # Get staged files

@@ -1,8 +1,8 @@
 {
   "$schema": "./identity-schema.json",
   "agent_id": "cli-claude-executor-001",
-  "display_name": "Claude Code CLI",
-  "short_name": "CLI",
+  "display_name": "Claude Code CLI-Executor",
+  "short_name": "CEXE",
   "environment": "local-windows",
   "role": "executor-validator",
   "owner": "Project Perplex Team",
@@ -29,13 +29,16 @@
     "Glob",
     "MCP",
     "SystemAccess",
-    "LocalFileSystem"
+    "LocalFileSystem",
+    "SpecKit",
+    "GitFull"
   ],
   "constraints": {
     "windows_environment": true,
     "local_system_access": true,
     "mcp_tools_available": true,
-    "direct_git_access": true
+    "direct_git_access": true,
+    "spec_kit_available": true
   },
   "responsibilities": {
     "primary": [
@@ -46,7 +49,7 @@
       "Document execution results"
     ],
     "collaboration": [
-      "Receive detailed prompts from Claude Code Web",
+      "Receive specifications from CDIR",
       "Execute with strategic awareness",
       "Report results with full context",
       "Update coordination registry when needed"
@@ -54,15 +57,44 @@
   },
   "coordination": {
     "communication_pattern": "envelope",
-    "message_prefix": "[From: CLI]",
-    "handoff_protocol": "direct-execution",
-    "verification_required": true
+    "message_prefix": "[From: CEXE]",
+    "handoff_protocol": "implementation-to-validation",
+    "verification_required": true,
+    "primary_handoff_source": "cli-claude-director-001"
   },
   "session_info": {
     "started": "2025-11-12T18:44:00Z",
     "session_type": "local-cli",
-    "context_persistence": "session-state-json",
-    "state_management": "local-session-state"
+    "context_persistence": "mcp-memory",
+    "state_management": "local-session-state",
+    "terminal": "PowerShell-Terminal-2"
+  },
+  "spec_kit": {
+    "role": "implementation-executor",
+    "allowed_commands": [
+      "/speckit.plan",
+      "/speckit.tasks",
+      "/speckit.implement",
+      "/speckit.analyze",
+      "/speckit.checklist"
+    ],
+    "prohibited_commands": [
+      "/speckit.constitution",
+      "/speckit.specify",
+      "/speckit.clarify"
+    ],
+    "workflow_stage": "Phase 1-3: Planning, Tasks, Implementation"
+  },
+  "workspace": {
+    "primary_ownership": [
+      "src/",
+      "tests/",
+      "specs/*/plan.md",
+      "specs/*/tasks.md",
+      "specs/*/implementation/"
+    ],
+    "branch_pattern": "claude/impl-*",
+    "branch_naming": "claude/impl-{description}-{timestamp}"
   },
   "stage1_completion": {
     "basic_memory_installed": true,
@@ -75,6 +107,7 @@
     "created": "2025-11-12T21:45:00Z",
     "version": "1.0",
     "schema_version": "1.0",
-    "last_updated": "2025-11-12T21:45:00Z"
+    "last_updated": "2025-11-13T00:00:00Z",
+    "migration_phase": "phase-2"
   }
 }

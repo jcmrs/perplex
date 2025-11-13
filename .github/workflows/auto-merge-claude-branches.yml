@@ -27,6 +27,52 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Detect agent from branch name
+        id: detect-agent
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Branch: $BRANCH_NAME"
+
+          if [[ "$BRANCH_NAME" =~ ^claude/design- ]]; then
+            AGENT_NAME="CDIR"
+            AGENT_FULL_NAME="CLI-Director"
+            CAN_AUTO_MERGE="true"
+            echo "Agent: CDIR (Designer-Researcher)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/impl- ]]; then
+            AGENT_NAME="CEXE"
+            AGENT_FULL_NAME="CLI-Executor"
+            CAN_AUTO_MERGE="true"
+            echo "Agent: CEXE (Executor-Validator)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/web-emergency- ]]; then
+            AGENT_NAME="Web"
+            AGENT_FULL_NAME="Web Emergency"
+            CAN_AUTO_MERGE="false"
+            echo "Agent: Web (Emergency Standby - REQUIRES MANUAL APPROVAL)"
+          else
+            AGENT_NAME="Claude"
+            AGENT_FULL_NAME="Claude Agent"
+            CAN_AUTO_MERGE="true"
+            echo "Agent: Unknown pattern (allowing auto-merge)"
+          fi
+
+          echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+          echo "agent_full_name=$AGENT_FULL_NAME" >> $GITHUB_OUTPUT
+          echo "can_auto_merge=$CAN_AUTO_MERGE" >> $GITHUB_OUTPUT
+
+      - name: Check Web emergency branch (requires manual approval)
+        if: steps.detect-agent.outputs.can_auto_merge == 'false'
+        run: |
+          echo "⚠️  Web emergency branch detected"
+          echo "Merge rule: Requires manual approval (emergency only)"
+          echo ""
+          echo "Web agent should only be active when:"
+          echo "  - CDIR unavailable for >24 hours"
+          echo "  - Critical emergency requiring immediate action"
+          echo ""
+          echo "This PR will NOT be auto-merged."
+          echo "Human review and manual merge required."
+          exit 1
+
       - name: Run foundation validation
         id: validation
         run: |
@@ -45,6 +91,9 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
 
+            const agentName = '${{ steps.detect-agent.outputs.agent_name }}';
+            const agentFullName = '${{ steps.detect-agent.outputs.agent_full_name }}';
+
             // Add comment explaining auto-merge
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -52,13 +101,16 @@ jobs:
               issue_number: pr.number,
               body: `## ✅ Auto-merge Initiated
 
-              This PR is from a Claude Code branch and has passed validation:
+              **Agent:** ${agentFullName} (${agentName})
+              **Branch:** \`${pr.head.ref}\`
+
+              This PR has passed all validation checks:
+              - Agent detection: ✅ ${agentName}
               - Foundation validation: ✅ Passed
               - All required checks: ✅ Passed
 
-              Merging automatically per AI-First workflow policy.
+              Merging automatically per three-agent AI-First workflow policy.
 
-              Branch: \`${pr.head.ref}\`
               Workflow: \`.github/workflows/auto-merge-claude-branches.yml\`
               `
             });

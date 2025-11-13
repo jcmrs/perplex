@@ -27,21 +27,32 @@ jobs:
           BRANCH_NAME="${{ github.head_ref }}"
           echo "Branch: $BRANCH_NAME"
 
-          if [[ "$BRANCH_NAME" =~ ^claude/cli- ]]; then
+          if [[ "$BRANCH_NAME" =~ ^claude/design- ]]; then
+            AGENT_ID="cli-claude-director-001"
+            AGENT_NAME="CDIR"
+            AGENT_FULL_NAME="Claude Code CLI-Director"
+            echo "Agent: CDIR (Designer-Researcher)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/impl- ]]; then
             AGENT_ID="cli-claude-executor-001"
-            AGENT_NAME="Claude Code CLI"
-          elif [[ "$BRANCH_NAME" =~ ^claude/ ]]; then
+            AGENT_NAME="CEXE"
+            AGENT_FULL_NAME="Claude Code CLI-Executor"
+            echo "Agent: CEXE (Executor-Validator)"
+          elif [[ "$BRANCH_NAME" =~ ^claude/web-emergency- ]]; then
             AGENT_ID="web-claude-designer-001"
-            AGENT_NAME="Claude Code Web"
+            AGENT_NAME="Web"
+            AGENT_FULL_NAME="Claude Code Web"
+            echo "Agent: Web (Emergency Standby)"
           else
             AGENT_ID="unknown"
-            AGENT_NAME="Unknown Agent"
+            AGENT_NAME="Unknown"
+            AGENT_FULL_NAME="Unknown Agent"
           fi
 
           echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
           echo "agent_name=$AGENT_NAME" >> $GITHUB_OUTPUT
+          echo "agent_full_name=$AGENT_FULL_NAME" >> $GITHUB_OUTPUT
 
-          echo "Detected agent: $AGENT_NAME ($AGENT_ID)"
+          echo "Detected agent: $AGENT_FULL_NAME ($AGENT_ID)"
 
       - name: Get changed files
         id: changed-files
@@ -122,13 +133,15 @@ jobs:
         with:
           script: |
             const agentName = '${{ steps.detect-agent.outputs.agent_name }}';
+            const agentFullName = '${{ steps.detect-agent.outputs.agent_full_name }}';
             const agentId = '${{ steps.detect-agent.outputs.agent_id }}';
             const violationCount = '${{ steps.validate.outputs.violation_count }}';
             const violations = `${{ steps.validate.outputs.violations }}`;
 
             const comment = `## ⚠️ Workspace Boundary Violations
 
-**Agent:** ${agentName} (\`${agentId}\`)
+**Agent:** ${agentFullName} (${agentName})
+**Agent ID:** \`${agentId}\`
 **Branch:** \`${{ github.head_ref }}\`
 **Violations:** ${violationCount}
 
@@ -138,20 +151,29 @@ ${violations}
 
 ### Workspace Rules
 
-**Web (Claude Code Web) owns:**
+**CDIR (CLI-Director) owns:**
 - \`decisions/\` - Architecture Decision Records
 - \`docs/\` - Documentation
+- \`requirements/\` - Requirements and traceability
+- \`ideas/\` - Idea capture
 - \`specs/*/spec.md\` - Feature specifications
+- \`.specify/memory/constitution.md\` - Project constitution
 
-**CLI (Claude Code CLI) owns:**
+**CEXE (CLI-Executor) owns:**
 - \`src/\` - Implementation code
 - \`tests/\` - Test code
-- \`specs/*/plan.md\`, \`specs/*/tasks.md\` - Technical plans and tasks
+- \`specs/*/plan.md\` - Technical implementation plans
+- \`specs/*/tasks.md\` - Atomic task decomposition
+- \`specs/*/implementation/\` - Implementation artifacts
 
-**Shared (both can modify):**
+**Web (Emergency Standby) owns:**
+- Same as CDIR (only active in emergencies)
+
+**Shared (all can modify):**
 - \`sessions/\` - Session logs
 - \`checkpoints/\` - Checkpoints
 - \`.claude/agent-registry.json\` - Agent coordination
+- \`.claude/handoffs/\` - Handoff markers
 
 ### Resolution
 
@@ -194,18 +216,20 @@ Edit \`.claude/workspace-coordination.yml\` in separate PR first.
         with:
           script: |
             const agentName = '${{ steps.detect-agent.outputs.agent_name }}';
+            const agentFullName = '${{ steps.detect-agent.outputs.agent_full_name }}';
             const agentId = '${{ steps.detect-agent.outputs.agent_id }}';
             const fileCount = '${{ steps.changed-files.outputs.file_count }}';
 
             const comment = `## ✅ Workspace Validation Passed
 
-**Agent:** ${agentName} (\`${agentId}\`)
+**Agent:** ${agentFullName} (${agentName})
+**Agent ID:** \`${agentId}\`
 **Files checked:** ${fileCount}
 **Status:** All files respect workspace boundaries
 
 ---
 
-*Workspace coordination enforces proper agent boundaries. Great work!*
+*Three-agent workspace coordination enforces proper boundaries between CDIR (designer), CEXE (executor), and Web (emergency). Great work!*
             `;
 
             github.rest.issues.createComment({

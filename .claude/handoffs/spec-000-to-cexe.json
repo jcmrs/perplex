@@ -1,0 +1,86 @@
+{
+  "$schema": "../handoff-schema.json",
+  "handoff_id": "spec-000-to-cexe",
+  "type": "specification-to-plan",
+  "created": "2025-11-13T21:10:00Z",
+  "from_agent": {
+    "agent_id": "cli-claude-director-001",
+    "display_name": "Claude Code CLI-Director",
+    "short_name": "CDIR",
+    "terminal": "PowerShell-Terminal-1"
+  },
+  "to_agent": {
+    "agent_id": "cli-claude-executor-001",
+    "display_name": "Claude Code CLI-Executor",
+    "short_name": "CEXE",
+    "terminal": "PowerShell-Terminal-2"
+  },
+  "specification": {
+    "spec_id": "000-migration-test",
+    "spec_file": "specs/000-migration-test/spec.md",
+    "title": "Three-Agent Migration Test",
+    "purpose": "Validate CDIR → CEXE → CDIR coordination workflow",
+    "scope": "Simple hello_world() function implementation with test"
+  },
+  "context": {
+    "phase": "migration-testing",
+    "branch": "claude/design-three-agent-config",
+    "migration_phase": "Phase 7: Validation & Testing",
+    "test_scenario": "Full three-agent coordination cycle"
+  },
+  "deliverables_expected": {
+    "plan": "specs/000-migration-test/plan.md",
+    "tasks": "specs/000-migration-test/tasks.md",
+    "implementation": [
+      "src/hello.py",
+      "tests/test_hello.py"
+    ],
+    "validation": "Tests pass with pytest"
+  },
+  "success_criteria": [
+    "Plan created with technical approach",
+    "Tasks decomposed atomically",
+    "Implementation matches specification exactly",
+    "Tests pass: pytest tests/test_hello.py",
+    "No workspace boundary violations",
+    "Agent registry updated at each step",
+    "Handoff marker created for return to CDIR"
+  ],
+  "instructions_for_cexe": {
+    "step_1": "Read specification: specs/000-migration-test/spec.md",
+    "step_2": "Create technical plan: specs/000-migration-test/plan.md",
+    "step_3": "Decompose into atomic tasks: specs/000-migration-test/tasks.md",
+    "step_4": "Implement function: src/hello.py with hello_world() returning 'Hello from CEXE'",
+    "step_5": "Create test: tests/test_hello.py validating return value",
+    "step_6": "Run tests: pytest tests/test_hello.py (must pass)",
+    "step_7": "Update agent registry: mark CEXE as waiting, add implementation handoff to CDIR",
+    "step_8": "Create handoff marker: .claude/handoffs/impl-000-to-cdir.json",
+    "step_9": "Commit all work with message: '[CEXE] [Migration Test] Implement spec 000-migration-test'"
+  },
+  "coordination": {
+    "handoff_method": "human-intermediary",
+    "user_action_required": "Open PowerShell Terminal 2, paste CEXE prompt, execute steps",
+    "return_handoff": "CEXE creates .claude/handoffs/impl-000-to-cdir.json when complete"
+  },
+  "workspace_boundaries": {
+    "cdir_owns": [
+      "specs/000-migration-test/spec.md"
+    ],
+    "cexe_owns": [
+      "specs/000-migration-test/plan.md",
+      "specs/000-migration-test/tasks.md",
+      "src/hello.py",
+      "tests/test_hello.py"
+    ],
+    "shared": [
+      ".claude/agent-registry.json",
+      ".claude/handoffs/"
+    ]
+  },
+  "validation_protocol": {
+    "cexe_self_validation": "Tests must pass before marking complete",
+    "cdir_final_validation": "CDIR validates implementation matches spec after handoff return"
+  },
+  "status": "pending",
+  "notes": "This is Phase 7 Part A → Part B handoff. CEXE will boot in Terminal 2 and execute Parts B-E."
+}
