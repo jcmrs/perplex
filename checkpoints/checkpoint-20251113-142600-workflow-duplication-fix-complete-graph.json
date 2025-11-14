@@ -1,0 +1,42 @@
+{
+  "checkpoint_id": "checkpoint-20251113-142600-workflow-duplication-fix-complete",
+  "timestamp": "2025-11-13T14:26:01Z",
+  "phase": "foundation",
+  "next_phase": "discovery",
+
+  "critical_files": [
+    {"path": "FOUNDATION.md", "reason": "Core principles and imperatives", "priority": "critical"},
+    {"path": "docs/PRODUCT_VISION.md", "reason": "Mission and goals", "priority": "critical"}
+  ],
+
+  "active_work": {
+    "focus": "CLI agent guidance - Stage 1 knowledge graph setup and perplex-transformer spec work. Test workflow deduplication. Close PR #46 and #53.",
+    "blockers": [],
+    "next_steps": []
+  },
+
+  "relationships": {
+    "2025-11-10-foundation-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-10-foundation-methodology": {"type": "decision", "status": "active"},
+    "2025-11-11-checkpoint-automation-strategy": {"type": "decision", "status": "active"},
+    "2025-11-11-claude-md-architecture": {"type": "decision", "status": "active"},
+    "2025-11-11-completeness-review-enhancements": {"type": "decision", "status": "active"},
+    "2025-11-11-testing-infrastructure": {"type": "decision", "status": "active"},
+    "2025-11-12-basic-memory-as-stage1-foundation": {"type": "decision", "status": "active"},
+    "2025-11-12-methodology-architecture": {"type": "decision", "status": "active"},
+    "2025-11-12-perplexity-integration-architecture": {"type": "decision", "status": "active"},
+    "2025-11-13-agent-workspace-coordination": {"type": "decision", "status": "active"}
+  },
+
+  "skip_for_now": [
+    "*/TEMPLATE.md",
+    "sessions/session-*.md",
+    "examples/*"
+  ],
+
+  "git_state": {
+    "branch": "main",
+    "last_commit": "b815679",
+    "last_commit_message": "Update README.md and document workflow duplication fix session"
+  }
+}

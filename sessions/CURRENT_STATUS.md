@@ -1,8 +1,8 @@
 # Current Project Status
 
-**Last Updated:** 2025-11-13 02:11 UTC
+**Last Updated:** 2025-11-13 14:26 UTC
 **Phase:** foundation
-**Branch:** claude/overlooked-items-analysis-011CV35RoubgSRMHNVuYa7Si
+**Branch:** main
 
 ## Quick Context
 
@@ -12,28 +12,32 @@ Project Perplex is bridging local AI development tools with Perplexity AI's rese
 
 ### Git Status
 ```
+ M checkpoints/LATEST-graph.json
+ M checkpoints/LATEST.md
  M sessions/CURRENT_STATUS.md
+?? checkpoints/checkpoint-20251113-142600-workflow-duplication-fix-complete-graph.json
+?? checkpoints/checkpoint-20251113-142600-workflow-duplication-fix-complete.md
 ```
 
 ### Recent Commits
 ```
-fb1bae5 Merge Document session: Spec Kit integration and sequential strategy
-c313468 Update CURRENT_STATUS after session wrap-up
-a37dd9b Document session: Spec Kit integration and sequential strategy
-ff03390 Complete GitHub Spec Kit integration and documentation (#34)
-0749b54 Merge Define local automation strategy for Spec Kit integration
+b815679 Update README.md and document workflow duplication fix session
+0af2247 Merge Update Perplexity prompt with live workflow duplication evidence
+2031c01 Trigger workflows after CODEOWNERS removal and concurrency fix
+089389c Merge [EMERGENCY] Fix concurrency groups: make ref-specific to prevent duplicates
+1b883e5 Trigger workflows after CODEOWNERS removal
 ```
 
 ### Statistics
-- Decisions Logged: 10
-- Latest Session: session-20251113-spec-kit-integration-and-sequential-strategy.md
+- Decisions Logged: 11
+- Latest Session: session-20251113-workflow-duplication-fix.md
 
 ## Recent Decisions
 
 Last 3 decisions:
+- 2025-11-13-agent-workspace-coordination.md
 - 2025-11-12-methodology-architecture.md
 - 2025-11-12-basic-memory-as-stage1-foundation.md
-- 2025-11-12-perplexity-integration-architecture.md
 
 ## For Next Session
 
@@ -41,7 +45,7 @@ Last 3 decisions:
 2. Review this file for context
 3. Check recent decisions in `/decisions`
 4. Review `/docs/PRODUCT_VISION.md` for alignment
-5. Check latest session log: `sessions/session-20251113-spec-kit-integration-and-sequential-strategy.md`
+5. Check latest session log: `sessions/session-20251113-workflow-duplication-fix.md`
 
 ## Notes
 

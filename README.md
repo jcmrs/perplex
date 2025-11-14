@@ -27,11 +27,12 @@ Perplex aims to solve a common problem in AI-assisted development: the friction 
 ## 📊 Project Status
 
 **Phase:** Foundation Complete ✅ → Discovery Phase Ready
-**Status:** Multi-agent autonomous workflow operational with enforced workspace coordination
+**Status:** Multi-agent autonomous workflow operational with workflow duplication fix deployed
 
 **Major Breakthroughs:**
 - **2025-11-11:** Fully autonomous PR workflow (GitHub Actions + REST API)
-- **2025-11-13:** Multi-agent workspace coordination with enforcement (ADR-011)
+- **2025-11-13 AM:** Multi-agent workspace coordination with enforcement (ADR-011)
+- **2025-11-13 PM:** Workflow duplication fix - ref-specific concurrency groups deployed
 
 **Active Agents:**
 - **CDIR (CLI-Director)** - Primary designer (PowerShell Terminal 1): Specifications, ADRs, documentation
@@ -279,15 +280,34 @@ This will:
 
 **No manual "Compare & pull request" clicks required!**
 
+**Workflow Duplication Fix (2025-11-13):**
+
+Critical issue discovered: workflows triggering duplicate runs (push + pull_request events).
+
+**Root cause:** Static concurrency group names caused:
+- Push event triggers workflows (auto-create-pr, tests, workspace-validation)
+- PR created → pull_request event triggers SAME workflows again
+- Result: Tests runs twice, duplicated effort
+
+**Solution:** Ref-specific concurrency groups
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+**Impact:** Eliminates push+pull_request duplicates while maintaining concurrency control per-ref.
+
 **Key Technologies:**
 - GitHub Actions workflows for automation
 - GitHub REST API for PR creation (gh CLI blocked in environment)
 - `jq` for proper JSON construction
+- Ref-specific concurrency groups for deduplication
 - Idempotency checks throughout
 
-**Result:** True AI-First autonomy - AI agents work without human intervention in execution loop.
+**Result:** True AI-First autonomy - AI agents work without human intervention and without duplicate workflows.
 
-See [`docs/BRANCH_MANAGEMENT.md`](docs/BRANCH_MANAGEMENT.md) and [`checkpoints/GITHUB_AUTOMATION.md`](checkpoints/GITHUB_AUTOMATION.md) for complete details.
+See [`docs/BRANCH_MANAGEMENT.md`](docs/BRANCH_MANAGEMENT.md), [`checkpoints/GITHUB_AUTOMATION.md`](checkpoints/GITHUB_AUTOMATION.md), and [`docs/WORKFLOW_IDEMPOTENCY_IMPLEMENTATION.md`](docs/WORKFLOW_IDEMPOTENCY_IMPLEMENTATION.md) for complete details.
 
 ---
 
@@ -525,12 +545,13 @@ For questions or feedback:
 
 ---
 
-**Last Updated:** 2025-11-13
+**Last Updated:** 2025-11-13 14:20 UTC
 **Project Phase:** Foundation Complete
 **Status:** Discovery Phase Ready
 **Major Achievements:**
 - Autonomous AI-First workflow (PR automation breakthrough, 2025-11-11)
-- Multi-agent workspace coordination with enforcement (2025-11-13)
+- Multi-agent workspace coordination with enforcement (2025-11-13 AM)
+- Workflow duplication fix deployed (ref-specific concurrency, 2025-11-13 PM)
 
 ---
 
